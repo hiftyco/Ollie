@@ -183,6 +183,9 @@ def get_news():
         ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/"),
         ("Decrypt", "https://decrypt.co/feed"),
         ("BitcoinNews", "https://bitcoinnews.com/feed/"),
+        ("Cointelegraph", "https://cointelegraph.com/rss"),
+        ("Bitcoin.com", "https://news.bitcoin.com/feed/"),
+        ("The Block", "https://www.theblock.co/rss.xml"),
     ]
 
     for source, url in feeds:
@@ -332,7 +335,7 @@ def generate_thought(price_data, fg, blockchain, mempool, headlines, reddit, hal
 
     return thought
 
-def generate_insights(price_data, fg, blockchain, mempool, halving_info):
+def generate_insights(price_data, fg, blockchain, mempool, halving_info, kb):
     """Generate bullet-point insights from the data."""
     insights = []
     if not price_data:
@@ -380,7 +383,117 @@ def generate_insights(price_data, fg, blockchain, mempool, halving_info):
     if abs(change) > 5:
         insights.append(f"Significant 24h move: {'+' if change > 0 else ''}{change}%. Watch for follow-through volume.")
 
+    # Trend analysis
+    price_history = kb.get("price_history", [])
+    if len(price_history) >= 30:
+        prices = [p["price"] for p in price_history[-30:]]
+        avg_30d = sum(prices) / len(prices)
+        if price > avg_30d * 1.05:
+            insights.append("Price is 5% above 30-day average — bullish momentum.")
+        elif price < avg_30d * 0.95:
+            insights.append("Price is 5% below 30-day average — bearish pressure.")
+
     return insights[:MAX_INSIGHTS]
+
+def generate_tips(price_data, fg, blockchain, mempool, halving_info, topics):
+    """Generate helpful tips for Bitcoiners based on current data."""
+    tips = []
+
+    if fg:
+        val = fg['value']
+        if val >= 75:
+            tips.append("Extreme Greed: Markets are euphoric. Consider taking profits or setting stop-losses.")
+        elif val <= 25:
+            tips.append("Extreme Fear: This could be a buying opportunity. Remember, fear is your friend in crypto.")
+        elif val >= 55:
+            tips.append("Greed is creeping in. Stay disciplined and don't FOMO into bad positions.")
+        elif val <= 45:
+            tips.append("Fear levels rising. Focus on long-term fundamentals over short-term noise.")
+
+    if price_data:
+        change = price_data.get("change_24h_pct", 0)
+        if change > 10:
+            tips.append("Big green day! Congrats to those who held. But remember, volatility is Bitcoin's nature.")
+        elif change < -10:
+            tips.append("Red day ahead. If you're long-term, this is just noise. Dollar-cost average if you believe.")
+
+    if halving_info:
+        days = halving_info.get("days_until_halving", 0)
+        if days < 100:
+            tips.append(f"Halving approaching in ~{int(days)} days. Historically, halvings lead to bull runs. Prepare your stack.")
+
+    if mempool:
+        high = mempool.get("high_fee", 0)
+        if high > 50:
+            tips.append("High fees! If sending, consider batching transactions or using Lightning Network.")
+
+    if "Halving" in topics:
+        tips.append("Halving discussion heating up. Remember, halvings reduce new supply by 50%, historically bullish.")
+
+    if "ETF" in topics:
+        tips.append("ETF news circulating. Spot ETFs could bring institutional money, but don't forget self-custody.")
+
+    tips.append("Always do your own research. Bitcoin is about financial sovereignty - learn, stack sats, and HODL.")
+
+def generate_tips(price_data, fg, blockchain, mempool, halving_info, topics):
+    """Generate helpful tips for Bitcoiners based on current data."""
+    tips = []
+
+    if fg:
+        val = fg['value']
+        if val >= 75:
+            tips.append("Extreme Greed: Markets are euphoric. Consider taking profits or setting stop-losses.")
+        elif val <= 25:
+            tips.append("Extreme Fear: This could be a buying opportunity. Remember, fear is your friend in crypto.")
+        elif val >= 55:
+            tips.append("Greed is creeping in. Stay disciplined and don't FOMO into bad positions.")
+        elif val <= 45:
+            tips.append("Fear levels rising. Focus on long-term fundamentals over short-term noise.")
+
+    if price_data:
+        change = price_data.get("change_24h_pct", 0)
+        if change > 10:
+            tips.append("Big green day! Congrats to those who held. But remember, volatility is Bitcoin's nature.")
+        elif change < -10:
+            tips.append("Red day ahead. If you're long-term, this is just noise. Dollar-cost average if you believe.")
+
+    if halving_info:
+        days = halving_info.get("days_until_halving", 0)
+        if days < 100:
+            tips.append(f"Halving approaching in ~{int(days)} days. Historically, halvings lead to bull runs. Prepare your stack.")
+
+    if mempool:
+        high = mempool.get("high_fee", 0)
+        if high > 50:
+            tips.append("High fees! If sending, consider batching transactions or using Lightning Network.")
+
+    if "Halving" in topics:
+        tips.append("Halving discussion heating up. Remember, halvings reduce new supply by 50%, historically bullish.")
+
+    if "ETF" in topics:
+        tips.append("ETF news circulating. Spot ETFs could bring institutional money, but don't forget self-custody.")
+
+    tips.append("Always do your own research. Bitcoin is about financial sovereignty - learn, stack sats, and HODL.")
+
+    return tips[:5]
+
+def generate_daily_fact():
+    """Return a random educational fact about Bitcoin."""
+    facts = [
+        "Bitcoin was created in 2008 by Satoshi Nakamoto, whose true identity remains unknown.",
+        "The total supply of Bitcoin is capped at 21 million coins, making it a deflationary asset.",
+        "Bitcoin transactions are verified by network nodes and recorded in a public distributed ledger called the blockchain.",
+        "The first Bitcoin transaction was made in 2009, when Satoshi sent 10 BTC to Hal Finney.",
+        "Bitcoin's proof-of-work algorithm is designed to prevent double-spending and ensure network security.",
+        "Lightning Network allows for instant, low-cost Bitcoin transactions by enabling off-chain payments.",
+        "Bitcoin halvings occur every 4 years, reducing the block reward and controlling inflation.",
+        "The Bitcoin whitepaper, published in 2008, is only 9 pages long and outlines the core concepts.",
+        "Bitcoin mining secures the network and processes transactions, requiring significant computational power.",
+        "Self-custody means you control your own keys, reducing reliance on third parties.",
+    ]
+    import random
+    random.seed(datetime.now().strftime("%Y-%m-%d"))  # daily fact
+    return random.choice(facts)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 
@@ -455,7 +568,13 @@ def main():
     thought = generate_thought(price_data, fg, blockchain, mempool, headlines, reddit_posts, halving_info, today_pretty)
 
     # Insights
-    insights = generate_insights(price_data, fg, blockchain, mempool, halving_info)
+    insights = generate_insights(price_data, fg, blockchain, mempool, halving_info, kb)
+
+    # Tips for Bitcoiners
+    tips = generate_tips(price_data, fg, blockchain, mempool, halving_info, topics)
+
+    # Daily educational fact
+    fact = generate_daily_fact()
 
     # ── UPDATE KNOWLEDGE ──────────────────────────────────────────────────────
     print("\n[PHASE 6] Updating knowledge base...")
@@ -501,6 +620,8 @@ def main():
     knowledge["todays_headlines"] = headlines
     knowledge["todays_reddit"] = reddit_posts
     knowledge["todays_insights"] = insights
+    knowledge["todays_tips"] = tips
+    knowledge["todays_fact"] = fact
 
     # Price history
     price_history = kb.setdefault("price_history", [])

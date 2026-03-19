@@ -453,6 +453,22 @@ canvas.chart { width:100%; height:100%; }
     </div>
   </div>
 
+  <!-- ═══ TIPS FOR BITCOINERS ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> TIPS FOR BITCOINERS</div>
+    <div class="insight-list" id="tips-list">
+      <div class="shimmer"></div><div class="shimmer" style="width:80%"></div>
+    </div>
+  </div>
+
+  <!-- ═══ DAILY BITCOIN FACT ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> DAILY BITCOIN FACT</div>
+    <div id="fact-text" class="thought-text" style="padding:12px 0;">
+      <div class="shimmer"></div>
+    </div>
+  </div>
+
   <!-- ═══ NEWS ═══ -->
   <div class="sec">
     <div class="sec-hd"><span class="tag">◈</span> TODAY'S BITCOIN HEADLINES</div>
@@ -721,6 +737,19 @@ function render(d){
   } else {
     iEl.innerHTML='<div style="color:var(--muted2);font-size:12px;">Insights will appear after the first learning cycle.</div>';
   }
+
+  // Tips
+  const tips=d.todays_tips||[];
+  const tEl=document.getElementById('tips-list');
+  if(tips.length){
+    tEl.innerHTML=tips.map(t=>`<div class="insight"><span class="insight-bullet">◆</span><span class="insight-text">${t}</span></div>`).join('');
+  } else {
+    tEl.innerHTML='<div style="color:var(--muted2);font-size:12px;">Tips will appear after the first learning cycle.</div>';
+  }
+
+  // Fact
+  const fact=d.todays_fact||'Facts will appear after the first learning cycle.';
+  document.getElementById('fact-text').textContent=fact;
 
   // News
   const news=d.todays_headlines||[];
