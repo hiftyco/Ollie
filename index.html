@@ -215,6 +215,12 @@ body::after {
 .tool h4 { margin: 0 0 10px 0; color: var(--btc); }
 .tool select { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; box-shadow: 0 0 5px var(--btc-dim); }
 .tool button { width: 100%; padding: 8px; background: var(--btc); color: black; border: none; cursor: pointer; margin: 5px 0; border-radius: 4px; box-shadow: 0 0 10px var(--btc-glow); }
+.tool-desc { font-size: 12px; color: var(--muted2); margin-bottom: 10px; }
+.tool-input { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; box-shadow: 0 0 5px var(--btc-dim); }
+.tool-btn { width: 100%; padding: 8px; background: var(--btc); color: black; border: none; cursor: pointer; margin: 5px 0; border-radius: 4px; box-shadow: 0 0 10px var(--btc-glow); transition: background 0.2s; }
+.tool-btn:hover { background: var(--gold); }
+.tool-result { margin-top: 10px; font-size: 14px; color: var(--cream2); }
+.tool-select { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; box-shadow: 0 0 5px var(--btc-dim); }
 
 .typing { animation: blink 1.5s infinite; }
 @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
@@ -517,40 +523,46 @@ canvas.chart { width:100%; height:100%; }
 
   <!-- ═══ BITCOIN TOOLS ═══ -->
   <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> BITCOIN TOOLS</div>
+    <div class="sec-hd"><span class="tag">◈</span> BITCOIN TOOLS & CALCULATORS</div>
     <div class="tools-grid">
       <div class="tool">
-        <h4>Satoshi Converter</h4>
-        <input id="sats-input" type="number" placeholder="Enter satoshis">
-        <button id="convert-btn">Convert to BTC</button>
-        <div id="btc-result"></div>
+        <h4>💰 Satoshi Converter</h4>
+        <p class="tool-desc">Convert satoshis to BTC and USD values.</p>
+        <input id="sats-input" type="number" placeholder="Enter satoshis" class="tool-input">
+        <button id="convert-btn" class="tool-btn">Convert</button>
+        <div id="btc-result" class="tool-result"></div>
       </div>
       <div class="tool">
-        <h4>Profit Calculator</h4>
-        <input id="buy-price" type="number" placeholder="Buy price (USD)">
-        <input id="sell-price" type="number" placeholder="Sell price (USD)">
-        <input id="amount" type="number" placeholder="Amount (BTC)">
-        <button id="calc-profit-btn">Calculate</button>
-        <div id="profit-result"></div>
+        <h4>📈 Profit Calculator</h4>
+        <p class="tool-desc">Calculate profit/loss from BTC trades.</p>
+        <input id="buy-price" type="number" placeholder="Buy price (USD)" class="tool-input">
+        <input id="sell-price" type="number" placeholder="Sell price (USD)" class="tool-input">
+        <input id="amount" type="number" placeholder="Amount (BTC)" class="tool-input">
+        <button id="calc-profit-btn" class="tool-btn">Calculate</button>
+        <div id="profit-result" class="tool-result"></div>
       </div>
       <div class="tool">
-        <h4>Halving Progress</h4>
-        <div id="halving-progress">Loading...</div>
+        <h4>⏳ Halving Progress</h4>
+        <p class="tool-desc">Track progress to next halving event.</p>
+        <div id="halving-progress" class="tool-result">Loading...</div>
       </div>
       <div class="tool">
-        <h4>Block Reward Calculator</h4>
-        <input id="blocks-input" type="number" placeholder="Blocks to mine">
-        <button id="reward-btn">Calculate Reward</button>
-        <div id="reward-result"></div>
+        <h4>🏆 Block Reward Calculator</h4>
+        <p class="tool-desc">Estimate BTC rewards for mining blocks.</p>
+        <input id="blocks-input" type="number" placeholder="Blocks to mine" class="tool-input">
+        <button id="reward-btn" class="tool-btn">Calculate</button>
+        <div id="reward-result" class="tool-result"></div>
       </div>
       <div class="tool">
-        <h4>Bitcoin Facts Quiz</h4>
-        <button id="quiz-btn">Start Quiz</button>
-        <div id="quiz-result"></div>
+        <h4>🧠 Bitcoin Facts Quiz</h4>
+        <p class="tool-desc">Test your Bitcoin knowledge.</p>
+        <button id="quiz-btn" class="tool-btn">Start Quiz</button>
+        <div id="quiz-result" class="tool-result"></div>
       </div>
       <div class="tool">
-        <h4>Glossary</h4>
-        <select id="glossary-select">
+        <h4>📚 Glossary</h4>
+        <p class="tool-desc">Learn key Bitcoin terms.</p>
+        <select id="glossary-select" class="tool-select">
           <option value="">Select term...</option>
           <option value="blockchain">Blockchain</option>
           <option value="halving">Halving</option>
@@ -558,31 +570,56 @@ canvas.chart { width:100%; height:100%; }
           <option value="hodl">HODL</option>
           <option value="lightning">Lightning Network</option>
         </select>
-        <div id="glossary-result"></div>
+        <div id="glossary-result" class="tool-result"></div>
       </div>
       <div class="tool">
-        <h4>Fiat to BTC Calculator</h4>
-        <input id="fiat-amount" type="number" placeholder="Amount in USD">
-        <button id="fiat-to-btc-btn">Convert to BTC</button>
-        <div id="fiat-result"></div>
+        <h4>💱 Fiat to BTC Calculator</h4>
+        <p class="tool-desc">Convert USD to BTC at current price.</p>
+        <input id="fiat-amount" type="number" placeholder="Amount in USD" class="tool-input">
+        <button id="fiat-to-btc-btn" class="tool-btn">Convert</button>
+        <div id="fiat-result" class="tool-result"></div>
       </div>
       <div class="tool">
-        <h4>Block Time Calculator</h4>
-        <input id="blocks-time" type="number" placeholder="Number of blocks">
-        <button id="time-calc-btn">Calculate Time</button>
-        <div id="time-result"></div>
+        <h4>⏰ Block Time Calculator</h4>
+        <p class="tool-desc">Estimate time for block confirmations.</p>
+        <input id="blocks-time" type="number" placeholder="Number of blocks" class="tool-input">
+        <button id="time-calc-btn" class="tool-btn">Calculate</button>
+        <div id="time-result" class="tool-result"></div>
       </div>
       <div class="tool">
-        <h4>Bitcoin Donation</h4>
+        <h4>🔍 Address Validator</h4>
+        <p class="tool-desc">Check if a Bitcoin address is valid.</p>
+        <input id="address-input" type="text" placeholder="Enter BTC address" class="tool-input">
+        <button id="validate-btn" class="tool-btn">Validate</button>
+        <div id="validate-result" class="tool-result"></div>
+      </div>
+      <div class="tool">
+        <h4>⚡ Difficulty Calculator</h4>
+        <p class="tool-desc">Estimate mining difficulty adjustments.</p>
+        <input id="hashrate-input" type="number" placeholder="Hashrate (EH/s)" class="tool-input">
+        <button id="difficulty-btn" class="tool-btn">Calculate</button>
+        <div id="difficulty-result" class="tool-result"></div>
+      </div>
+      <div class="tool">
+        <h4>📊 Portfolio Tracker</h4>
+        <p class="tool-desc">Simple BTC portfolio value calculator.</p>
+        <input id="btc-holdings" type="number" placeholder="BTC holdings" class="tool-input">
+        <button id="portfolio-btn" class="tool-btn">Calculate Value</button>
+        <div id="portfolio-result" class="tool-result"></div>
+      </div>
+      <div class="tool">
+        <h4>🎁 Bitcoin Donation</h4>
+        <p class="tool-desc">Support Ollie's development.</p>
         <div style="text-align:center;">
-          <div>Support Ollie: hiftyco@coinos.io</div>
-          <div id="qr-code" style="margin:10px 0;">[QR Code would go here]</div>
+          <div>Address: hiftyco@coinos.io</div>
+          <div id="qr-code" style="margin:10px 0;">[QR Code]</div>
         </div>
       </div>
       <div class="tool">
-        <h4>Share Ollie</h4>
-        <button id="share-btn">Share This Site</button>
-        <div id="share-result"></div>
+        <h4>📤 Share Ollie</h4>
+        <p class="tool-desc">Spread the knowledge.</p>
+        <button id="share-btn" class="tool-btn">Share This Site</button>
+        <div id="share-result" class="tool-result"></div>
       </div>
     </div>
   </div>
@@ -1123,9 +1160,11 @@ function setupTools(d) {
   // Satoshi Converter
   document.getElementById('convert-btn').addEventListener('click', () => {
     const sats = parseFloat(document.getElementById('sats-input').value);
+    const price = d.current.price_usd || 0;
     if (sats > 0) {
       const btc = sats / 100000000;
-      document.getElementById('btc-result').textContent = `${sats.toLocaleString()} sats = ${btc.toFixed(8)} BTC`;
+      const usd = btc * price;
+      document.getElementById('btc-result').textContent = `${sats.toLocaleString()} sats = ${btc.toFixed(8)} BTC ≈ $${usd.toFixed(2)} USD`;
     }
   });
   
@@ -1199,7 +1238,8 @@ function setupTools(d) {
     const btcPrice = d.current.price_usd || 0;
     if (fiat > 0 && btcPrice > 0) {
       const btc = fiat / btcPrice;
-      document.getElementById('fiat-result').textContent = `$${fiat} = ${btc.toFixed(8)} BTC`;
+      const sats = btc * 100000000;
+      document.getElementById('fiat-result').textContent = `$${fiat} = ${btc.toFixed(8)} BTC ≈ ${sats.toLocaleString()} sats`;
     }
   });
   
@@ -1225,6 +1265,47 @@ function setupTools(d) {
     } else {
       navigator.clipboard.writeText(window.location.href);
       document.getElementById('share-result').textContent = 'Link copied to clipboard!';
+    }
+  });
+  
+  // Address Validator
+  document.getElementById('validate-btn').addEventListener('click', () => {
+    const address = document.getElementById('address-input').value.trim();
+    if (!address) {
+      document.getElementById('validate-result').textContent = 'Please enter a Bitcoin address.';
+      return;
+    }
+    // Simple regex for Bitcoin addresses (legacy or segwit)
+    const legacyRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+    const segwitRegex = /^bc1[a-z0-9]{39,59}$/;
+    if (legacyRegex.test(address) || segwitRegex.test(address)) {
+      document.getElementById('validate-result').textContent = '✅ Valid Bitcoin address.';
+    } else {
+      document.getElementById('validate-result').textContent = '❌ Invalid Bitcoin address.';
+    }
+  });
+  
+  // Difficulty Calculator
+  document.getElementById('difficulty-btn').addEventListener('click', () => {
+    const hashrate = parseFloat(document.getElementById('hashrate-input').value);
+    const currentDifficulty = d.current.difficulty || 145042165424853; // example
+    if (hashrate > 0) {
+      const blocksPerDay = (hashrate * 1e18 * 86400) / (currentDifficulty * 2**32);
+      document.getElementById('difficulty-result').textContent = `With ${hashrate} EH/s, you could mine ~${blocksPerDay.toFixed(2)} blocks per day.`;
+    } else {
+      document.getElementById('difficulty-result').textContent = 'Please enter a valid hashrate.';
+    }
+  });
+  
+  // Portfolio Tracker
+  document.getElementById('portfolio-btn').addEventListener('click', () => {
+    const holdings = parseFloat(document.getElementById('btc-holdings').value);
+    const price = d.current.price_usd || 0;
+    if (holdings > 0 && price > 0) {
+      const value = holdings * price;
+      document.getElementById('portfolio-result').textContent = `${holdings} BTC = $${value.toLocaleString()} USD`;
+    } else {
+      document.getElementById('portfolio-result').textContent = 'Please enter valid holdings.';
     }
   });
 }
