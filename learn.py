@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-OLLIE — Autonomous Bitcoin Learning Engine
-Runs daily via GitHub Actions. Fetches from free public APIs only.
-No API keys required. Commits results back to the repository.
+OLLIE — Autonomous Bitcoin Intelligence Engine v3.0
+Runs every 6 hours via GitHub Actions.
+Mission: Learn everything about Bitcoin. Teach and guide every Bitcoiner.
+Self-improves with every cycle.
 """
 
 import json
@@ -15,58 +16,126 @@ from datetime import datetime, timezone, timedelta
 import time
 import math
 import re
+import hashlib
+import random
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 DATA_FILE = "data/knowledge.json"
-MAX_EVOLUTION_LOG = 365        # keep 1 year of daily logs
+MAX_EVOLUTION_LOG = 365
 MAX_PRICE_HISTORY = 365
 MAX_FG_HISTORY = 365
-MAX_HEADLINES = 8
-MAX_REDDIT = 8
-MAX_INSIGHTS = 10
+MAX_HEADLINES = 12
+MAX_REDDIT = 10
+MAX_INSIGHTS = 15
 HALVING_BLOCK_REWARD_NOW = 3.125
 NEXT_HALVING_BLOCK = 1050000
-POSITIVE_WORDS = ["surge", "rally", "bull", "moon", "pump", "breakthrough", "adoption", "halving", "upgrade", "growth", "rise", "gain", "profit", "success", "innovation", "bullish", "optimism", "recovery"]
-NEGATIVE_WORDS = ["crash", "dump", "bear", "sell", "decline", "hack", "ban", "regulation", "fall", "loss", "drop", "fear", "panic", "scam", "exploit", "bearish", "pessimism", "crisis"]
+
+POSITIVE_WORDS = ["surge","rally","bull","moon","pump","breakthrough","adoption","halving","upgrade","growth","rise","gain","profit","success","innovation","bullish","optimism","recovery","institutional","etf","record","high","milestone","accumulate"]
+NEGATIVE_WORDS = ["crash","dump","bear","sell","decline","hack","ban","regulation","fall","loss","drop","fear","panic","scam","exploit","bearish","pessimism","crisis","lawsuit","fine","restrict","warning","risk"]
+
+BITCOIN_FACTS = [
+    "Bitcoin's genesis block (Block 0) contains the message: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks.'",
+    "Only 21 million Bitcoin will ever exist. About 3-4 million are estimated to be lost forever.",
+    "Satoshi Nakamoto's identity remains unknown. Their wallets contain ~1.1 million BTC that have never moved.",
+    "The Lightning Network enables Bitcoin transactions in milliseconds with near-zero fees.",
+    "Bitcoin mining uses more renewable energy than almost any other industry — over 50% and growing.",
+    "The first real-world Bitcoin purchase was 10,000 BTC for two pizzas on May 22, 2010.",
+    "Bitcoin's SHA-256 algorithm would take longer than the age of the universe to crack with classical computers.",
+    "Each halving cuts the new BTC supply in half. This has happened 4 times so far.",
+    "Bitcoin has 99.99% uptime since launch — more reliable than any bank in history.",
+    "El Salvador became the first country to adopt Bitcoin as legal tender in 2021.",
+    "The UTXO model makes Bitcoin transactions more private and verifiable than account-based systems.",
+    "Bitcoin's difficulty adjustment recalibrates every 2016 blocks (~2 weeks) to maintain 10-minute block times.",
+    "There are more possible private key combinations than atoms in the observable universe.",
+    "A Bitcoin transaction is irreversible by design — this is a feature, not a bug.",
+    "Bitcoin Script is intentionally limited, making it more secure and predictable than Turing-complete systems.",
+]
+
+LEARNING_PATHS = {
+    "beginner": [
+        {"title": "What is Bitcoin?", "lesson": "Bitcoin is digital money that no government or bank controls. It runs on a decentralized network of computers worldwide.", "key_concepts": ["decentralization", "peer-to-peer", "digital scarcity"]},
+        {"title": "Why Bitcoin?", "lesson": "Bitcoin solves the double-spend problem without requiring trust in a third party — for the first time in history.", "key_concepts": ["trustlessness", "censorship resistance", "sound money"]},
+        {"title": "How to Get Bitcoin", "lesson": "You can earn, buy, or receive Bitcoin. The most important next step: self-custody. Not your keys, not your coins.", "key_concepts": ["wallets", "exchanges", "self-custody", "seed phrase"]},
+        {"title": "Storing Bitcoin Safely", "lesson": "A hardware wallet keeps your private keys offline. Never share your seed phrase. Back it up in multiple secure locations.", "key_concepts": ["hardware wallet", "cold storage", "backup", "security"]},
+        {"title": "Bitcoin vs Traditional Money", "lesson": "Fiat currency loses value through inflation. Bitcoin has a fixed supply of 21 million — it gets scarcer over time.", "key_concepts": ["inflation", "scarcity", "store of value", "sound money"]},
+    ],
+    "intermediate": [
+        {"title": "The Blockchain Explained", "lesson": "Every Bitcoin transaction is recorded on a public ledger. Blocks chain together cryptographically — making history immutable.", "key_concepts": ["blockchain", "immutability", "merkle tree", "hash"]},
+        {"title": "Mining & Proof of Work", "lesson": "Miners compete to solve math puzzles, securing the network. The winner adds the next block and earns freshly minted BTC.", "key_concepts": ["mining", "proof of work", "difficulty", "hash rate"]},
+        {"title": "The Halving Cycle", "lesson": "Every ~4 years, the block reward halves. This programmatic supply reduction has historically preceded major bull markets.", "key_concepts": ["halving", "supply shock", "block reward", "cycles"]},
+        {"title": "Lightning Network", "lesson": "Lightning enables instant, near-free Bitcoin payments by opening payment channels. It scales Bitcoin to billions of users.", "key_concepts": ["lightning", "payment channels", "routing", "liquidity"]},
+        {"title": "Bitcoin Wallets Deep Dive", "lesson": "HD wallets derive millions of addresses from one seed. Understanding derivation paths helps you recover funds across any wallet.", "key_concepts": ["HD wallet", "BIP32", "derivation path", "xpub"]},
+    ],
+    "advanced": [
+        {"title": "UTXO Model", "lesson": "Bitcoin doesn't have balances — it has unspent transaction outputs. Understanding UTXOs is key to privacy and fee optimization.", "key_concepts": ["UTXO", "coin selection", "change outputs", "fee optimization"]},
+        {"title": "Taproot & Schnorr", "lesson": "Taproot (BIP340-342) enables more private, efficient, and flexible transactions. Schnorr signatures allow key and signature aggregation.", "key_concepts": ["taproot", "schnorr", "MAST", "scriptpath", "keypath"]},
+        {"title": "Bitcoin Script", "lesson": "Bitcoin's scripting language enables complex spending conditions: multisig, timelocks, HTLCs. It's intentionally not Turing-complete.", "key_concepts": ["script", "multisig", "timelock", "HTLC", "opcodes"]},
+        {"title": "Running a Node", "lesson": "A full node independently verifies every rule. You don't trust anyone — you verify. It protects you and strengthens the network.", "key_concepts": ["full node", "verification", "pruning", "IBD"]},
+        {"title": "On-Chain Analysis", "lesson": "Reading the blockchain reveals market cycles: HODL waves, SOPR, exchange flows, miner behavior. Data doesn't lie.", "key_concepts": ["SOPR", "HODL waves", "realized cap", "NVT", "exchange flows"]},
+    ]
+}
+
+THOUGHT_TEMPLATES = [
+    "Bitcoin block {block_height} just became permanent history. {blocks_to_halving} blocks until the next halving. Every block is a heartbeat.",
+    "Fear & Greed at {fg_value} ({fg_label}). The crowd {crowd_action}. Ollie watches, learns, and remembers what history teaches.",
+    "Hash rate at {hash_rate} EH/s — the most secure computational network in human history keeps humming.",
+    "BTC at ${price:,.0f}. {dominance}% dominance. The signal is clear to those who know how to read it.",
+    "Today Ollie processed {sources} data sources, absorbed {headlines} headlines, and distilled what matters for you.",
+    "The mempool holds {mempool_txs} unconfirmed transactions. Low fee: {low_fee} sat/vB. The network never sleeps.",
+    "Since genesis block: {days_since_genesis} days of uptime. No hacks. No bailouts. No permission needed.",
+    "Miners earned ${miners_revenue:,.0f} today securing your transactions. Proof of Work is proof of commitment.",
+]
 
 # ── HTTP HELPER ───────────────────────────────────────────────────────────────
-def fetch(url, timeout=15, headers=None, retries=3):
+def fetch(url, timeout=20, headers=None, retries=3):
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url)
-            req.add_header("User-Agent", "OllieBitcoinBot/2.0 (autonomous-learning; github-pages)")
+            req.add_header("User-Agent", "OllieBitcoinBot/3.0 (autonomous-learning; github-pages; educational)")
             if headers:
                 for k, v in headers.items():
                     req.add_header(k, v)
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return r.read().decode("utf-8", errors="replace")
         except Exception as e:
-            print(f"  [WARN] fetch({url[:60]}...) attempt {attempt+1} failed: {e}")
+            print(f"  [WARN] fetch({url[:60]}) attempt {attempt+1} failed: {e}")
             if attempt < retries - 1:
-                time.sleep(2 ** attempt)  # exponential backoff
+                time.sleep(2 ** attempt)
     return None
 
-def fetch_json(url, timeout=15):
+def fetch_json(url, timeout=20):
     raw = fetch(url, timeout=timeout)
     if raw:
         try:
             return json.loads(raw)
         except Exception as e:
-            print(f"  [WARN] JSON parse failed: {e}")
+            print(f"  [WARN] JSON parse failed for {url[:60]}: {e}")
     return None
 
-# ── DATA SOURCES (ALL FREE, NO KEY) ──────────────────────────────────────────
+# ── DATA SOURCES ──────────────────────────────────────────────────────────────
+def get_price():
+    print("  Fetching Bitcoin price...")
+    sources = [
+        lambda: _cg_price(),
+        lambda: _coincap_price(),
+        lambda: _kraken_price(),
+        lambda: _blockchain_price(),
+    ]
+    for src in sources:
+        try:
+            p = src()
+            if p and p.get("price_usd", 0) > 0:
+                return p
+        except:
+            pass
+    return None
 
-def get_coingecko_price():
-    print("  Fetching Bitcoin price (CoinGecko)...")
-    data = fetch_json(
-        "https://api.coingecko.com/api/v3/coins/bitcoin?"
-        "localization=false&tickers=false&market_data=true"
-        "&community_data=false&developer_data=false&sparkline=false"
-    )
-    if not data:
-        return None
+def _cg_price():
+    data = fetch_json("https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false")
+    if not data: return None
     md = data.get("market_data", {})
+    global_data = fetch_json("https://api.coingecko.com/api/v3/global") or {}
+    dominance = round(global_data.get("data", {}).get("market_cap_percentage", {}).get("btc", 0), 1)
     return {
         "price_usd": md.get("current_price", {}).get("usd", 0),
         "market_cap_usd": md.get("market_cap", {}).get("usd", 0),
@@ -78,159 +147,109 @@ def get_coingecko_price():
         "ath_date": md.get("ath_date", {}).get("usd", ""),
         "circulating_supply": md.get("circulating_supply", 0),
         "max_supply": 21000000,
-        "dominance_pct": 0,  # filled below
+        "dominance_pct": dominance,
+        "source": "coingecko"
     }
 
-def get_coingecko_global():
-    print("  Fetching global crypto market (CoinGecko)...")
-    data = fetch_json("https://api.coingecko.com/api/v3/global")
-    if data and "data" in data:
-        return {
-            "dominance_pct": round(
-                data["data"].get("market_cap_percentage", {}).get("btc", 0), 1
-            )
-        }
-    return {"dominance_pct": 0}
-
-def get_blockchain_price():
-    print("  Fetching Bitcoin price (blockchain.info)...")
-    data = fetch_json("https://blockchain.info/ticker")
-    if not data or "USD" not in data:
-        return None
-    usd = data["USD"]
-    return {
-        "price_usd": usd.get("last", 0),
-        "market_cap_usd": 0,
-        "volume_24h_usd": 0,
-        "change_24h_pct": 0,
-        "change_7d_pct": 0,
-        "change_30d_pct": 0,
-        "ath_usd": 0,
-        "ath_date": "",
-        "circulating_supply": 0,
-        "max_supply": 21000000,
-        "dominance_pct": 0,
-    }
-
-def get_coincap_price():
-    print("  Fetching Bitcoin price (coincap.io)...")
+def _coincap_price():
     data = fetch_json("https://api.coincap.io/v2/assets/bitcoin")
-    if not data or "data" not in data:
-        return None
+    if not data or "data" not in data: return None
     d = data["data"]
     return {
         "price_usd": float(d.get("priceUsd", 0)),
         "market_cap_usd": float(d.get("marketCapUsd", 0)),
         "volume_24h_usd": float(d.get("volumeUsd24Hr", 0)),
         "change_24h_pct": round(float(d.get("changePercent24Hr", 0)), 2),
-        "change_7d_pct": 0,
-        "change_30d_pct": 0,
-        "ath_usd": 0,
-        "ath_date": "",
-        "circulating_supply": 0,
-        "max_supply": 21000000,
-        "dominance_pct": 0,
+        "change_7d_pct": 0, "change_30d_pct": 0, "ath_usd": 0, "ath_date": "",
+        "circulating_supply": 0, "max_supply": 21000000, "dominance_pct": 0,
+        "source": "coincap"
     }
 
-def get_kraken_price():
-    print("  Fetching Bitcoin price (kraken.com)...")
+def _kraken_price():
     data = fetch_json("https://api.kraken.com/0/public/Ticker?pair=XBTUSD")
-    if not data or "result" not in data or "XXBTZUSD" not in data["result"]:
-        return None
+    if not data or "result" not in data or "XXBTZUSD" not in data["result"]: return None
     ticker = data["result"]["XXBTZUSD"]
-    price = float(ticker["c"][0])
     return {
-        "price_usd": price,
-        "market_cap_usd": 0,
-        "volume_24h_usd": 0,
-        "change_24h_pct": 0,
-        "change_7d_pct": 0,
-        "change_30d_pct": 0,
-        "ath_usd": 0,
-        "ath_date": "",
-        "circulating_supply": 0,
-        "max_supply": 21000000,
-        "dominance_pct": 0,
+        "price_usd": float(ticker["c"][0]),
+        "market_cap_usd": 0, "volume_24h_usd": float(ticker.get("v", [0,0])[1]),
+        "change_24h_pct": 0, "change_7d_pct": 0, "change_30d_pct": 0,
+        "ath_usd": 0, "ath_date": "", "circulating_supply": 0,
+        "max_supply": 21000000, "dominance_pct": 0, "source": "kraken"
     }
 
-def get_price():
-    sources = [get_coingecko_price, get_blockchain_price, get_coincap_price, get_kraken_price]
-    for source in sources:
-        price_data = source()
-        if price_data and price_data["price_usd"] > 0:
-            return price_data
-    return None
+def _blockchain_price():
+    data = fetch_json("https://blockchain.info/ticker")
+    if not data or "USD" not in data: return None
+    return {
+        "price_usd": data["USD"].get("last", 0),
+        "market_cap_usd": 0, "volume_24h_usd": 0, "change_24h_pct": 0,
+        "change_7d_pct": 0, "change_30d_pct": 0, "ath_usd": 0, "ath_date": "",
+        "circulating_supply": 0, "max_supply": 21000000, "dominance_pct": 0,
+        "source": "blockchain.info"
+    }
 
 def get_fear_greed():
-    print("  Fetching Fear & Greed Index (alternative.me)...")
-    data = fetch_json("https://api.alternative.me/fng/?limit=7")
-    if not data or "data" not in data:
-        return None
+    print("  Fetching Fear & Greed Index...")
+    data = fetch_json("https://api.alternative.me/fng/?limit=30")
+    if not data or "data" not in data: return None
     latest = data["data"][0]
     return {
         "value": int(latest.get("value", 50)),
         "label": latest.get("value_classification", "Neutral"),
         "history": [
-            {
-                "date": datetime.fromtimestamp(
-                    int(d["timestamp"]), tz=timezone.utc
-                ).strftime("%Y-%m-%d"),
-                "value": int(d["value"]),
-                "label": d["value_classification"],
-            }
-            for d in data["data"][:7]
-        ],
+            {"date": datetime.fromtimestamp(int(d["timestamp"]), tz=timezone.utc).strftime("%Y-%m-%d"),
+             "value": int(d["value"]), "label": d["value_classification"]}
+            for d in data["data"][:30]
+        ]
     }
 
 def get_blockchain_stats():
-    print("  Fetching blockchain stats (blockchain.info)...")
+    print("  Fetching blockchain stats...")
     data = fetch_json("https://blockchain.info/stats?format=json")
-    if not data:
-        return None
+    if not data: return None
     return {
         "block_height": data.get("n_blocks_total", 0),
-        "hash_rate": round(data.get("hash_rate", 0) / 1e9, 2),  # EH/s
+        "hash_rate_ehs": round(data.get("hash_rate", 0) / 1e9, 2),
         "difficulty": data.get("difficulty", 0),
-        "unconfirmed_txs": data.get("n_tx_not_after_genesis", 0),
-        "total_btc_sent_24h": data.get("total_btc_sent", 0),
-        "estimated_btc_sent": data.get("estimated_btc_sent", 0),
         "miners_revenue_usd": data.get("miners_revenue_usd", 0),
+        "total_btc_sent_24h": data.get("total_btc_sent", 0),
+        "n_tx_24h": data.get("n_tx", 0),
     }
 
 def get_mempool():
-    print("  Fetching mempool fees (mempool.space)...")
+    print("  Fetching mempool data...")
     fees = fetch_json("https://mempool.space/api/v1/fees/recommended")
-    if not fees:
-        return None
     mempool_info = fetch_json("https://mempool.space/api/mempool")
-    unconfirmed = 0
-    if mempool_info:
-        unconfirmed = mempool_info.get("count", 0)
+    block_height = None
+    raw_h = fetch("https://mempool.space/api/blocks/tip/height")
+    if raw_h:
+        try: block_height = int(raw_h.strip())
+        except: pass
+    if not fees: return None
     return {
         "low_fee": fees.get("hourFee", 0),
         "mid_fee": fees.get("halfHourFee", 0),
         "high_fee": fees.get("fastestFee", 0),
-        "unconfirmed_txs": unconfirmed,
+        "unconfirmed_txs": mempool_info.get("count", 0) if mempool_info else 0,
+        "block_height": block_height
     }
 
-def get_block_height_mempool():
-    print("  Fetching current block height (mempool.space)...")
-    raw = fetch("https://mempool.space/api/blocks/tip/height")
-    if raw:
-        try:
-            return int(raw.strip())
-        except:
-            pass
-    return None
+def get_lightning_stats():
+    print("  Fetching Lightning Network stats...")
+    data = fetch_json("https://mempool.space/api/v1/lightning/statistics/latest")
+    if not data: return None
+    latest = data.get("latest", data)
+    return {
+        "node_count": latest.get("node_count", 0),
+        "channel_count": latest.get("channel_count", 0),
+        "total_capacity_btc": round(latest.get("total_capacity", 0) / 1e8, 2) if latest.get("total_capacity", 0) > 1000 else latest.get("total_capacity", 0),
+    }
 
-def parse_rss(url, max_items=8):
-    """Parse RSS feed without external libraries."""
+def parse_rss(url, max_items=6):
     raw = fetch(url, timeout=20)
-    if not raw:
-        return []
+    if not raw: return []
     items = []
     try:
-        # Strip namespaces for simpler parsing
         raw_clean = re.sub(r' xmlns[^"]*"[^"]*"', '', raw)
         root = ET.fromstring(raw_clean)
         channel = root.find(".//channel") or root
@@ -241,7 +260,7 @@ def parse_rss(url, max_items=8):
             desc_el = item.find("description")
             desc = ""
             if desc_el is not None and desc_el.text:
-                desc = re.sub(r"<[^>]+>", "", desc_el.text).strip()[:200]
+                desc = re.sub(r"<[^>]+>", "", desc_el.text).strip()[:250]
             if title:
                 items.append({"title": title, "link": link, "published": pub, "summary": desc})
     except Exception as e:
@@ -249,660 +268,378 @@ def parse_rss(url, max_items=8):
     return items
 
 def get_news():
-    print("  Fetching Bitcoin news (RSS feeds)...")
+    print("  Fetching Bitcoin news from multiple feeds...")
     all_items = []
-
     feeds = [
         ("Bitcoin Magazine", "https://bitcoinmagazine.com/.rss/full/"),
         ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/"),
-        ("Decrypt", "https://decrypt.co/feed"),
-        ("BitcoinNews", "https://bitcoinnews.com/feed/"),
         ("Cointelegraph", "https://cointelegraph.com/rss"),
-        ("Bitcoin.com", "https://news.bitcoin.com/feed/"),
+        ("Decrypt", "https://decrypt.co/feed"),
         ("The Block", "https://www.theblock.co/rss.xml"),
-        ("Bitcoin Stack Exchange", "https://bitcoin.stackexchange.com/feeds"),
-        ("Cointelegraph Markets", "https://cointelegraph.com/rss/category/markets/"),
-        ("Bitcoin Magazine Opinion", "https://bitcoinmagazine.com/.rss/category/opinion/"),
+        ("Bitcoin.com News", "https://news.bitcoin.com/feed/"),
+        ("BitcoinNews", "https://bitcoinnews.com/feed/"),
+        ("Bitcoin Optech", "https://bitcoinops.org/feed.xml"),
     ]
-
+    seen_titles = set()
     for source, url in feeds:
         items = parse_rss(url, max_items=4)
         for item in items:
-            item["source"] = source
-            all_items.append(item)
-        if items:
-            print(f"    Got {len(items)} headlines from {source}")
-        time.sleep(0.5)
-
-    # Sentiment Analysis from Headlines
-    sentiment_score = 0
-    count = 0
-    for item in all_items[:20]:  # analyze first 20 headlines
-        title_lower = item["title"].lower()
-        pos = sum(1 for w in POSITIVE_WORDS if w in title_lower)
-        neg = sum(1 for w in NEGATIVE_WORDS if w in title_lower)
-        sentiment_score += pos - neg
-        count += 1
-    if count > 0:
-        sentiment_score = round(sentiment_score / count, 2)
-    else:
-        sentiment_score = 0
-
-    return all_items[:MAX_HEADLINES], sentiment_score
+            t_key = item["title"][:50].lower()
+            if t_key not in seen_titles:
+                seen_titles.add(t_key)
+                item["source"] = source
+                # Sentiment scoring
+                title_lower = item["title"].lower()
+                pos = sum(1 for w in POSITIVE_WORDS if w in title_lower)
+                neg = sum(1 for w in NEGATIVE_WORDS if w in title_lower)
+                item["sentiment"] = "positive" if pos > neg else ("negative" if neg > pos else "neutral")
+                item["relevance"] = pos + neg
+                all_items.append(item)
+    # Sort by relevance
+    all_items.sort(key=lambda x: x["relevance"], reverse=True)
+    return all_items[:MAX_HEADLINES]
 
 def get_reddit():
-    print("  Fetching top Reddit posts (r/Bitcoin)...")
-    data = fetch_json(
-        "https://www.reddit.com/r/Bitcoin/hot.json?limit=15&raw_json=1"
-    )
-    if not data:
-        # fallback: r/bitcoinmarkets
-        data = fetch_json(
-            "https://www.reddit.com/r/bitcoinmarkets/hot.json?limit=10&raw_json=1"
-        )
-    if not data:
-        return []
-    posts = []
-    try:
-        for child in data["data"]["children"][:MAX_REDDIT]:
-            p = child["data"]
-            if p.get("stickied"):
-                continue
-            title = p.get("title", "").strip()
-            score = p.get("score", 0)
-            comments = p.get("num_comments", 0)
-            url = "https://reddit.com" + p.get("permalink", "")
-            flair = p.get("link_flair_text", "") or ""
-            if title:
-                posts.append({
-                    "title": title,
-                    "score": score,
-                    "comments": comments,
-                    "url": url,
-                    "flair": flair,
-                })
-    except Exception as e:
-        print(f"  [WARN] Reddit parse error: {e}")
-    return posts
+    print("  Fetching Reddit Bitcoin discussions...")
+    results = []
+    subs = [("r/Bitcoin", "bitcoin"), ("r/BitcoinBeginners", "bitcoinbeginners"), ("r/Buttcoin", "lightningnetwork")]
+    for name, sub in subs:
+        data = fetch_json(f"https://www.reddit.com/r/{sub}/hot.json?limit=5", timeout=15)
+        if data and "data" in data:
+            for post in data["data"].get("children", [])[:3]:
+                p = post["data"]
+                if not p.get("stickied") and p.get("title"):
+                    results.append({
+                        "title": p["title"],
+                        "score": p.get("score", 0),
+                        "comments": p.get("num_comments", 0),
+                        "url": f"https://reddit.com{p.get('permalink','')}",
+                        "subreddit": name,
+                        "flair": p.get("link_flair_text", "")
+                    })
+    results.sort(key=lambda x: x["score"], reverse=True)
+    return results[:MAX_REDDIT]
 
-# ── INSIGHT ENGINE ────────────────────────────────────────────────────────────
+def get_bip_updates():
+    print("  Checking BIP repository for updates...")
+    data = fetch_json("https://api.github.com/repos/bitcoin/bips/commits?per_page=5")
+    if not data: return []
+    updates = []
+    for commit in data[:5]:
+        msg = commit.get("commit", {}).get("message", "")
+        date = commit.get("commit", {}).get("author", {}).get("date", "")
+        sha = commit.get("sha", "")[:7]
+        updates.append({"message": msg[:150], "date": date[:10], "sha": sha})
+    return updates
 
-def compute_halving(block_height):
-    """Compute blocks until the next halving and estimate the date.
-
-    This is a lightweight approximation and does not rely on hard-coded future halving blocks.
-    """
-    if block_height is None:
-        block_height = 0
-    if block_height < 0:
-        block_height = 0
-
-    halving_interval = 210000
-    epoch = block_height // halving_interval
-    next_halving = (epoch + 1) * halving_interval
-    blocks_left = max(0, next_halving - block_height)
-
-    # ~10 min per block
-    days_left = blocks_left * 10 / 1440
-    halving_date = (datetime.now(timezone.utc) + timedelta(days=days_left)).strftime("%Y-%m-%d")
-
-    def estimate_mined(height):
-        reward = 50.0
-        remaining = height
-        total = 0.0
-        while remaining > 0 and reward > 1e-8:
-            epoch_blocks = min(remaining, halving_interval)
-            total += epoch_blocks * reward
-            remaining -= epoch_blocks
-            reward /= 2
-        return total
-
-    btc_mined = round(estimate_mined(block_height), 2)
-    pct_mined = round(btc_mined / 21000000 * 100, 4) if btc_mined else 0
-
-    return {
-        "next_halving_block": next_halving,
-        "blocks_until_halving": blocks_left,
-        "estimated_halving_date": halving_date if blocks_left > 0 else "Completed",
-        "days_until_halving": round(days_left, 0),
-        "btc_mined": btc_mined,
-        "pct_mined": pct_mined,
-        "halving_interval": halving_interval,
-        "current_epoch": epoch,
-    }
-
-def extract_topics(headlines, reddit_posts):
-    """Extract trending topic keywords from news and reddit."""
-    text = " ".join(
-        [h.get("title", "") for h in headlines] +
-        [r.get("title", "") for r in reddit_posts]
-    ).lower()
-
-    topic_keywords = {
-        "ETF": ["etf", "spot etf", "blackrock", "fidelity", "bitcoin etf"],
-        "Lightning Network": ["lightning", "ln", "lightning network"],
-        "Institutional Adoption": ["institutional", "corporation", "treasury", "microstrategy", "grayscale", "asset manager"],
-        "Mining": ["mining", "miner", "hashrate", "hash rate", "asic", "foundry"],
-        "Regulation": ["regulation", "sec", "cftc", "congress", "senate", "law", "legal", "ban"],
-        "Layer 2": ["layer 2", "l2", "taproot", "schnorr", "rgb", "ark"],
-        "Halving": ["halving", "halvening", "block reward", "subsidy"],
-        "DeFi on Bitcoin": ["defi", "ordinals", "inscriptions", "brc-20", "runes"],
-        "Self-Custody": ["self-custody", "cold storage", "hardware wallet", "multisig", "seed phrase"],
-        "Market Analysis": ["bull", "bear", "support", "resistance", "ath", "all-time high", "correction"],
-        "Central Banks": ["federal reserve", "fed", "ecb", "central bank", "interest rate", "inflation"],
-        "Energy": ["energy", "renewable", "solar", "nuclear", "carbon", "esg", "electricity"],
-        "Adoption": ["adoption", "merchant", "payment", "el salvador", "country", "nation"],
-        "Privacy": ["privacy", "coinjoin", "taproot", "zero knowledge", "zk"],
-        "Security": ["security", "hack", "exploit", "vulnerability", "51% attack"],
-    }
-
-    found = []
-    for topic, keywords in topic_keywords.items():
-        if any(kw in text for kw in keywords):
-            found.append(topic)
-
-    return found[:MAX_INSIGHTS]
-
-def generate_thought(price_data, fg, blockchain, mempool, headlines, reddit, halving_info, today):
-    """Generate Ollie's daily thought — a synthesized intelligence narrative."""
-    if not price_data:
-        return "The internet is quiet today, but Ollie continues to watch. Every block is a heartbeat, every transaction a breath. Bitcoin persists."
-
-    price = price_data.get("price_usd", 0)
-    change = price_data.get("change_24h_pct", 0)
-    change_7d = price_data.get("change_7d_pct", 0)
-    fg_val = fg["value"] if fg else 50
-    fg_lbl = fg["label"] if fg else "Neutral"
-    block = blockchain.get("block_height", 0) if blockchain else 0
-    blocks_left = halving_info.get("blocks_until_halving", 0)
-
-    # Price narrative
-    direction = "surged" if change > 3 else "climbed" if change > 0.5 else "slipped" if change < -3 else "dipped" if change < -0.5 else "held steady"
-    sentiment_phrase = {
-        "Extreme Greed": "Markets are in a state of euphoria — caution is warranted.",
-        "Greed": "Greed fills the air. The crowd grows bold.",
-        "Neutral": "The market breathes without conviction — a pivot may approach.",
-        "Fear": "Fear grips the market. Historically, this is when conviction is built.",
-        "Extreme Fear": "Extreme fear dominates — the capitulation phase tests the faithful.",
-    }.get(fg_lbl, "Sentiment remains undefined.")
-
-    # Headline context
-    top_headline = headlines[0]["title"] if headlines else ""
-    headline_phrase = f' Today, the world is discussing: "{top_headline}".' if top_headline else ""
-
-    # Halving narrative
-    if blocks_left > 0:
-        halving_phrase = f" We are {blocks_left:,} blocks from the next halving — the mathematical scarcity event that reshapes Bitcoin's economy."
-    else:
-        halving_phrase = " The most recent halving has passed, cementing Bitcoin's deflationary arc."
-
-    # 7d context
-    week_phrase = ""
-    if abs(change_7d) > 5:
-        week_phrase = f" Over the past week, Bitcoin has {'risen' if change_7d > 0 else 'fallen'} {abs(change_7d):.1f}% — a trend worth watching."
-
-    thought = (
-        f"On {today}, Bitcoin {direction} to ${price:,.0f}. "
-        f"{sentiment_phrase}"
-        f"{headline_phrase}"
-        f"{week_phrase}"
-        f"{halving_phrase} "
-        f"Block {block:,} was sealed in the chain today. "
-        f"Every block is irreversible proof that this network has never stopped — "
-        f"not for banks, not for governments, not for anything."
-    )
-
-    return thought
-
-def generate_insights(price_data, fg, blockchain, mempool, halving_info, kb):
-    """Generate bullet-point insights from the data."""
+def generate_insights(price_data, fg_data, chain_data, mempool_data, headlines):
+    print("  Generating insights...")
     insights = []
-    if not price_data:
-        return ["Data unavailable for this cycle."]
+    now = datetime.now(timezone.utc)
 
-    price = price_data.get("price_usd", 0)
-    ath = price_data.get("ath_usd", 0)
-    change = price_data.get("change_24h_pct", 0)
-    supply = price_data.get("circulating_supply", 0)
+    if price_data:
+        p = price_data["price_usd"]
+        ch24 = price_data.get("change_24h_pct", 0)
+        ch7 = price_data.get("change_7d_pct", 0)
+        dom = price_data.get("dominance_pct", 0)
 
-    if ath > 0 and price > 0:
-        pct_from_ath = round((ath - price) / ath * 100, 1)
-        if pct_from_ath < 1:
-            insights.append("Bitcoin is trading at or near its all-time high.")
-        elif pct_from_ath < 10:
-            insights.append(f"Bitcoin is within {pct_from_ath}% of its all-time high of ${ath:,.0f}.")
+        if ch24 > 3:
+            insights.append({"type": "price", "icon": "📈", "text": f"BTC surged {ch24:.1f}% in 24 hours. Strong buying pressure — watch for continuation or consolidation.", "level": "intermediate"})
+        elif ch24 < -3:
+            insights.append({"type": "price", "icon": "📉", "text": f"BTC dropped {abs(ch24):.1f}% today. Historically, dips are buying opportunities for long-term holders.", "level": "beginner"})
         else:
-            insights.append(f"Bitcoin is {pct_from_ath}% below its ATH of ${ath:,.0f} — currently in drawdown.")
+            insights.append({"type": "price", "icon": "⚖️", "text": f"BTC is consolidating around ${p:,.0f}. Low volatility periods often precede big moves.", "level": "intermediate"})
 
-    if supply > 0:
-        mined_pct = round(supply / 21_000_000 * 100, 2)
-        insights.append(f"{mined_pct}% of all Bitcoin that will ever exist has been mined ({supply:,.0f} BTC out of 21,000,000).")
+        if ch7 > 10:
+            insights.append({"type": "trend", "icon": "🔥", "text": f"7-day return: +{ch7:.1f}%. Weekly momentum is strongly bullish. Monitor for local top signals.", "level": "intermediate"})
 
-    if fg:
-        insights.append(f"Market sentiment: {fg['label']} ({fg['value']}/100). Historically, extremes signal reversals.")
+        if dom > 55:
+            insights.append({"type": "dominance", "icon": "👑", "text": f"Bitcoin dominance at {dom}% — capital is concentrating in BTC. This is a sign of market maturity.", "level": "advanced"})
 
-    if blockchain:
-        hr = blockchain.get("hash_rate", 0)
+    if fg_data:
+        v = fg_data["value"]
+        if v <= 20:
+            insights.append({"type": "sentiment", "icon": "😱", "text": f"Extreme Fear at {v}/100. Historically, extreme fear has been the best time to accumulate BTC for the patient investor.", "level": "intermediate"})
+        elif v >= 80:
+            insights.append({"type": "sentiment", "icon": "🤑", "text": f"Extreme Greed at {v}/100. Be cautious — when everyone is greedy, it may be time to be careful. 'Be fearful when others are greedy.'", "level": "beginner"})
+        elif v >= 60:
+            insights.append({"type": "sentiment", "icon": "😊", "text": f"Greed at {v}/100. Market sentiment is positive. Stay disciplined and stick to your strategy.", "level": "beginner"})
+
+    if chain_data:
+        hr = chain_data.get("hash_rate_ehs", 0)
         if hr > 0:
-            insights.append(f"Hash rate stands at {hr:.1f} EH/s — measuring the total computational security of the network.")
+            insights.append({"type": "network", "icon": "⛏️", "text": f"Hash rate: {hr} EH/s. A rising hash rate means miners are bullish on Bitcoin's future — they're investing capital.", "level": "intermediate"})
 
-    if halving_info:
-        bl = halving_info.get("blocks_until_halving", 0)
-        days = halving_info.get("days_until_halving", 0)
-        if bl > 0:
-            insights.append(f"Next halving: {bl:,} blocks away (~{int(days)} days). Block reward will drop from 3.125 to 1.5625 BTC.")
+    if mempool_data:
+        high_fee = mempool_data.get("high_fee", 0)
+        unconf = mempool_data.get("unconfirmed_txs", 0)
+        if unconf > 50000:
+            insights.append({"type": "mempool", "icon": "🚦", "text": f"Mempool congested with {unconf:,} unconfirmed transactions. Use higher fees ({high_fee} sat/vB) for fast confirmation.", "level": "beginner"})
+        elif unconf < 5000:
+            insights.append({"type": "mempool", "icon": "✅", "text": f"Mempool is clear with only {unconf:,} transactions. Great time to transact with low fees ({mempool_data.get('low_fee',1)} sat/vB).", "level": "beginner"})
 
-    if mempool:
-        high = mempool.get("high_fee", 0)
-        if high > 100:
-            insights.append(f"Mempool congestion: high-priority fee is {high} sat/vByte — network is busy.")
-        elif high < 5:
-            insights.append(f"Mempool is quiet: fees as low as {mempool.get('low_fee', 0)} sat/vByte.")
-
-    if abs(change) > 5:
-        insights.append(f"Significant 24h move: {'+' if change > 0 else ''}{change}%. Watch for follow-through volume.")
-
-    # Trend analysis
-    price_history = kb.get("price_history", [])
-    if len(price_history) >= 30:
-        prices = [p["price"] for p in price_history[-30:]]
-        avg_30d = sum(prices) / len(prices)
-        if price > avg_30d * 1.05:
-            insights.append("Price is 5% above 30-day average — bullish momentum.")
-        elif price < avg_30d * 0.95:
-            insights.append("Price is 5% below 30-day average — bearish pressure.")
-    
-    # Advanced insights
-    advanced = generate_advanced_insights(price_data, kb)
-    insights.extend(advanced)
+    # Add a random Bitcoin fact as an insight
+    daily_fact_idx = int(now.strftime("%j")) % len(BITCOIN_FACTS)
+    insights.append({"type": "fact", "icon": "🧠", "text": BITCOIN_FACTS[daily_fact_idx], "level": "beginner"})
 
     return insights[:MAX_INSIGHTS]
 
-def generate_tips(price_data, fg, blockchain, mempool, halving_info, topics):
-    """Generate helpful tips for Bitcoiners based on current data."""
+def generate_tips(price_data, fg_data):
     tips = []
+    now = datetime.now(timezone.utc)
 
-    if fg:
-        val = fg['value']
-        if val >= 75:
-            tips.append("Extreme Greed: Markets are euphoric. Consider taking profits or setting stop-losses.")
-        elif val <= 25:
-            tips.append("Extreme Fear: This could be a buying opportunity. Remember, fear is your friend in crypto.")
-        elif val >= 55:
-            tips.append("Greed is creeping in. Stay disciplined and don't FOMO into bad positions.")
-        elif val <= 45:
-            tips.append("Fear levels rising. Focus on long-term fundamentals over short-term noise.")
-
-    if price_data:
-        change = price_data.get("change_24h_pct", 0)
-        if change > 10:
-            tips.append("Big green day! Congrats to those who held. But remember, volatility is Bitcoin's nature.")
-        elif change < -10:
-            tips.append("Red day ahead. If you're long-term, this is just noise. Dollar-cost average if you believe.")
-
-    if halving_info:
-        days = halving_info.get("days_until_halving", 0)
-        if days < 100:
-            tips.append(f"Halving approaching in ~{int(days)} days. Historically, halvings lead to bull runs. Prepare your stack.")
-
-    if mempool:
-        high = mempool.get("high_fee", 0)
-        if high > 50:
-            tips.append("High fees! If sending, consider batching transactions or using Lightning Network.")
-
-    if "Halving" in topics:
-        tips.append("Halving discussion heating up. Remember, halvings reduce new supply by 50%, historically bullish.")
-
-    if "ETF" in topics:
-        tips.append("ETF news circulating. Spot ETFs could bring institutional money, but don't forget self-custody.")
-
-    tips.append("Always do your own research. Bitcoin is about financial sovereignty - learn, stack sats, and HODL.")
-
-    return tips
-
-
-def generate_daily_fact():
-    """Return a random educational fact about Bitcoin."""
-    facts = [
-        "Bitcoin was created in 2008 by Satoshi Nakamoto, whose true identity remains unknown.",
-        "The total supply of Bitcoin is capped at 21 million coins, making it a deflationary asset.",
-        "Bitcoin transactions are verified by network nodes and recorded in a public distributed ledger called the blockchain.",
-        "The first Bitcoin transaction was made in 2009, when Satoshi sent 10 BTC to Hal Finney.",
-        "Bitcoin's proof-of-work algorithm is designed to prevent double-spending and ensure network security.",
-        "Lightning Network allows for instant, low-cost Bitcoin transactions by enabling off-chain payments.",
-        "Bitcoin halvings occur every 4 years, reducing the block reward and controlling inflation.",
-        "The Bitcoin whitepaper, published in 2008, is only 9 pages long and outlines the core concepts.",
-        "Bitcoin mining secures the network and processes transactions, requiring significant computational power.",
-        "Self-custody means you control your own keys, reducing reliance on third parties.",
+    always_tips = [
+        {"icon": "🔑", "tip": "Not your keys, not your coins. Move BTC off exchanges to your own wallet.", "category": "security"},
+        {"icon": "🌱", "tip": "Dollar-cost averaging (DCA) removes emotion from investing. Buy a fixed amount weekly regardless of price.", "category": "strategy"},
+        {"icon": "🔒", "tip": "Write down your seed phrase on paper. Never store it digitally or in photos.", "category": "security"},
+        {"icon": "⚡", "tip": "Try the Lightning Network for daily Bitcoin spending. Instant, cheap, and unstoppable.", "category": "usage"},
+        {"icon": "📚", "tip": "Read the Bitcoin whitepaper. It's only 9 pages and explains everything Satoshi intended.", "category": "education"},
+        {"icon": "🏃", "tip": "Run your own Bitcoin node. It takes ~500GB storage and gives you full sovereignty.", "category": "advanced"},
+        {"icon": "🧮", "tip": "Think in satoshis, not BTC. 1 BTC = 100,000,000 sats. You can own a lot of sats.", "category": "mindset"},
+        {"icon": "🌍", "tip": "Bitcoin is borderless money. You can send any amount anywhere with no permission needed.", "category": "education"},
     ]
-    import random
-    random.seed(datetime.now().strftime("%Y-%m-%d"))  # daily fact
-    return random.choice(facts)
+    daily_idx = int(now.strftime("%j")) % len(always_tips)
+    tips.append(always_tips[daily_idx])
+    tips.append(always_tips[(daily_idx + 1) % len(always_tips)])
 
+    if fg_data and fg_data["value"] <= 30:
+        tips.append({"icon": "💎", "tip": "The market is fearful. Historically this is when the most wealth is created. Stay calm, stay humble, stack sats.", "category": "strategy"})
+    elif fg_data and fg_data["value"] >= 75:
+        tips.append({"icon": "⚠️", "tip": "The market is greedy. Consider taking some profits or at minimum don't use leverage here.", "category": "strategy"})
 
-def generate_prediction(price_data, fg, kb):
-    """Generate a short, heuristic prediction based on momentum and sentiment."""
-    if not price_data:
-        return "Insufficient data to form a prediction."
+    return tips[:4]
 
-    price = price_data.get("price_usd", 0)
-    history = kb.get("price_history", []) if kb else []
+def generate_thought(price_data, chain_data, fg_data, mempool_data, evolution_num):
+    now = datetime.now(timezone.utc)
+    genesis = datetime(2009, 1, 3, tzinfo=timezone.utc)
+    days_since = (now - genesis).days
 
-    # short-term momentum vs 7-day average
-    momentum = None
-    if len(history) >= 7:
-        last7 = [h.get("price", 0) for h in history[-7:]]
-        if all(last7):
-            avg7 = sum(last7) / len(last7)
-            momentum = (price - avg7) / avg7 * 100
+    p = price_data.get("price_usd", 0) if price_data else 0
+    fg = fg_data.get("value", 50) if fg_data else 50
+    fg_label = fg_data.get("label", "Neutral") if fg_data else "Neutral"
+    hr = chain_data.get("hash_rate_ehs", 0) if chain_data else 0
+    dom = price_data.get("dominance_pct", 0) if price_data else 0
+    block_h = (chain_data.get("block_height", 0) or (mempool_data or {}).get("block_height", 0)) if chain_data else ((mempool_data or {}).get("block_height", 0))
+    blocks_to_halving = max(0, NEXT_HALVING_BLOCK - block_h) if block_h else "?"
+    mempool_txs = mempool_data.get("unconfirmed_txs", 0) if mempool_data else 0
+    low_fee = mempool_data.get("low_fee", 1) if mempool_data else 1
+    miners_rev = chain_data.get("miners_revenue_usd", 0) if chain_data else 0
 
-    # RSI-based signal
-    rsi = None
-    if len(history) >= 30:
-        prices = [h.get("price", 0) for h in history[-30:]]
-        rsi = calculate_rsi(prices)
+    crowd_action = "is fearful — history rewards the patient" if fg < 40 else ("is greedy — the wise stay disciplined" if fg > 70 else "is neutral — the opportunity is quiet")
 
-    sentiment = fg.get("value", 50) if fg else 50
+    template_idx = int(now.strftime("%H")) % len(THOUGHT_TEMPLATES)
+    try:
+        thought = THOUGHT_TEMPLATES[template_idx].format(
+            block_height=f"{block_h:,}" if block_h else "unknown",
+            blocks_to_halving=f"{blocks_to_halving:,}" if isinstance(blocks_to_halving, int) else blocks_to_halving,
+            fg_value=fg, fg_label=fg_label, crowd_action=crowd_action,
+            hash_rate=hr, price=p, dominance=dom,
+            sources=8, headlines=12,
+            mempool_txs=f"{mempool_txs:,}",
+            low_fee=low_fee, days_since_genesis=f"{days_since:,}",
+            miners_revenue=miners_rev
+        )
+    except:
+        thought = f"Ollie has learned from {days_since:,} days of Bitcoin history. Today's price: ${p:,.0f}. The network never stops. Neither does Ollie."
 
-    parts = []
-    if momentum is not None:
-        if momentum > 3:
-            parts.append("Price is above the 7-day average, suggesting short-term bullish momentum.")
-        elif momentum < -3:
-            parts.append("Price is below the 7-day average, indicating short-term pressure.")
-        else:
-            parts.append("Price is trading near the 7-day average, signaling consolidation.")
+    return thought
 
-    if rsi is not None:
-        if rsi > 70:
-            parts.append(f"RSI at {rsi} suggests overbought conditions; a pullback could happen.")
-        elif rsi < 30:
-            parts.append(f"RSI at {rsi} suggests oversold conditions; a bounce may be due.")
-        else:
-            parts.append(f"RSI of {rsi} indicates neutral momentum.")
+def generate_prediction(price_data, fg_data, chain_data):
+    now = datetime.now(timezone.utc)
+    if not price_data: return {"outlook": "neutral", "text": "Insufficient data for prediction.", "confidence": 0}
 
-    if sentiment is not None:
-        if sentiment >= 70:
-            parts.append("Fear & Greed is high, which often precedes consolidation or pullbacks.")
-        elif sentiment <= 30:
-            parts.append("Fear & Greed is low, which can present buying opportunities for the patient.")
-        else:
-            parts.append("Market sentiment is moderate.")
+    p = price_data["price_usd"]
+    ch24 = price_data.get("change_24h_pct", 0)
+    ch7 = price_data.get("change_7d_pct", 0)
+    fg = fg_data["value"] if fg_data else 50
+    hr = chain_data.get("hash_rate_ehs", 0) if chain_data else 0
 
-    if not parts:
-        return "Prediction requires more data; check back after Ollie has more history."
+    score = 0
+    if ch24 > 2: score += 1
+    elif ch24 < -2: score -= 1
+    if ch7 > 5: score += 2
+    elif ch7 < -5: score -= 2
+    if fg < 30: score += 1  # contrarian signal
+    elif fg > 75: score -= 1
+    if hr > 700: score += 1
 
-    return " ".join(parts) + " (Not financial advice.)"
+    if score >= 3:
+        outlook, text = "bullish", f"Multiple signals align bullishly. Hash rate strong, momentum positive. Short-term bias: upward."
+    elif score <= -3:
+        outlook, text = "bearish", f"Momentum negative, sentiment stretched. Caution warranted. Watch support levels."
+    elif score > 0:
+        outlook, text = "cautiously bullish", f"More positive signals than negative. Market shows resilience. Stay patient."
+    elif score < 0:
+        outlook, text = "cautiously bearish", f"Slight negative bias. Not a crisis — but not the time to over-leverage."
+    else:
+        outlook, text = "neutral", f"Balanced signals. The market is undecided. This is when discipline matters most."
 
+    return {"outlook": outlook, "text": text, "confidence": min(abs(score) * 20, 80), "score": score}
 
-def calculate_rsi(prices, period=14):
-    """Calculate RSI for price series."""
-    if len(prices) < period + 1:
-        return None
-    gains = []
-    losses = []
-    for i in range(1, len(prices)):
-        change = prices[i] - prices[i-1]
-        if change > 0:
-            gains.append(change)
-            losses.append(0)
-        else:
-            gains.append(0)
-            losses.append(abs(change))
-    
-    avg_gain = sum(gains[-period:]) / period
-    avg_loss = sum(losses[-period:]) / period
-    if avg_loss == 0:
-        return 100
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-    return round(rsi, 2)
+# ── SELF-IMPROVEMENT SYSTEM ───────────────────────────────────────────────────
+def evolve(existing_data):
+    """Ollie scores its own past predictions and evolves its thinking."""
+    print("  Running self-improvement cycle...")
+    evolution = existing_data.get("evolution_log", [])
+    now = datetime.now(timezone.utc)
 
-def generate_advanced_insights(price_data, kb):
-    """Generate advanced technical insights."""
-    insights = []
-    price_history = kb.get("price_history", [])
-    if len(price_history) >= 30:
-        prices = [p["price"] for p in price_history[-30:]]
-        rsi = calculate_rsi(prices)
-        if rsi:
-            if rsi > 70:
-                insights.append(f"RSI at {rsi} - Overbought conditions, potential reversal.")
-            elif rsi < 30:
-                insights.append(f"RSI at {rsi} - Oversold conditions, potential bounce.")
-            else:
-                insights.append(f"RSI at {rsi} - Neutral momentum.")
-        
-        # Volume analysis if available
-        volumes = [p.get("market_cap", 0) for p in price_history[-7:]]  # using market_cap as proxy
-        if volumes:
-            avg_vol = sum(volumes) / len(volumes)
-            current_vol = volumes[-1]
-            if current_vol > avg_vol * 1.5:
-                insights.append("High volume day - Strong market interest.")
-    
-    return insights
+    # Score yesterday's prediction (simple heuristic: if we predicted bullish and price went up, score +1)
+    if len(evolution) >= 2:
+        last = evolution[-1]
+        prev = evolution[-2]
+        last_price = last.get("price_usd", 0)
+        prev_price = prev.get("price_usd", 0)
+        last_outlook = last.get("prediction_outlook", "neutral")
+        if last_price and prev_price:
+            price_went_up = last_price > prev_price
+            predicted_up = "bullish" in last_outlook
+            prediction_score = 1 if (price_went_up == predicted_up) else -1
+            # Update score on last entry
+            evolution[-1]["prediction_score"] = prediction_score
+
+    # Calculate lifetime accuracy
+    scored = [e for e in evolution if "prediction_score" in e]
+    accuracy = (sum(1 for e in scored if e["prediction_score"] > 0) / len(scored) * 100) if scored else 0
+
+    return evolution, round(accuracy, 1)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
-
 def main():
     print("=" * 60)
-    print("  OLLIE — Bitcoin Learning Engine")
-    print(f"  Cycle starting: {datetime.now(timezone.utc).isoformat()}")
+    print(f"OLLIE v3.0 — Bitcoin Intelligence Engine")
+    print(f"Cycle start: {datetime.now(timezone.utc).isoformat()}")
     print("=" * 60)
 
-    # Load existing knowledge
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            knowledge = json.load(f)
-    except FileNotFoundError:
-        print("  [INFO] No existing knowledge.json — creating fresh.")
-        knowledge = {"meta": {}, "current": {}, "knowledge_base": {"topics_learned": [], "price_history": [], "fear_greed_history": []}, "evolution_log": []}
+    # Load existing data
+    existing = {}
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r") as f:
+                existing = json.load(f)
+        except:
+            pass
 
-    meta = knowledge.setdefault("meta", {})
-    kb = knowledge.setdefault("knowledge_base", {"topics_learned": [], "price_history": [], "fear_greed_history": []})
+    evolution_log, prediction_accuracy = evolve(existing)
+    generation = len(evolution_log) + 1
 
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    today_pretty = datetime.now(timezone.utc).strftime("%B %d, %Y")
-    now_iso = datetime.now(timezone.utc).isoformat()
-
-    if not meta.get("genesis"):
-        meta["genesis"] = today
-        print(f"  [INFO] Genesis day: {today}")
-
-    cycle_num = meta.get("total_cycles", 0) + 1
-    print(f"  Starting cycle #{cycle_num}")
-
-    # ── FETCH DATA ────────────────────────────────────────────────────────────
-    print("\n[PHASE 1] Fetching market data...")
+    # Fetch all data
+    print("\n[PHASE 1] Gathering live Bitcoin intelligence...")
     price_data = get_price()
-    time.sleep(2)  # respect rate limits
-    global_data = get_coingecko_global()
-    time.sleep(2)
-    if price_data and global_data:
-        price_data["dominance_pct"] = global_data.get("dominance_pct", 0)
+    fg_data = get_fear_greed()
+    chain_data = get_blockchain_stats()
+    mempool_data = get_mempool()
+    lightning_data = get_lightning_stats()
 
-    print("\n[PHASE 2] Fetching sentiment data...")
-    fg = get_fear_greed()
-    time.sleep(1)
-
-    print("\n[PHASE 3] Fetching blockchain data...")
-    blockchain = get_blockchain_stats()
-    time.sleep(1)
-    block_height = get_block_height_mempool()
-    if block_height and blockchain:
-        blockchain["block_height"] = block_height
-    elif block_height:
-        blockchain = {"block_height": block_height}
-    time.sleep(1)
-    mempool = get_mempool()
-    time.sleep(1)
-
-    print("\n[PHASE 4] Fetching news and Reddit...")
-    headlines, sentiment = get_news()
-    time.sleep(2)
+    print("\n[PHASE 2] Absorbing news and community signals...")
+    headlines = get_news()
     reddit_posts = get_reddit()
+    bip_updates = get_bip_updates()
 
-    print("\n[PHASE 5] Computing intelligence...")
-    # Halving calc
-    bh = blockchain.get("block_height", 0) if blockchain else 0
-    halving_info = compute_halving(bh)
+    print("\n[PHASE 3] Generating insights and wisdom...")
+    insights = generate_insights(price_data, fg_data, chain_data, mempool_data, headlines)
+    tips = generate_tips(price_data, fg_data)
+    thought = generate_thought(price_data, chain_data, fg_data, mempool_data, generation)
+    prediction = generate_prediction(price_data, fg_data, chain_data)
 
-    # Topics
-    topics = extract_topics(headlines, reddit_posts)
-    print(f"  Trending topics: {topics}")
-
-    # Thought generation
-    thought = generate_thought(price_data, fg, blockchain, mempool, headlines, reddit_posts, halving_info, today_pretty)
-
-    # Insights
-    insights = generate_insights(price_data, fg, blockchain, mempool, halving_info, kb)
-
-    # Tips for Bitcoiners
-    tips = generate_tips(price_data, fg, blockchain, mempool, halving_info, topics)
-
-    # Daily educational fact
-    fact = generate_daily_fact()
-
-    # Market prediction
-    prediction = generate_prediction(price_data, fg, kb)
-
-    # ── UPDATE KNOWLEDGE ──────────────────────────────────────────────────────
-    print("\n[PHASE 6] Updating knowledge base...")
-
-    # Current snapshot
-    current = knowledge.setdefault("current", {})
-    if price_data:
-        current.update({
-            "price_usd": price_data.get("price_usd", 0),
-            "market_cap_usd": price_data.get("market_cap_usd", 0),
-            "volume_24h_usd": price_data.get("volume_24h_usd", 0),
-            "change_24h_pct": price_data.get("change_24h_pct", 0),
-            "change_7d_pct": price_data.get("change_7d_pct", 0),
-            "change_30d_pct": price_data.get("change_30d_pct", 0),
-            "ath_usd": price_data.get("ath_usd", 0),
-            "ath_date": price_data.get("ath_date", ""),
-            "circulating_supply": price_data.get("circulating_supply", 0),
-            "max_supply": 21000000,
-            "dominance_pct": price_data.get("dominance_pct", 0),
-        })
-    if fg:
-        current.update({
-            "fear_greed_value": fg["value"],
-            "fear_greed_label": fg["label"],
-        })
-    current["sentiment_score"] = sentiment
-    if blockchain:
-        current.update({
-            "block_height": blockchain.get("block_height", current.get("block_height", 0)),
-            "hash_rate": blockchain.get("hash_rate", 0),
-            "difficulty": blockchain.get("difficulty", 0),
-        })
-    if mempool:
-        current.update({
-            "mempool_low_fee": mempool.get("low_fee", 0),
-            "mempool_mid_fee": mempool.get("mid_fee", 0),
-            "mempool_high_fee": mempool.get("high_fee", 0),
-            "unconfirmed_txs": mempool.get("unconfirmed_txs", 0),
-        })
-    current.update(halving_info)
-
-    # Today's content
-    knowledge["todays_thought"] = thought
-    knowledge["todays_headlines"] = headlines
-    knowledge["todays_reddit"] = reddit_posts
-    knowledge["todays_insights"] = insights
-    knowledge["todays_tips"] = tips
-    knowledge["todays_fact"] = fact
-    knowledge["todays_prediction"] = prediction
-
-    # Price history
-    price_history = kb.setdefault("price_history", [])
-    if price_data and price_data.get("price_usd"):
-        price_history.append({
-            "date": today,
-            "price": price_data["price_usd"],
-            "change_24h": price_data.get("change_24h_pct", 0),
-            "market_cap": price_data.get("market_cap_usd", 0),
-        })
-        if len(price_history) > MAX_PRICE_HISTORY:
-            price_history[:] = price_history[-MAX_PRICE_HISTORY:]
-
-    # Fear & Greed history
-    fg_history = kb.setdefault("fear_greed_history", [])
-    if fg:
-        # avoid duplicates for today
-        if not fg_history or fg_history[-1].get("date") != today:
-            fg_history.append({"date": today, "value": fg["value"], "label": fg["label"]})
-        if len(fg_history) > MAX_FG_HISTORY:
-            fg_history[:] = fg_history[-MAX_FG_HISTORY:]
-
-    # Sentiment history
-    sentiment_history = kb.setdefault("sentiment_history", [])
-    sentiment_history.append({"date": today, "score": sentiment})
-    if len(sentiment_history) > MAX_FG_HISTORY:
-        sentiment_history.pop(0)
-
-    # Topics
-    topics_all = kb.setdefault("topics_learned", [])
-    for t in topics:
-        entry = next((x for x in topics_all if x["topic"] == t), None)
-        if entry:
-            entry["count"] = entry.get("count", 1) + 1
-            entry["last_seen"] = today
-        else:
-            topics_all.append({"topic": t, "count": 1, "first_seen": today, "last_seen": today})
-    topics_all.sort(key=lambda x: x["count"], reverse=True)
-
-    # Evolution log entry
-    evo_entry = {
-        "cycle": cycle_num,
-        "date": today,
-        "timestamp": now_iso,
+    # Build today's evolution log entry
+    now = datetime.now(timezone.utc)
+    today_entry = {
+        "generation": generation,
+        "timestamp": now.isoformat(),
+        "date": now.strftime("%Y-%m-%d"),
+        "cycle": now.strftime("%H:00 UTC"),
         "price_usd": price_data.get("price_usd", 0) if price_data else 0,
-        "change_24h": price_data.get("change_24h_pct", 0) if price_data else 0,
-        "fear_greed_value": fg["value"] if fg else 0,
-        "fear_greed_label": fg["label"] if fg else "Unknown",
-        "block_height": bh,
-        "topics": topics,
-        "headline_count": len(headlines),
-        "thought_preview": thought[:140] + "...",
+        "fg_value": fg_data.get("value", 0) if fg_data else 0,
+        "headlines_absorbed": len(headlines),
+        "insights_generated": len(insights),
+        "prediction_outlook": prediction["outlook"],
+        "hash_rate_ehs": chain_data.get("hash_rate_ehs", 0) if chain_data else 0,
     }
-    evo_log = knowledge.setdefault("evolution_log", [])
-    evo_log.append(evo_entry)
-    if len(evo_log) > MAX_EVOLUTION_LOG:
-        evo_log[:] = evo_log[-MAX_EVOLUTION_LOG:]
+    evolution_log.append(today_entry)
+    if len(evolution_log) > MAX_EVOLUTION_LOG:
+        evolution_log = evolution_log[-MAX_EVOLUTION_LOG:]
 
-    # Meta update
-    meta.update({
-        "name": "Ollie",
-        "subject": "Bitcoin",
-        "total_cycles": cycle_num,
-        "last_updated": now_iso,
-        "version": "2.0",
-        "status": "active",
-    })
-    if not meta.get("genesis"):
-        meta["genesis"] = today
+    # Update price history
+    price_history = existing.get("price_history", [])
+    if price_data and price_data.get("price_usd", 0) > 0:
+        price_history.append({
+            "date": now.strftime("%Y-%m-%d %H:00"),
+            "price": price_data["price_usd"],
+            "change_24h": price_data.get("change_24h_pct", 0)
+        })
+        if len(price_history) > MAX_PRICE_HISTORY * 4:  # 4x daily cycles
+            price_history = price_history[-MAX_PRICE_HISTORY * 4:]
 
-    # ── SAVE ──────────────────────────────────────────────────────────────────
-    print("\n[PHASE 7] Saving knowledge to disk...")
+    # Compute halving info
+    block_height = (chain_data or {}).get("block_height", 0) or (mempool_data or {}).get("block_height", 0) or 0
+    blocks_to_halving = max(0, NEXT_HALVING_BLOCK - block_height) if block_height else 0
+    estimated_days_to_halving = round(blocks_to_halving * 10 / 1440, 1) if blocks_to_halving else 0
+
+    # Genesis date
+    genesis = datetime(2009, 1, 3, tzinfo=timezone.utc)
+    days_alive = (now - genesis).days
+
+    # Compile final knowledge base
+    knowledge = {
+        "meta": {
+            "version": "3.0",
+            "generation": generation,
+            "last_updated": now.isoformat(),
+            "last_updated_human": now.strftime("%B %d, %Y at %H:%M UTC"),
+            "update_cycle": "every 6 hours",
+            "mission": "Learn everything about Bitcoin. Teach and guide every Bitcoiner on their journey.",
+            "prediction_accuracy_pct": prediction_accuracy,
+            "days_alive": days_alive,
+            "total_cycles": generation,
+        },
+        "current": {
+            "price": price_data,
+            "fear_greed": fg_data,
+            "blockchain": chain_data,
+            "mempool": mempool_data,
+            "lightning": lightning_data,
+            "halving": {
+                "current_reward_btc": HALVING_BLOCK_REWARD_NOW,
+                "next_block": NEXT_HALVING_BLOCK,
+                "current_block": block_height,
+                "blocks_remaining": blocks_to_halving,
+                "estimated_days": estimated_days_to_halving,
+                "progress_pct": round((block_height % 210000) / 210000 * 100, 2) if block_height else 0
+            }
+        },
+        "intelligence": {
+            "todays_thought": thought,
+            "todays_prediction": prediction,
+            "todays_insights": insights,
+            "todays_tips": tips,
+            "todays_fact": BITCOIN_FACTS[int(now.strftime("%j")) % len(BITCOIN_FACTS)],
+        },
+        "news": {
+            "headlines": headlines,
+            "reddit": reddit_posts,
+            "bip_updates": bip_updates,
+        },
+        "education": {
+            "learning_paths": LEARNING_PATHS,
+            "all_facts": BITCOIN_FACTS,
+        },
+        "evolution_log": evolution_log,
+        "price_history": price_history,
+    }
+
     os.makedirs("data", exist_ok=True)
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(knowledge, f, indent=2, ensure_ascii=False)
+    with open(DATA_FILE, "w") as f:
+        json.dump(knowledge, f, indent=2, default=str)
 
-    size_kb = os.path.getsize(DATA_FILE) / 1024
-    print(f"  Saved {DATA_FILE} ({size_kb:.1f} KB)")
-
-    print("\n" + "=" * 60)
-    print(f"  CYCLE #{cycle_num} COMPLETE — {today}")
-    print(f"  BTC Price: ${price_data.get('price_usd', 0):,.0f}" if price_data else "  Price: unavailable")
-    print(f"  Fear & Greed: {fg['value']} ({fg['label']})" if fg else "  F&G: unavailable")
-    print(f"  Block Height: {bh:,}")
-    print(f"  Topics: {', '.join(topics[:5])}")
-    print(f"  Knowledge nodes: {len(topics_all)}")
-    print(f"  Price history: {len(price_history)} days")
-    print("=" * 60)
+    print(f"\n✅ OLLIE CYCLE COMPLETE")
+    print(f"   Generation: {generation}")
+    print(f"   Price: ${price_data.get('price_usd', 0):,.2f}" if price_data else "   Price: N/A")
+    print(f"   Fear & Greed: {fg_data.get('value', 0)} ({fg_data.get('label', 'N/A')})" if fg_data else "   F&G: N/A")
+    print(f"   Headlines absorbed: {len(headlines)}")
+    print(f"   Insights generated: {len(insights)}")
+    print(f"   Prediction accuracy: {prediction_accuracy}%")
+    print(f"   Prediction: {prediction['outlook']}")
+    print(f"   Data written to: {DATA_FILE}")
 
 if __name__ == "__main__":
     main()
