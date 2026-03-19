@@ -1,0 +1,27 @@
+name: Cycle D — 18:30 UTC
+
+on:
+  schedule:
+    - cron: '30 18 * * *'
+  workflow_dispatch:
+
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Run Ollie learning engine
+        run: python learn.py
+      - name: Commit updated knowledge
+        run: |
+          git config --local user.email "ollie@bitcoin.ai"
+          git config --local user.name "Ollie AI"
+          git add data/knowledge.json
+          git commit -m "🤖 Ollie cycle D — $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "No changes"
+          git push
