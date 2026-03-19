@@ -28,18 +28,21 @@ HALVING_BLOCK_REWARD_NOW = 3.125
 NEXT_HALVING_BLOCK = 1050000
 
 # ── HTTP HELPER ───────────────────────────────────────────────────────────────
-def fetch(url, timeout=15, headers=None):
-    req = urllib.request.Request(url)
-    req.add_header("User-Agent", "OllieBitcoinBot/2.0 (autonomous-learning; github-pages)")
-    if headers:
-        for k, v in headers.items():
-            req.add_header(k, v)
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.read().decode("utf-8", errors="replace")
-    except Exception as e:
-        print(f"  [WARN] fetch({url[:60]}...) failed: {e}")
-        return None
+def fetch(url, timeout=15, headers=None, retries=3):
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url)
+            req.add_header("User-Agent", "OllieBitcoinBot/2.0 (autonomous-learning; github-pages)")
+            if headers:
+                for k, v in headers.items():
+                    req.add_header(k, v)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read().decode("utf-8", errors="replace")
+        except Exception as e:
+            print(f"  [WARN] fetch({url[:60]}...) attempt {attempt+1} failed: {e}")
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)  # exponential backoff
+    return None
 
 def fetch_json(url, timeout=15):
     raw = fetch(url, timeout=timeout)
@@ -186,6 +189,7 @@ def get_news():
         ("Cointelegraph", "https://cointelegraph.com/rss"),
         ("Bitcoin.com", "https://news.bitcoin.com/feed/"),
         ("The Block", "https://www.theblock.co/rss.xml"),
+        ("Bitcoin Stack Exchange", "https://bitcoin.stackexchange.com/feeds"),
     ]
 
     for source, url in feeds:
@@ -495,6 +499,25 @@ def generate_daily_fact():
     random.seed(datetime.now().strftime("%Y-%m-%d"))  # daily fact
     return random.choice(facts)
 
+def generate_prediction(price_data, fg, kb):
+    """Generate a simple market prediction based on trends."""
+    prediction = ""
+    price = price_data.get("price_usd", 0) if price_data else 0
+    fg_val = fg['value'] if fg else 50
+    price_history = kb.get("price_history", [])
+    if len(price_history) >= 7:
+        recent_prices = [p["price"] for p in price_history[-7:]]
+        avg_7d = sum(recent_prices) / len(recent_prices)
+        if price > avg_7d and fg_val < 40:
+            prediction = "Bullish outlook: Price above 7-day average with low fear levels."
+        elif price < avg_7d and fg_val > 60:
+            prediction = "Bearish outlook: Price below 7-day average with high greed levels."
+        else:
+            prediction = "Neutral: Market conditions mixed, monitor closely."
+    else:
+        prediction = "Insufficient data for prediction."
+    return prediction
+
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -576,6 +599,9 @@ def main():
     # Daily educational fact
     fact = generate_daily_fact()
 
+    # Market prediction
+    prediction = generate_prediction(price_data, fg, kb)
+
     # ── UPDATE KNOWLEDGE ──────────────────────────────────────────────────────
     print("\n[PHASE 6] Updating knowledge base...")
 
@@ -622,6 +648,7 @@ def main():
     knowledge["todays_insights"] = insights
     knowledge["todays_tips"] = tips
     knowledge["todays_fact"] = fact
+    knowledge["todays_prediction"] = prediction
 
     # Price history
     price_history = kb.setdefault("price_history", [])

@@ -202,6 +202,11 @@ body::after {
 
 /* ═══ INSIGHTS LIST ═══ */
 .insight-list { display:flex; flex-direction:column; gap:10px; }
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+.tool { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+.tool h4 { margin: 0 0 10px 0; color: var(--btc); }
+.tool input, .tool select { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; }
+.tool button { width: 100%; padding: 8px; background: var(--btc); color: black; border: none; cursor: pointer; margin: 5px 0; border-radius: 4px; }
 .insight {
   display:flex; gap:14px; padding:14px 18px;
   background:var(--card); border:1px solid var(--border); border-radius:4px;
@@ -469,6 +474,14 @@ canvas.chart { width:100%; height:100%; }
     </div>
   </div>
 
+  <!-- ═══ MARKET PREDICTION ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> OLLIE'S PREDICTION</div>
+    <div id="prediction-text" class="thought-text" style="padding:12px 0;">
+      <div class="shimmer"></div>
+    </div>
+  </div>
+
   <!-- ═══ NEWS ═══ -->
   <div class="sec">
     <div class="sec-hd"><span class="tag">◈</span> TODAY'S BITCOIN HEADLINES</div>
@@ -481,6 +494,86 @@ canvas.chart { width:100%; height:100%; }
   <div class="sec" id="reddit-sec" style="display:none">
     <div class="sec-hd"><span class="tag">◈</span> COMMUNITY PULSE — R/BITCOIN</div>
     <div class="reddit-list" id="reddit-list"></div>
+  </div>
+
+  <!-- ═══ ASK OLLIE ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> ASK OLLIE</div>
+    <div id="chat-messages" style="max-height:300px; overflow-y:auto; margin-bottom:10px; background:var(--deep); padding:8px; border-radius:4px;"></div>
+    <input id="chat-input" type="text" placeholder="Ask about Bitcoin..." style="width:70%; padding:8px; background:var(--card); color:var(--cream); border:1px solid var(--border);">
+    <button id="chat-send" style="padding:8px 16px; background:var(--btc); color:black; border:none; cursor:pointer;">Ask</button>
+  </div>
+
+  <!-- ═══ BITCOIN TOOLS ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> BITCOIN TOOLS</div>
+    <div class="tools-grid">
+      <div class="tool">
+        <h4>Satoshi Converter</h4>
+        <input id="sats-input" type="number" placeholder="Enter satoshis">
+        <button id="convert-btn">Convert to BTC</button>
+        <div id="btc-result"></div>
+      </div>
+      <div class="tool">
+        <h4>Profit Calculator</h4>
+        <input id="buy-price" type="number" placeholder="Buy price (USD)">
+        <input id="sell-price" type="number" placeholder="Sell price (USD)">
+        <input id="amount" type="number" placeholder="Amount (BTC)">
+        <button id="calc-profit-btn">Calculate</button>
+        <div id="profit-result"></div>
+      </div>
+      <div class="tool">
+        <h4>Halving Progress</h4>
+        <div id="halving-progress">Loading...</div>
+      </div>
+      <div class="tool">
+        <h4>Block Reward Calculator</h4>
+        <input id="blocks-input" type="number" placeholder="Blocks to mine">
+        <button id="reward-btn">Calculate Reward</button>
+        <div id="reward-result"></div>
+      </div>
+      <div class="tool">
+        <h4>Bitcoin Facts Quiz</h4>
+        <button id="quiz-btn">Start Quiz</button>
+        <div id="quiz-result"></div>
+      </div>
+      <div class="tool">
+        <h4>Glossary</h4>
+        <select id="glossary-select">
+          <option value="">Select term...</option>
+          <option value="blockchain">Blockchain</option>
+          <option value="halving">Halving</option>
+          <option value="satoshi">Satoshi</option>
+          <option value="hodl">HODL</option>
+          <option value="lightning">Lightning Network</option>
+        </select>
+        <div id="glossary-result"></div>
+      </div>
+      <div class="tool">
+        <h4>Fiat to BTC Calculator</h4>
+        <input id="fiat-amount" type="number" placeholder="Amount in USD">
+        <button id="fiat-to-btc-btn">Convert to BTC</button>
+        <div id="fiat-result"></div>
+      </div>
+      <div class="tool">
+        <h4>Block Time Calculator</h4>
+        <input id="blocks-time" type="number" placeholder="Number of blocks">
+        <button id="time-calc-btn">Calculate Time</button>
+        <div id="time-result"></div>
+      </div>
+      <div class="tool">
+        <h4>Bitcoin Donation</h4>
+        <div style="text-align:center;">
+          <div>Support Ollie: bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+          <div id="qr-code" style="margin:10px 0;">[QR Code would go here]</div>
+        </div>
+      </div>
+      <div class="tool">
+        <h4>Share Ollie</h4>
+        <button id="share-btn">Share This Site</button>
+        <div id="share-result"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ KNOWLEDGE BASE ═══ -->
@@ -751,6 +844,10 @@ function render(d){
   const fact=d.todays_fact||'Facts will appear after the first learning cycle.';
   document.getElementById('fact-text').textContent=fact;
 
+  // Prediction
+  const prediction=d.todays_prediction||'Predictions will appear after more data is collected.';
+  document.getElementById('prediction-text').textContent=prediction;
+
   // News
   const news=d.todays_headlines||[];
   const nEl=document.getElementById('news-list');
@@ -815,6 +912,211 @@ function render(d){
   }
 }
 
+/* ═══ CHAT FUNCTIONS ═══ */
+function addMessage(text, isUser=false) {
+  const chatMessages = document.getElementById('chat-messages');
+  const msg = document.createElement('div');
+  msg.style.padding = '8px';
+  msg.style.margin = '4px 0';
+  msg.style.borderRadius = '4px';
+  msg.style.background = isUser ? 'var(--btc-dim)' : 'var(--layer)';
+  msg.textContent = text;
+  chatMessages.appendChild(msg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function searchKnowledge(d, query) {
+  const q = query.toLowerCase();
+  let response = "I'm still learning about Bitcoin. Try asking about price, news, tips, halving, or facts.";
+  
+  // Specific Q&A responses
+  if (q.includes('price')) {
+    response = `Current Bitcoin price is $${d.current.price_usd?.toLocaleString() || 'unavailable'} USD.`;
+  } else if (q.includes('halving')) {
+    response = `Next halving in ${d.current.blocks_until_halving?.toLocaleString() || 'unknown'} blocks, estimated ${d.current.estimated_halving_date || 'unknown'}. Current block reward: ${d.current.next_halving_block ? 3.125 : 'unknown'} BTC.`;
+  } else if (q.includes('fear') || q.includes('greed')) {
+    response = `Current Fear & Greed Index: ${d.current.fear_greed_value || 'unknown'} (${d.current.fear_greed_label || 'unknown'}).`;
+  } else if (q.includes('supply')) {
+    response = `${d.current.circulating_supply?.toLocaleString() || 'unknown'} BTC mined out of 21 million total.`;
+  } else if (q.includes('hash') || q.includes('mining')) {
+    response = `Current hash rate: ${d.current.hash_rate || 'unknown'} EH/s. Difficulty: ${d.current.difficulty?.toLocaleString() || 'unknown'}.`;
+  } else if (q.includes('fee')) {
+    response = `Current mempool fees: Low ${d.current.mempool_low_fee || 'unknown'} sat/vB, Mid ${d.current.mempool_mid_fee || 'unknown'} sat/vB, High ${d.current.mempool_high_fee || 'unknown'} sat/vB.`;
+  } else if (q.includes('market cap')) {
+    response = `Bitcoin market cap: $${d.current.market_cap_usd?.toLocaleString() || 'unknown'} USD. Dominance: ${d.current.dominance_pct || 'unknown'}%.`;
+  } else if (q.includes('volume')) {
+    response = `24h trading volume: $${d.current.volume_24h_usd?.toLocaleString() || 'unknown'} USD.`;
+  } else if (q.includes('change') || q.includes('24h')) {
+    response = `24h change: ${d.current.change_24h_pct || 'unknown'}%. 7d: ${d.current.change_7d_pct || 'unknown'}%. 30d: ${d.current.change_30d_pct || 'unknown'}%.`;
+  } else if (q.includes('ath')) {
+    response = `All-time high: $${d.current.ath_usd?.toLocaleString() || 'unknown'} on ${d.current.ath_date || 'unknown'}.`;
+  } else if (q.includes('block height')) {
+    response = `Current block height: ${d.current.block_height?.toLocaleString() || 'unknown'}.`;
+  } else if (q.includes('unconfirmed')) {
+    response = `Unconfirmed transactions: ${d.current.unconfirmed_txs?.toLocaleString() || 'unknown'}.`;
+  }
+  
+  // Fallback to content search
+  if (response === "I'm still learning about Bitcoin. Try asking about price, news, tips, halving, or facts.") {
+    // Search thought
+    if (d.todays_thought && d.todays_thought.toLowerCase().includes(q)) {
+      response = d.todays_thought;
+    }
+    
+    // Search insights
+    if (d.todays_insights) {
+      for (let i of d.todays_insights) {
+        if (i.toLowerCase().includes(q)) {
+          response = i;
+          break;
+        }
+      }
+    }
+    
+    // Search tips
+    if (d.todays_tips) {
+      for (let t of d.todays_tips) {
+        if (t.toLowerCase().includes(q)) {
+          response = t;
+          break;
+        }
+      }
+    }
+    
+    // Search headlines
+    if (d.todays_headlines) {
+      for (let h of d.todays_headlines) {
+        if (h.title.toLowerCase().includes(q)) {
+          response = `${h.title} - ${h.summary}`;
+          break;
+        }
+      }
+    }
+    
+    // Search reddit
+    if (d.todays_reddit) {
+      for (let r of d.todays_reddit) {
+        if (r.title.toLowerCase().includes(q)) {
+          response = r.title;
+          break;
+        }
+      }
+    }
+  }
+  
+  return response;
+}
+
+function setupTools(d) {
+  // Satoshi Converter
+  document.getElementById('convert-btn').addEventListener('click', () => {
+    const sats = parseFloat(document.getElementById('sats-input').value);
+    if (sats > 0) {
+      const btc = sats / 100000000;
+      document.getElementById('btc-result').textContent = `${sats.toLocaleString()} sats = ${btc.toFixed(8)} BTC`;
+    }
+  });
+  
+  // Profit Calculator
+  document.getElementById('calc-profit-btn').addEventListener('click', () => {
+    const buy = parseFloat(document.getElementById('buy-price').value);
+    const sell = parseFloat(document.getElementById('sell-price').value);
+    const amount = parseFloat(document.getElementById('amount').value);
+    if (buy > 0 && sell > 0 && amount > 0) {
+      const profit = (sell - buy) * amount;
+      const pct = ((sell - buy) / buy * 100).toFixed(2);
+      document.getElementById('profit-result').textContent = `Profit: $${profit.toFixed(2)} (${pct}%)`;
+    }
+  });
+  
+  // Halving Progress
+  const blocksLeft = d.current.blocks_until_halving || 0;
+  const totalBlocks = 210000;
+  const progress = ((totalBlocks - blocksLeft) / totalBlocks * 100).toFixed(2);
+  document.getElementById('halving-progress').innerHTML = `
+    <div>Blocks until halving: ${blocksLeft.toLocaleString()}</div>
+    <div>Progress: ${progress}%</div>
+    <div style="background:var(--deep); height:10px; border-radius:5px; margin:5px 0;">
+      <div style="background:var(--btc); height:10px; width:${progress}%; border-radius:5px;"></div>
+    </div>
+  `;
+  
+  // Block Reward Calculator
+  document.getElementById('reward-btn').addEventListener('click', () => {
+    const blocks = parseFloat(document.getElementById('blocks-input').value);
+    if (blocks > 0) {
+      const reward = blocks * 3.125; // current reward
+      document.getElementById('reward-result').textContent = `${blocks} blocks = ${reward} BTC`;
+    }
+  });
+  
+  // Quiz
+  const quizQuestions = [
+    { q: "What is the maximum supply of Bitcoin?", a: "21 million" },
+    { q: "Who created Bitcoin?", a: "Satoshi Nakamoto" },
+    { q: "What happens every 4 years in Bitcoin?", a: "Halving" },
+    { q: "What is the smallest unit of Bitcoin?", a: "Satoshi" },
+    { q: "What network allows instant Bitcoin payments?", a: "Lightning Network" }
+  ];
+  document.getElementById('quiz-btn').addEventListener('click', () => {
+    const randomQ = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
+    const answer = prompt(randomQ.q);
+    if (answer && answer.toLowerCase().includes(randomQ.a.toLowerCase())) {
+      document.getElementById('quiz-result').textContent = "Correct! 🎉";
+    } else {
+      document.getElementById('quiz-result').textContent = `Wrong. Answer: ${randomQ.a}`;
+    }
+  });
+  
+  // Glossary
+  const glossary = {
+    blockchain: "A decentralized, distributed ledger technology that records transactions across many computers.",
+    halving: "An event that reduces Bitcoin's block reward by half, occurring every 210,000 blocks.",
+    satoshi: "The smallest unit of Bitcoin, equal to 0.00000001 BTC.",
+    hodl: "A misspelling of 'hold' that became a meme meaning to hold onto Bitcoin long-term.",
+    lightning: "A layer-2 solution for fast, low-cost Bitcoin transactions."
+  };
+  document.getElementById('glossary-select').addEventListener('change', (e) => {
+    const term = e.target.value;
+    document.getElementById('glossary-result').textContent = glossary[term] || '';
+  });
+  
+  // Fiat to BTC
+  document.getElementById('fiat-to-btc-btn').addEventListener('click', () => {
+    const fiat = parseFloat(document.getElementById('fiat-amount').value);
+    const btcPrice = d.current.price_usd || 0;
+    if (fiat > 0 && btcPrice > 0) {
+      const btc = fiat / btcPrice;
+      document.getElementById('fiat-result').textContent = `$${fiat} = ${btc.toFixed(8)} BTC`;
+    }
+  });
+  
+  // Block Time Calculator
+  document.getElementById('time-calc-btn').addEventListener('click', () => {
+    const blocks = parseFloat(document.getElementById('blocks-time').value);
+    if (blocks > 0) {
+      const minutes = blocks * 10; // approx 10 min per block
+      const hours = minutes / 60;
+      const days = hours / 24;
+      document.getElementById('time-result').textContent = `${blocks} blocks ≈ ${minutes} min ≈ ${hours.toFixed(1)} hours ≈ ${days.toFixed(1)} days`;
+    }
+  });
+  
+  // Share
+  document.getElementById('share-btn').addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Ollie - Autonomous Bitcoin Intelligence',
+        text: 'Check out this amazing Bitcoin learning AI!',
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      document.getElementById('share-result').textContent = 'Link copied to clipboard!';
+    }
+  });
+}
+
 /* ═══ BOOT — fetch knowledge.json ═══ */
 async function boot(){
   try {
@@ -822,6 +1124,28 @@ async function boot(){
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
     render(d);
+    
+    // Setup chat
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    chatSend.addEventListener('click', () => {
+      const query = chatInput.value.trim();
+      if (query) {
+        addMessage(query, true);
+        const response = searchKnowledge(d, query);
+        addMessage(response);
+        chatInput.value = '';
+      }
+    });
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        chatSend.click();
+      }
+    });
+    
+    // Setup tools
+    setupTools(d);
+    
   } catch(e){
     document.getElementById('thought-text').textContent=
       'Ollie is waiting for the first GitHub Actions cycle to run. Push this repo to GitHub, enable GitHub Actions, and trigger the workflow. Within minutes, Ollie will be alive and learning Bitcoin.';
