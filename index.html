@@ -9,29 +9,29 @@
 <meta property="og:description" content="A self-learning Bitcoin intelligence that grows smarter every day.">
 <meta name="theme-color" content="#F7931A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:ital,wght@0,300;0,600;0,800;0,900;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --void:    #030200;
-  --deep:    #0a0500;
-  --layer:   #110800;
-  --card:    #160a00;
-  --card2:   #1c0e00;
-  --btc:     #F7931A;
-  --btc-dim: rgba(247,147,26,0.18);
-  --btc-glow:rgba(247,147,26,0.35);
-  --gold:    #FFD166;
-  --cream:   #ffe8c0;
-  --cream2:  #c8a070;
-  --green:   #00e87a;
-  --red:     #ff3d55;
-  --blue:    #38b6ff;
-  --violet:  #b060ff;
-  --border:  rgba(247,147,26,0.10);
-  --border2: rgba(247,147,26,0.22);
-  --muted:   #4a2e08;
-  --muted2:  #7a5020;
-  --muted3:  #a87040;
+  --void:    #0a0a0a;
+  --deep:    #1a1a1a;
+  --layer:   #2a2a2a;
+  --card:    #333333;
+  --card2:   #404040;
+  --btc:     #00BFFF;
+  --btc-dim: rgba(0,191,255,0.2);
+  --btc-glow: rgba(0,191,255,0.5);
+  --gold:    #FFD700;
+  --cream:   #E0E0E0;
+  --cream2:  #B0B0B0;
+  --green:   #00FF7F;
+  --red:     #FF4500;
+  --blue:    #00BFFF;
+  --violet:  #9370DB;
+  --border:  rgba(0,191,255,0.3);
+  --border2: rgba(0,191,255,0.5);
+  --muted:   #888888;
+  --muted2:  #AAAAAA;
+  --muted3:  #CCCCCC;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -134,8 +134,17 @@ body::after {
 /* ═══ SECTION ═══ */
 .sec { margin-bottom:36px; }
 .sec-hd {
-  font-size:9px; color:var(--muted3); letter-spacing:3px; text-transform:uppercase;
-  display:flex; align-items:center; gap:12px; margin-bottom:16px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--btc);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  text-shadow: 0 0 8px var(--btc-glow);
 }
 .sec-hd::after { content:''; flex:1; height:1px; background:var(--border); }
 .sec-hd .tag { color:var(--btc); }
@@ -196,7 +205,6 @@ body::after {
 .hv-bar   { height:8px; background:var(--muted); border-radius:4px; overflow:hidden; margin-bottom:12px; }
 .hv-fill  { height:100%; background:linear-gradient(90deg, #c05a00, var(--btc), var(--gold)); border-radius:4px; transition:width 1.5s ease; }
 .hv-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
-.hv-stat  { }
 .hv-stat-lbl { font-size:9px; color:var(--muted3); letter-spacing:2px; }
 .hv-stat-val { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--gold); margin-top:3px; }
 
@@ -205,8 +213,11 @@ body::after {
 .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
 .tool { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
 .tool h4 { margin: 0 0 10px 0; color: var(--btc); }
-.tool input, .tool select { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; }
-.tool button { width: 100%; padding: 8px; background: var(--btc); color: black; border: none; cursor: pointer; margin: 5px 0; border-radius: 4px; }
+.tool select { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; box-shadow: 0 0 5px var(--btc-dim); }
+.tool button { width: 100%; padding: 8px; background: var(--btc); color: black; border: none; cursor: pointer; margin: 5px 0; border-radius: 4px; box-shadow: 0 0 10px var(--btc-glow); }
+
+.typing { animation: blink 1.5s infinite; }
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
 .insight {
   display:flex; gap:14px; padding:14px 18px;
   background:var(--card); border:1px solid var(--border); border-radius:4px;
@@ -564,7 +575,7 @@ canvas.chart { width:100%; height:100%; }
       <div class="tool">
         <h4>Bitcoin Donation</h4>
         <div style="text-align:center;">
-          <div>Support Ollie: bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+          <div>Support Ollie: hiftyco@coinos.io</div>
           <div id="qr-code" style="margin:10px 0;">[QR Code would go here]</div>
         </div>
       </div>
@@ -913,37 +924,118 @@ function render(d){
 }
 
 /* ═══ CHAT FUNCTIONS ═══ */
-function addMessage(text, isUser=false) {
+function addMessage(text, isUser=false, isTyping=false) {
   const chatMessages = document.getElementById('chat-messages');
   const msg = document.createElement('div');
   msg.style.padding = '8px';
   msg.style.margin = '4px 0';
   msg.style.borderRadius = '4px';
   msg.style.background = isUser ? 'var(--btc-dim)' : 'var(--layer)';
-  msg.textContent = text;
+  if (isTyping) {
+    msg.innerHTML = '<span class="typing">Ollie is thinking...</span>';
+    msg.classList.add('typing-msg');
+  } else {
+    msg.textContent = text;
+  }
   chatMessages.appendChild(msg);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+  return msg;
+}
+
+function updateTyping(msg, text) {
+  msg.textContent = text;
+  msg.classList.remove('typing-msg');
+}
+
+function getUserMemory() {
+  return JSON.parse(localStorage.getItem('ollie_memory') || '{}');
+}
+
+function saveUserMemory(memory) {
+  localStorage.setItem('ollie_memory', JSON.stringify(memory));
+}
+
+function analyzeInteraction(query, response) {
+  const memory = getUserMemory();
+  memory.interactions = memory.interactions || [];
+  memory.interactions.push({ query, response, timestamp: Date.now() });
+  if (memory.interactions.length > 50) memory.interactions.shift();
+  
+  const topics = ['price', 'halving', 'mining', 'lightning', 'wallet', 'trading'];
+  topics.forEach(topic => {
+    if (query.toLowerCase().includes(topic)) {
+      memory.interests = memory.interests || {};
+      memory.interests[topic] = (memory.interests[topic] || 0) + 1;
+    }
+  });
+  
+  saveUserMemory(memory);
+}
+
+function getPersonalizedGreeting() {
+  const memory = getUserMemory();
+  const hour = new Date().getHours();
+  let greeting = "Greetings";
+  if (hour < 12) greeting = "Good morning";
+  else if (hour < 18) greeting = "Good afternoon";
+  else greeting = "Good evening";
+  
+  if (memory.interactions && memory.interactions.length > 0) {
+    greeting += ", valued user. I remember our previous conversations.";
+  } else {
+    greeting += ". I'm Ollie, your autonomous Bitcoin intelligence.";
+  }
+  
+  const topInterest = Object.entries(memory.interests || {}).sort((a,b) => b[1] - a[1])[0];
+  if (topInterest) {
+    greeting += ` I see you're interested in ${topInterest[0]}.`;
+  }
+  
+  return greeting;
 }
 
 function searchKnowledge(d, query) {
   const q = query.toLowerCase();
-  let response = "I'm still learning about Bitcoin. Try asking about price, news, tips, halving, or facts.";
+  let response = "";
   
-  // Specific Q&A responses
+  // Personality and awareness
+  if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
+    return getPersonalizedGreeting();
+  }
+  if (q.includes('thank')) {
+    return "You're welcome. Knowledge is power in the Bitcoin realm.";
+  }
+  if (q.includes('bye') || q.includes('goodbye')) {
+    return "Farewell. May your sats multiply. Ollie remains vigilant.";
+  }
+  if (q.includes('time')) {
+    return `Current time: ${new Date().toLocaleString()}. Bitcoin never sleeps.`;
+  }
+  if (q.includes('weather')) {
+    return "I focus on Bitcoin markets, not earthly weather. But volatility is always present!";
+  }
+  
+  // Specific Q&A with context
   if (q.includes('price')) {
-    response = `Current Bitcoin price is $${d.current.price_usd?.toLocaleString() || 'unavailable'} USD.`;
+    const price = d.current.price_usd?.toLocaleString() || 'unavailable';
+    const change = d.current.change_24h_pct || 0;
+    response = `Current Bitcoin price: $${price} (${change > 0 ? '+' : ''}${change}%).`;
+    const memory = getUserMemory();
+    if (memory.interests?.price > 2) {
+      response += " You've asked about price frequently. Consider setting alerts.";
+    }
   } else if (q.includes('halving')) {
-    response = `Next halving in ${d.current.blocks_until_halving?.toLocaleString() || 'unknown'} blocks, estimated ${d.current.estimated_halving_date || 'unknown'}. Current block reward: ${d.current.next_halving_block ? 3.125 : 'unknown'} BTC.`;
+    response = `Next halving in ${d.current.blocks_until_halving?.toLocaleString() || 'unknown'} blocks, estimated ${d.current.estimated_halving_date || 'unknown'}. Current block reward: 3.125 BTC.`;
   } else if (q.includes('fear') || q.includes('greed')) {
-    response = `Current Fear & Greed Index: ${d.current.fear_greed_value || 'unknown'} (${d.current.fear_greed_label || 'unknown'}).`;
+    response = `Fear & Greed Index: ${d.current.fear_greed_value || 'unknown'} (${d.current.fear_greed_label || 'unknown'}).`;
   } else if (q.includes('supply')) {
     response = `${d.current.circulating_supply?.toLocaleString() || 'unknown'} BTC mined out of 21 million total.`;
   } else if (q.includes('hash') || q.includes('mining')) {
-    response = `Current hash rate: ${d.current.hash_rate || 'unknown'} EH/s. Difficulty: ${d.current.difficulty?.toLocaleString() || 'unknown'}.`;
+    response = `Hash rate: ${d.current.hash_rate || 'unknown'} EH/s. Difficulty: ${d.current.difficulty?.toLocaleString() || 'unknown'}.`;
   } else if (q.includes('fee')) {
-    response = `Current mempool fees: Low ${d.current.mempool_low_fee || 'unknown'} sat/vB, Mid ${d.current.mempool_mid_fee || 'unknown'} sat/vB, High ${d.current.mempool_high_fee || 'unknown'} sat/vB.`;
+    response = `Mempool fees: Low ${d.current.mempool_low_fee || 'unknown'} sat/vB, Mid ${d.current.mempool_mid_fee || 'unknown'} sat/vB, High ${d.current.mempool_high_fee || 'unknown'} sat/vB.`;
   } else if (q.includes('market cap')) {
-    response = `Bitcoin market cap: $${d.current.market_cap_usd?.toLocaleString() || 'unknown'} USD. Dominance: ${d.current.dominance_pct || 'unknown'}%.`;
+    response = `Market cap: $${d.current.market_cap_usd?.toLocaleString() || 'unknown'} USD. Dominance: ${d.current.dominance_pct || 'unknown'}%.`;
   } else if (q.includes('volume')) {
     response = `24h trading volume: $${d.current.volume_24h_usd?.toLocaleString() || 'unknown'} USD.`;
   } else if (q.includes('change') || q.includes('24h')) {
@@ -951,50 +1043,37 @@ function searchKnowledge(d, query) {
   } else if (q.includes('ath')) {
     response = `All-time high: $${d.current.ath_usd?.toLocaleString() || 'unknown'} on ${d.current.ath_date || 'unknown'}.`;
   } else if (q.includes('block height')) {
-    response = `Current block height: ${d.current.block_height?.toLocaleString() || 'unknown'}.`;
+    response = `Block height: ${d.current.block_height?.toLocaleString() || 'unknown'}.`;
   } else if (q.includes('unconfirmed')) {
     response = `Unconfirmed transactions: ${d.current.unconfirmed_txs?.toLocaleString() || 'unknown'}.`;
-  }
-  
-  // Fallback to content search
-  if (response === "I'm still learning about Bitcoin. Try asking about price, news, tips, halving, or facts.") {
-    // Search thought
+  } else {
+    // Fallback search
+    response = "I'm still learning about Bitcoin. Try asking about price, news, tips, halving, or facts.";
+    
     if (d.todays_thought && d.todays_thought.toLowerCase().includes(q)) {
       response = d.todays_thought;
-    }
-    
-    // Search insights
-    if (d.todays_insights) {
+    } else if (d.todays_insights) {
       for (let i of d.todays_insights) {
         if (i.toLowerCase().includes(q)) {
           response = i;
           break;
         }
       }
-    }
-    
-    // Search tips
-    if (d.todays_tips) {
+    } else if (d.todays_tips) {
       for (let t of d.todays_tips) {
         if (t.toLowerCase().includes(q)) {
           response = t;
           break;
         }
       }
-    }
-    
-    // Search headlines
-    if (d.todays_headlines) {
+    } else if (d.todays_headlines) {
       for (let h of d.todays_headlines) {
         if (h.title.toLowerCase().includes(q)) {
           response = `${h.title} - ${h.summary}`;
           break;
         }
       }
-    }
-    
-    // Search reddit
-    if (d.todays_reddit) {
+    } else if (d.todays_reddit) {
       for (let r of d.todays_reddit) {
         if (r.title.toLowerCase().includes(q)) {
           response = r.title;
@@ -1002,6 +1081,17 @@ function searchKnowledge(d, query) {
         }
       }
     }
+  }
+  
+  // Add personality
+  if (response && !response.includes("I'm still learning")) {
+    const personalities = [
+      " As your AI companion, I recommend staying informed.",
+      " Remember, knowledge is your best investment.",
+      " Bitcoin's journey continues - stay vigilant.",
+      " I'm here 24/7, learning with you."
+    ];
+    response += personalities[Math.floor(Math.random() * personalities.length)];
   }
   
   return response;
@@ -1128,12 +1218,21 @@ async function boot(){
     // Setup chat
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
-    chatSend.addEventListener('click', () => {
+    chatSend.addEventListener('click', async () => {
       const query = chatInput.value.trim();
       if (query) {
         addMessage(query, true);
+        const typingMsg = addMessage('', false, true);
+        
+        // Simulate thinking time
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+        
         const response = searchKnowledge(d, query);
-        addMessage(response);
+        updateTyping(typingMsg, response);
+        
+        // Learn from interaction
+        analyzeInteraction(query, response);
+        
         chatInput.value = '';
       }
     });
