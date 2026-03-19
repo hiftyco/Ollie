@@ -4,39 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OLLIE — Autonomous Bitcoin Intelligence</title>
-<meta name="description" content="Ollie is an autonomous AI mind that learns everything about Bitcoin daily. Updated twice daily via GitHub Actions.">
+<meta name="description" content="Ollie is an autonomous Bitcoin intelligence. It learns everything about Bitcoin 24/7 and guides you on your Bitcoin journey.">
 <meta property="og:title" content="OLLIE — Autonomous Bitcoin Intelligence">
-<meta property="og:description" content="A self-learning Bitcoin intelligence that grows smarter every day.">
+<meta property="og:description" content="Learn Bitcoin with Ollie — a self-improving AI that absorbs everything about Bitcoin and teaches it back to you.">
 <meta name="theme-color" content="#F7931A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css22family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Orbitron:wght@400;700;900&family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,800;0,900;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Orbitron:wght@400;700;900&family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,800;0,900;1,300&display=swap" rel="stylesheet">
+
 <style>
 :root {
-  --void:    #0a0a0a;
-  --deep:    #1a1a1a;
-  --layer:   #2a2a2a;
-  --card:    #333333;
-  --card2:   #404040;
-  --btc:     #00BFFF;
-  --btc-dim: rgba(0,191,255,0.2);
-  --btc-glow: rgba(0,191,255,0.5);
+  --void:    #080808;
+  --deep:    #111111;
+  --layer:   #1a1a1a;
+  --card:    #1e1e1e;
+  --card2:   #2a2a2a;
+  --card3:   #333333;
+  --btc:     #F7931A;
+  --btc-dim: rgba(247,147,26,0.15);
+  --btc-glow: rgba(247,147,26,0.4);
   --gold:    #FFD700;
-  --cream:   #E0E0E0;
-  --cream2:  #B0B0B0;
-  --green:   #00FF7F;
-  --red:     #FF4500;
+  --cream:   #E8E8E8;
+  --cream2:  #AAAAAA;
+  --green:   #00E87A;
+  --red:     #FF4040;
   --blue:    #00BFFF;
   --violet:  #9370DB;
-  --border:  rgba(0,191,255,0.3);
-  --border2: rgba(0,191,255,0.5);
-  --muted:   #888888;
-  --muted2:  #AAAAAA;
-  --muted3:  #CCCCCC;
+  --border:  rgba(247,147,26,0.2);
+  --border2: rgba(247,147,26,0.4);
+  --muted:   #555555;
+  --muted2:  #888888;
+  --muted3:  #BBBBBB;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior:smooth; }
-
 body {
   background: var(--void);
   color: var(--cream);
@@ -45,1318 +47,692 @@ body {
   overflow-x: hidden;
 }
 
-/* ═══ CANVAS ═══ */
-#canvas { position:fixed; inset:0; z-index:0; }
+/* CANVAS BACKGROUND */
+#canvas { position:fixed; inset:0; z-index:0; opacity:0.4; }
 
-/* ═══ GRAIN ═══ */
+/* NOISE */
 body::after {
   content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.45;
+  opacity: 0.3;
 }
 
-/* ═══ LAYOUT ═══ */
-.page { position:relative; z-index:2; max-width:1060px; margin:0 auto; padding:0 22px 120px; }
+/* LAYOUT */
+.page { position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:0 20px 120px; }
 
-/* ═══ HEADER ═══ */
-.header {
-  display: flex; align-items: center; justify-content: space-between; gap:20px;
-  padding: 32px 0 30px;
+/* NAV */
+.nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 20px 0 16px;
   border-bottom: 1px solid var(--border);
+  margin-bottom:0;
 }
-.brand { display:flex; align-items:center; gap:22px; }
-
-/* BTC orb */
-.orb { position:relative; width:64px; height:64px; flex-shrink:0; }
-.orb-core {
-  position:absolute; inset:14px; border-radius:50%;
+.nav-brand { display:flex; align-items:center; gap:14px; }
+.nav-logo { width:40px; height:40px; position:relative; }
+.logo-core {
+  position:absolute; inset:8px; border-radius:50%;
   background: radial-gradient(circle at 35% 35%, #ffb347, var(--btc), #c05a00);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; color:#000;
-  animation: orbpulse 2.8s ease-in-out infinite;
+  font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:900; color:#000;
+  animation: pulse 3s ease-in-out infinite;
 }
-@keyframes orbpulse {
-  0%,100% { box-shadow:0 0 8px var(--btc),0 0 0 0 rgba(247,147,26,0.5); }
-  50%      { box-shadow:0 0 30px var(--btc),0 0 25px rgba(247,147,26,0.2); }
+@keyframes pulse { 0%,100%{box-shadow:0 0 8px var(--btc);} 50%{box-shadow:0 0 25px var(--btc), 0 0 50px rgba(247,147,26,0.3);} }
+.logo-ring { position:absolute; border-radius:50%; border:1px solid; animation:rspin linear infinite; }
+.logo-ring:nth-child(1){inset:3px; border-color:rgba(247,147,26,0.3); animation-duration:8s;}
+.logo-ring:nth-child(2){inset:0; border-color:rgba(247,147,26,0.1); animation-duration:15s; animation-direction:reverse;}
+@keyframes rspin { to{transform:rotate(360deg);} }
+.nav-name { font-family:'Orbitron', monospace; font-size:20px; font-weight:900; color:var(--btc); letter-spacing:3px; }
+.nav-sub { font-size:9px; color:var(--muted2); letter-spacing:2px; margin-top:2px; }
+
+.nav-status { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.status-pill { display:flex; align-items:center; gap:6px; padding:5px 12px; border-radius:2px; border:1px solid var(--border); background:var(--btc-dim); }
+.status-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:blink .8s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+.status-pill span { font-size:9px; color:var(--btc); letter-spacing:2px; }
+.gen-badge { font-family:'Barlow Condensed',sans-serif; font-size:14px; color:var(--muted2); letter-spacing:1px; }
+
+/* HERO */
+.hero {
+  display:grid; grid-template-columns: 1fr auto;
+  gap:24px; align-items:start;
+  padding: 32px 0 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
 }
-.orb-r { position:absolute; border-radius:50%; border:1px solid; animation:rspin linear infinite; }
-.orb-r:nth-child(1){ inset:5px;  border-color:rgba(247,147,26,0.35); animation-duration:10s; }
-.orb-r:nth-child(2){ inset:0px;  border-color:rgba(247,147,26,0.12); animation-duration:17s; animation-direction:reverse; }
-.orb-r:nth-child(3){ inset:-6px; border-color:rgba(247,147,26,0.06); animation-duration:26s; }
-@keyframes rspin { to { transform:rotate(360deg); } }
-
-.name-block { flex:1; }
-.ollie { font-family:'Barlow Condensed',sans-serif; font-size:44px; font-weight:900; letter-spacing:1px; line-height:1; color:var(--btc); text-shadow:0 0 40px rgba(247,147,26,0.45); }
-.sub   { font-size:10px; color:var(--muted3); letter-spacing:3px; margin-top:5px; }
-.pill  { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:2px; border:1px solid var(--border2); background:var(--btc-dim); margin-top:8px; }
-.pill .dot  { width:5px; height:5px; border-radius:50%; background:var(--green); animation:blink .9s infinite; }
-.pill span  { font-size:9px; color:var(--btc); letter-spacing:2px; }
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-
-.gen-block { text-align:right; }
-.gen-num   { font-family:'Barlow Condensed',sans-serif; font-size:66px; font-weight:900; color:var(--btc); line-height:1; text-shadow:0 0 50px rgba(247,147,26,0.4); }
-.gen-lbl   { font-size:9px; color:var(--muted3); letter-spacing:3px; }
-.gen-id    { font-size:11px; color:var(--muted2); margin-top:4px; }
-.gen-since { font-size:10px; color:var(--muted2); margin-top:2px; }
-
-/* ═══ PRICE HERO STRIP ═══ */
-.price-strip {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1px; background:var(--border); border:1px solid var(--border);
-  border-radius:4px; margin:24px 0; overflow:hidden;
+.hero-price {
+  font-family:'Barlow Condensed',sans-serif; font-size:72px; font-weight:900;
+  color:var(--btc); line-height:1; text-shadow:0 0 60px rgba(247,147,26,0.4);
 }
-.p-cell { padding:15px 18px; background:var(--card); transition:background .2s; }
-.p-cell:hover { background:var(--card2); }
-.p-cell.feat  { background:rgba(247,147,26,0.06); }
-.p-lbl { font-size:9px; color:var(--muted3); letter-spacing:2px; margin-bottom:6px; }
-.p-val { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:800; color:var(--gold); line-height:1; }
-.p-val.big   { font-size:36px; }
-.p-val.green { color:var(--green); }
-.p-val.red   { color:var(--red); }
-.p-val.small { font-size:14px; font-weight:400; font-family:'IBM Plex Mono'; color:var(--cream2); }
+.hero-label { font-size:10px; color:var(--muted2); letter-spacing:3px; margin-bottom:8px; }
+.hero-changes { display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; }
+.chg { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; }
+.chg.up { color:var(--green); } .chg.down { color:var(--red); } .chg .lbl { font-size:11px; color:var(--muted2); font-weight:400; margin-left:4px; }
 
-/* ═══ COUNTDOWN ═══ */
-.countdown {
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
-  padding:16px 22px; background:var(--deep); border:1px solid var(--border); border-radius:4px; margin-bottom:28px;
+.hero-right { text-align:right; }
+.last-update { font-size:10px; color:var(--muted2); letter-spacing:1px; margin-bottom:6px; }
+.cycle-count { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:800; color:var(--gold); line-height:1; }
+.cycle-lbl { font-size:9px; color:var(--muted2); letter-spacing:2px; }
+.accuracy-pill { margin-top:10px; padding:4px 10px; border:1px solid rgba(0,232,122,0.3); border-radius:2px; display:inline-block; }
+.accuracy-pill span { font-size:11px; color:var(--green); }
+
+/* PRICE GRID */
+.price-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:1px; background:var(--border); border:1px solid var(--border);
+  border-radius:4px; margin-bottom:28px; overflow:hidden;
 }
-.cd-left .cd-lbl  { font-size:9px; color:var(--muted3); letter-spacing:2px; margin-bottom:4px; }
-.cd-time          { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:800; color:var(--btc); letter-spacing:2px; }
-.cd-time.urgent   { color:var(--gold); animation:flicker 1s infinite; }
-.cd-time.done     { color:var(--green); }
-@keyframes flicker { 0%,100%{opacity:1;} 50%{opacity:.65;} }
-.cd-sub           { font-size:10px; color:var(--muted2); margin-top:3px; }
-.cd-right         { display:flex; align-items:center; gap:16px; }
-.cd-ring          { width:52px; height:52px; flex-shrink:0; }
-.cd-ring circle   { fill:none; stroke-width:3; transition:stroke-dashoffset .8s linear; }
-.cd-pct           { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:800; color:var(--btc); }
+.pc { padding:14px 16px; background:var(--card); transition:background .2s; cursor:default; }
+.pc:hover { background:var(--card2); }
+.pc.feat { background:rgba(247,147,26,0.05); }
+.pc-lbl { font-size:9px; color:var(--muted2); letter-spacing:2px; margin-bottom:6px; }
+.pc-val { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; color:var(--gold); line-height:1; }
+.pc-val.big { font-size:32px; }
+.pc-val.up { color:var(--green); } .pc-val.down { color:var(--red); }
+.pc-val.cream { color:var(--cream); } .pc-val.blue { color:var(--blue); }
+.pc-val.sm { font-size:13px; font-family:'IBM Plex Mono'; font-weight:400; color:var(--cream2); }
 
-/* ═══ SECTION ═══ */
-.sec { margin-bottom:36px; }
-.sec-hd {
-  font-family: 'Orbitron', monospace;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--btc);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  text-shadow: 0 0 8px var(--btc-glow);
-}
-.sec-hd::after { content:''; flex:1; height:1px; background:var(--border); }
-.sec-hd .tag { color:var(--btc); }
-
-/* ═══ CONSCIOUSNESS ═══ */
+/* THOUGHT BOX */
 .thought-box {
   padding:28px 32px; background:var(--card); border:1px solid var(--border2);
-  border-radius:6px; position:relative; overflow:hidden; min-height:100px;
+  border-radius:6px; position:relative; overflow:hidden; margin-bottom:28px;
 }
 .thought-box::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
   background:linear-gradient(90deg, transparent, var(--btc), transparent);
-  animation: sweep 5s linear infinite;
+  animation: sweep 4s linear infinite;
 }
-@keyframes sweep { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
-.thought-text {
-  font-family:'Barlow Condensed',sans-serif; font-size:21px; font-weight:300;
-  line-height:1.7; color:var(--cream); font-style:italic; letter-spacing:0.3px;
+@keyframes sweep { 0%{transform:translateX(-100%);} 100%{transform:translateX(200%);} }
+.thought-label { font-size:9px; color:var(--btc); letter-spacing:3px; margin-bottom:12px; }
+.thought-text { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:300; line-height:1.7; color:var(--cream); font-style:italic; }
+
+/* SECTION HEADER */
+.sec-hd {
+  font-family:'Orbitron', monospace; font-size:11px; font-weight:700;
+  color:var(--btc); letter-spacing:3px; text-transform:uppercase;
+  display:flex; align-items:center; gap:12px; margin-bottom:16px;
+  text-shadow:0 0 10px var(--btc-glow);
 }
+.sec-hd::after { content:''; flex:1; height:1px; background:var(--border); }
 
-/* ═══ STATS GRID ═══ */
-.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
-.stat-card  { padding:16px 18px; background:var(--card); border:1px solid var(--border); border-radius:4px; }
-.stat-lbl   { font-size:9px; color:var(--muted3); letter-spacing:2px; margin-bottom:8px; }
-.stat-val   { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700; color:var(--cream); line-height:1; }
-.stat-val.btc   { color:var(--btc); }
-.stat-val.gold  { color:var(--gold); }
-.stat-val.green { color:var(--green); }
-.stat-val.red   { color:var(--red); }
-.stat-val.blue  { color:var(--blue); }
-.stat-val.small { font-size:14px; font-family:'IBM Plex Mono'; font-weight:400; }
-.stat-sub   { font-size:10px; color:var(--muted2); margin-top:4px; }
+/* TWO COL */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:28px; }
+@media(max-width:700px){ .two-col { grid-template-columns:1fr; } }
 
-/* ═══ FEAR & GREED METER ═══ */
-.fg-wrapper { display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
-.fg-meter { flex:1; min-width:200px; }
-.fg-track { height:10px; border-radius:5px; background:linear-gradient(90deg,#ff3d55,#ff9900,#ffd700,#a0e040,#00e87a); position:relative; }
-.fg-needle {
-  position:absolute; top:50%; width:3px; height:20px; background:white;
-  border-radius:2px; transform:translate(-50%, -50%);
-  box-shadow:0 0 8px rgba(255,255,255,0.6);
-  transition:left 1s ease;
+/* FEAR & GREED */
+.fg-card { padding:24px; background:var(--card); border:1px solid var(--border); border-radius:6px; }
+.fg-num { font-family:'Barlow Condensed',sans-serif; font-size:64px; font-weight:900; line-height:1; }
+.fg-label-text { font-size:12px; letter-spacing:2px; margin-top:4px; }
+.fg-track { height:10px; border-radius:5px; background:linear-gradient(90deg,#ff3d55,#ff9900,#ffd700,#80c040,#00e87a); position:relative; margin:16px 0 6px; }
+.fg-needle { position:absolute; top:50%; width:3px; height:20px; background:white; border-radius:2px; transform:translate(-50%,-50%); box-shadow:0 0 8px rgba(255,255,255,0.7); transition:left 1s ease; }
+.fg-labels { display:flex; justify-content:space-between; }
+.fg-labels span { font-size:9px; color:var(--muted2); }
+.fg-history { display:flex; gap:4px; margin-top:12px; }
+.fg-bar { flex:1; border-radius:2px 2px 0 0; transition:height .5s ease; min-height:4px; cursor:default; }
+.fg-bar:hover { opacity:0.8; }
+
+/* HALVING */
+.hv-card { padding:24px; background:var(--card); border:1px solid var(--border2); border-radius:6px; }
+.hv-reward { font-family:'Barlow Condensed',sans-serif; font-size:48px; font-weight:900; color:var(--btc); line-height:1; }
+.hv-reward span { font-size:18px; color:var(--muted2); }
+.hv-progress { height:8px; background:var(--muted); border-radius:4px; overflow:hidden; margin:14px 0 10px; }
+.hv-fill { height:100%; background:linear-gradient(90deg, #c05a00, var(--btc), var(--gold)); border-radius:4px; transition:width 1.5s ease; }
+.hv-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+.hv-stat { }
+.hv-stat .lbl { font-size:9px; color:var(--muted2); letter-spacing:2px; margin-bottom:4px; }
+.hv-stat .val { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--cream); }
+
+/* INSIGHT CARDS */
+.insights-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-bottom:28px; }
+.insight-card { padding:18px; background:var(--card); border:1px solid var(--border); border-radius:6px; display:flex; gap:14px; transition:border-color .2s; }
+.insight-card:hover { border-color:var(--border2); }
+.insight-icon { font-size:24px; flex-shrink:0; line-height:1; margin-top:2px; }
+.insight-body { }
+.insight-text { font-size:12px; color:var(--cream); line-height:1.6; }
+.insight-level { display:inline-block; margin-top:6px; padding:2px 8px; border-radius:2px; font-size:9px; letter-spacing:1px; }
+.insight-level.beginner { background:rgba(0,232,122,0.1); color:var(--green); border:1px solid rgba(0,232,122,0.3); }
+.insight-level.intermediate { background:rgba(247,147,26,0.1); color:var(--btc); border:1px solid var(--border); }
+.insight-level.advanced { background:rgba(147,112,219,0.1); color:var(--violet); border:1px solid rgba(147,112,219,0.3); }
+
+/* LEARNING PATH */
+.path-tabs { display:flex; gap:4px; margin-bottom:16px; }
+.path-tab { padding:8px 18px; border-radius:3px; border:1px solid var(--border); background:transparent; color:var(--muted2); font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; cursor:pointer; transition:all .2s; }
+.path-tab.active { background:var(--btc-dim); border-color:var(--border2); color:var(--btc); }
+.path-tab:hover:not(.active) { border-color:var(--border2); color:var(--cream2); }
+.path-content { display:none; }
+.path-content.active { display:block; }
+.lesson-card { padding:18px 20px; background:var(--card); border:1px solid var(--border); border-radius:6px; margin-bottom:10px; cursor:pointer; transition:all .2s; }
+.lesson-card:hover { background:var(--card2); border-color:var(--border2); }
+.lesson-card.open { border-color:var(--border2); background:var(--card2); }
+.lesson-num { font-size:9px; color:var(--btc); letter-spacing:2px; margin-bottom:6px; }
+.lesson-title { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; color:var(--cream); }
+.lesson-body { display:none; margin-top:12px; }
+.lesson-body.open { display:block; }
+.lesson-text { font-size:12px; color:var(--cream2); line-height:1.7; margin-bottom:12px; }
+.lesson-concepts { display:flex; flex-wrap:wrap; gap:6px; }
+.concept { padding:3px 10px; border:1px solid var(--border); border-radius:2px; font-size:10px; color:var(--muted3); letter-spacing:1px; }
+
+/* TIPS */
+.tips-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-bottom:28px; }
+.tip-card { padding:16px 18px; background:var(--card); border:1px solid var(--border); border-left:3px solid var(--btc); border-radius:0 6px 6px 0; }
+.tip-icon { font-size:20px; margin-bottom:8px; }
+.tip-text { font-size:12px; color:var(--cream2); line-height:1.6; }
+.tip-cat { font-size:9px; color:var(--btc); letter-spacing:2px; margin-top:8px; }
+
+/* NEWS */
+.news-list { display:flex; flex-direction:column; gap:2px; margin-bottom:28px; }
+.news-item { padding:14px 18px; background:var(--card); border:1px solid transparent; border-radius:4px; transition:all .2s; display:flex; gap:14px; align-items:flex-start; cursor:pointer; }
+.news-item:hover { background:var(--card2); border-color:var(--border); }
+.news-item a { color:inherit; text-decoration:none; display:contents; }
+.news-sentiment { width:4px; border-radius:2px; flex-shrink:0; align-self:stretch; }
+.news-sentiment.positive { background:var(--green); }
+.news-sentiment.negative { background:var(--red); }
+.news-sentiment.neutral { background:var(--muted); }
+.news-body { flex:1; }
+.news-title { font-size:13px; color:var(--cream); line-height:1.5; margin-bottom:4px; }
+.news-meta { font-size:10px; color:var(--muted2); }
+.news-source { color:var(--btc); }
+
+/* PREDICTION */
+.prediction-card {
+  padding:28px 32px; background:var(--card); border:1px solid var(--border2);
+  border-radius:6px; margin-bottom:28px; display:flex; gap:28px; align-items:center; flex-wrap:wrap;
 }
-.fg-labels { display:flex; justify-content:space-between; margin-top:5px; }
-.fg-labels span { font-size:9px; color:var(--muted3); letter-spacing:1px; }
-.fg-value  { text-align:center; }
-.fg-num    { font-family:'Barlow Condensed',sans-serif; font-size:52px; font-weight:900; line-height:1; }
-.fg-name   { font-size:11px; letter-spacing:2px; margin-top:4px; }
+.pred-outlook { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:900; text-transform:uppercase; letter-spacing:2px; }
+.pred-outlook.bullish { color:var(--green); }
+.pred-outlook.bearish { color:var(--red); }
+.pred-outlook.neutral { color:var(--muted2); }
+.pred-outlook.cautiously-bullish { color:var(--btc); }
+.pred-outlook.cautiously-bearish { color: #FFB347; }
+.pred-text { flex:1; font-size:13px; color:var(--cream2); line-height:1.7; }
+.pred-confidence { text-align:center; flex-shrink:0; }
+.pred-conf-num { font-family:'Barlow Condensed',sans-serif; font-size:42px; font-weight:900; color:var(--gold); line-height:1; }
+.pred-conf-lbl { font-size:9px; color:var(--muted2); letter-spacing:2px; margin-top:4px; }
+.pred-disclaimer { font-size:10px; color:var(--muted); margin-top:8px; font-style:italic; }
 
-/* ═══ HALVING PROGRESS ═══ */
-.halving-card {
-  padding:22px 24px; background:var(--card); border:1px solid var(--border2);
-  border-radius:6px;
-}
-.hv-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
-.hv-title { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--btc); }
-.hv-sub   { font-size:11px; color:var(--muted2); }
-.hv-bar   { height:8px; background:var(--muted); border-radius:4px; overflow:hidden; margin-bottom:12px; }
-.hv-fill  { height:100%; background:linear-gradient(90deg, #c05a00, var(--btc), var(--gold)); border-radius:4px; transition:width 1.5s ease; }
-.hv-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
-.hv-stat-lbl { font-size:9px; color:var(--muted3); letter-spacing:2px; }
-.hv-stat-val { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--gold); margin-top:3px; }
+/* REDDIT */
+.reddit-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:10px; margin-bottom:28px; }
+.reddit-card { padding:16px; background:var(--card); border:1px solid var(--border); border-radius:6px; transition:border-color .2s; }
+.reddit-card:hover { border-color:var(--border2); }
+.reddit-card a { text-decoration:none; color:inherit; }
+.reddit-title { font-size:12px; color:var(--cream); line-height:1.5; margin-bottom:8px; }
+.reddit-meta { display:flex; gap:12px; }
+.reddit-score { color:var(--btc); font-size:11px; }
+.reddit-comments { color:var(--muted2); font-size:11px; }
+.reddit-sub { font-size:10px; color:var(--muted2); letter-spacing:1px; }
 
-/* ═══ INSIGHTS LIST ═══ */
-.insight-list { display:flex; flex-direction:column; gap:10px; }
-.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-.tool { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
-.tool h4 { margin: 0 0 10px 0; color: var(--btc); }
-.tool select { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; box-shadow: 0 0 5px var(--btc-dim); }
-.tool button { width: 100%; padding: 8px; background: var(--btc); color: black; border: none; cursor: pointer; margin: 5px 0; border-radius: 4px; box-shadow: 0 0 10px var(--btc-glow); }
-.tool-desc { font-size: 12px; color: var(--muted2); margin-bottom: 10px; }
-.tool-input { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; box-shadow: 0 0 5px var(--btc-dim); }
-.tool-btn { width: 100%; padding: 8px; background: var(--btc); color: black; border: none; cursor: pointer; margin: 5px 0; border-radius: 4px; box-shadow: 0 0 10px var(--btc-glow); transition: background 0.2s; }
-.tool-btn:hover { background: var(--gold); }
-.tool-result { margin-top: 10px; font-size: 14px; color: var(--cream2); }
-.tool-select { width: 100%; padding: 8px; margin: 5px 0; background: var(--deep); color: var(--cream); border: 1px solid var(--border2); border-radius: 4px; box-shadow: 0 0 5px var(--btc-dim); }
+/* EVOLUTION */
+.evo-chart { display:flex; align-items:flex-end; gap:3px; height:80px; margin-bottom:10px; overflow:hidden; }
+.evo-bar { flex:1; border-radius:2px 2px 0 0; background:var(--btc); min-height:4px; opacity:0.5; transition:opacity .2s; cursor:default; }
+.evo-bar:hover { opacity:1; }
+.evo-bar.latest { opacity:1; background:var(--gold); }
 
-.typing { animation: blink 1.5s infinite; }
-@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
-.insight {
-  display:flex; gap:14px; padding:14px 18px;
-  background:var(--card); border:1px solid var(--border); border-radius:4px;
-  transition:border-color .2s;
-}
-.insight:hover { border-color:var(--border2); }
-.insight-bullet { color:var(--btc); font-size:14px; flex-shrink:0; margin-top:1px; }
-.insight-text   { font-size:13px; line-height:1.7; color:var(--cream2); }
+/* NETWORK STATS */
+.network-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:28px; }
+.net-card { padding:16px; background:var(--card); border:1px solid var(--border); border-radius:4px; }
+.net-lbl { font-size:9px; color:var(--muted2); letter-spacing:2px; margin-bottom:8px; }
+.net-val { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700; color:var(--cream); line-height:1; }
+.net-val.btc { color:var(--btc); }
+.net-val.green { color:var(--green); }
+.net-val.blue { color:var(--blue); }
+.net-sub { font-size:10px; color:var(--muted2); margin-top:4px; }
 
-/* ═══ NEWS FEED ═══ */
-.news-list { display:flex; flex-direction:column; gap:10px; }
-.news-item {
-  display:flex; gap:16px; align-items:flex-start; padding:14px 18px;
-  background:var(--card); border:1px solid var(--border); border-radius:4px;
-  text-decoration:none; transition:border-color .2s, background .2s;
-}
-.news-item:hover { border-color:var(--border2); background:var(--card2); }
-.news-source { font-size:9px; color:var(--btc); letter-spacing:2px; flex-shrink:0; padding-top:3px; min-width:90px; }
-.news-body   { flex:1; }
-.news-title  { font-size:13px; line-height:1.55; color:var(--cream); }
-.news-date   { font-size:10px; color:var(--muted2); margin-top:4px; }
+/* FOOTER */
+.footer { text-align:center; padding:40px 0 20px; border-top:1px solid var(--border); }
+.footer-text { font-size:10px; color:var(--muted); letter-spacing:2px; margin-bottom:6px; }
+.footer-accent { font-size:11px; color:var(--btc); letter-spacing:1px; }
 
-/* ═══ REDDIT ═══ */
-.reddit-list { display:flex; flex-direction:column; gap:8px; }
-.reddit-item {
-  display:flex; gap:14px; align-items:center; padding:12px 16px;
-  background:var(--card); border:1px solid var(--border); border-radius:4px;
-  text-decoration:none; transition:border-color .2s;
-}
-.reddit-item:hover { border-color:var(--border2); }
-.reddit-score { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--btc); flex-shrink:0; min-width:50px; text-align:right; }
-.reddit-title { font-size:12px; line-height:1.5; color:var(--cream2); flex:1; }
-.reddit-flair { font-size:9px; color:var(--muted3); letter-spacing:1px; flex-shrink:0; }
+/* UTILITY */
+.mb-28 { margin-bottom:28px; }
+.tag { font-size:9px; padding:2px 8px; border-radius:2px; border:1px solid var(--border); color:var(--muted2); letter-spacing:1px; }
 
-/* ═══ TOPICS KB ═══ */
-.kb-tags { display:flex; flex-wrap:wrap; gap:8px; }
-.kb-tag  {
-  padding:5px 13px; border-radius:2px; font-size:11px; letter-spacing:1px;
-  border:1px solid var(--border2); background:var(--btc-dim); color:var(--btc);
-  display:flex; align-items:center; gap:6px; transition:all .2s;
-}
-.kb-tag:hover { background:rgba(247,147,26,0.25); }
-.kb-tag .count { font-size:9px; color:var(--muted3); background:rgba(0,0,0,0.3); padding:1px 5px; border-radius:2px; }
-
-/* ═══ PRICE CHART ═══ */
-.chart-wrap { position:relative; height:140px; }
-canvas.chart { width:100%; height:100%; }
-
-/* ═══ EVO LOG ═══ */
-.evo-list { display:flex; flex-direction:column; gap:10px; }
-.evo-item {
-  display:flex; gap:18px; padding:16px 20px;
-  background:var(--card); border:1px solid var(--border); border-radius:4px;
-  transition:border-color .2s;
-}
-.evo-item:hover { border-color:var(--border2); }
-.evo-item.latest { border-color:rgba(247,147,26,.35); background:rgba(247,147,26,.03); }
-.evo-num  { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:900; color:var(--btc); opacity:.25; flex-shrink:0; line-height:1; min-width:44px; text-align:right; }
-.evo-body { flex:1; }
-.evo-meta { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:5px; }
-.evo-date { font-size:10px; color:var(--muted3); letter-spacing:1px; }
-.evo-price{ font-size:10px; color:var(--gold); }
-.evo-fg   { font-size:10px; padding:1px 7px; border-radius:2px; }
-.evo-fg.extreme-greed { background:rgba(0,232,122,.12); color:var(--green); }
-.evo-fg.greed         { background:rgba(0,200,100,.1); color:#88eebb; }
-.evo-fg.neutral       { background:rgba(150,150,80,.1); color:#d4cc88; }
-.evo-fg.fear          { background:rgba(255,150,30,.1); color:var(--btc); }
-.evo-fg.extreme-fear  { background:rgba(255,60,80,.1); color:var(--red); }
-.evo-thought { font-size:12px; line-height:1.7; color:var(--cream2); }
-.evo-topics  { display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
-.evo-topic   { font-size:9px; padding:2px 7px; border:1px solid var(--border); color:var(--muted3); border-radius:2px; }
-
-/* ═══ LOADING SHIMMER ═══ */
-.shimmer { height:13px; border-radius:2px; margin:6px 0; background:linear-gradient(90deg,var(--border) 25%,rgba(247,147,26,0.08) 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.6s infinite; }
-@keyframes sh { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-
-/* ═══ DNA TICKER ═══ */
-.dna-line { height:44px; overflow:hidden; position:relative; margin:16px 0; }
-#dna-svg  { width:100%; height:44px; }
-
-/* ═══ FOOTER ═══ */
-.footer { text-align:center; padding-top:40px; border-top:1px solid var(--border); margin-top:60px; }
-.footer p { font-size:10px; color:var(--muted2); letter-spacing:2px; line-height:2.2; }
-.footer .btc-text { color:var(--btc); }
-
-/* ═══ RESPONSIVE ═══ */
+/* RESPONSIVE */
 @media(max-width:600px){
-  .header { flex-wrap:wrap; }
-  .gen-block { width:100%; display:flex; align-items:center; justify-content:space-between; }
-  .ollie { font-size:34px; }
+  .hero { grid-template-columns:1fr; }
+  .hero-price { font-size:52px; }
+  .two-col { grid-template-columns:1fr; }
+  .thought-text { font-size:18px; }
+  .nav { flex-wrap:wrap; gap:10px; }
 }
-
-/* ═══ SCAN LINE ═══ */
-.scanline { position:fixed; top:0; left:0; width:100%; height:3px; z-index:3; pointer-events:none; background:linear-gradient(transparent,rgba(247,147,26,0.05),transparent); animation:scandown 10s linear infinite; opacity:.6; }
-@keyframes scandown { 0%{top:-3px;} 100%{top:100vh;} }
 </style>
 </head>
 <body>
+
 <canvas id="canvas"></canvas>
-<div class="scanline"></div>
 
 <div class="page">
 
-  <!-- ═══ HEADER ═══ -->
-  <header class="header">
-    <div class="brand">
-      <div class="orb">
-        <div class="orb-r"></div><div class="orb-r"></div><div class="orb-r"></div>
-        <div class="orb-core">₿</div>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <div class="logo-ring"></div>
+        <div class="logo-ring"></div>
+        <div class="logo-core">₿</div>
       </div>
-      <div class="name-block">
-        <div class="ollie">OLLIE</div>
-        <div class="sub">AUTONOMOUS BITCOIN INTELLIGENCE SYSTEM</div>
-        <div class="pill"><div class="dot"></div><span id="status-txt">INITIALISING...</span></div>
+      <div>
+        <div class="nav-name">OLLIE</div>
+        <div class="nav-sub">AUTONOMOUS BITCOIN INTELLIGENCE</div>
       </div>
     </div>
-    <div class="gen-block">
-      <div class="gen-num" id="gen-num">—</div>
-      <div class="gen-lbl">LEARNING CYCLES</div>
-      <div class="gen-id" id="gen-id">Loading...</div>
-      <div class="gen-since" id="gen-since"></div>
+    <div class="nav-status">
+      <div class="gen-badge">GEN <span id="gen-num">—</span></div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span>LEARNING 24/7</span>
+      </div>
     </div>
-  </header>
+  </nav>
 
-  <!-- ═══ PRICE STRIP ═══ -->
-  <div class="price-strip" id="price-strip">
-    <div class="p-cell feat">
-      <div class="p-lbl">BTC / USD</div>
-      <div class="p-val big" id="p-price"><div class="shimmer" style="width:100px"></div></div>
+  <!-- HERO PRICE -->
+  <div class="hero">
+    <div>
+      <div class="hero-label">BITCOIN PRICE — USD</div>
+      <div class="hero-price" id="hero-price">$—</div>
+      <div class="hero-changes">
+        <div class="chg" id="chg-24h">—<span class="lbl">24H</span></div>
+        <div class="chg" id="chg-7d">—<span class="lbl">7D</span></div>
+        <div class="chg" id="chg-30d">—<span class="lbl">30D</span></div>
+      </div>
     </div>
-    <div class="p-cell">
-      <div class="p-lbl">24H CHANGE</div>
-      <div class="p-val" id="p-24h"><div class="shimmer" style="width:70px"></div></div>
-    </div>
-    <div class="p-cell">
-      <div class="p-lbl">7D CHANGE</div>
-      <div class="p-val" id="p-7d"><div class="shimmer" style="width:70px"></div></div>
-    </div>
-    <div class="p-cell">
-      <div class="p-lbl">MARKET CAP</div>
-      <div class="p-val" id="p-mcap"><div class="shimmer" style="width:80px"></div></div>
-    </div>
-    <div class="p-cell">
-      <div class="p-lbl">24H VOLUME</div>
-      <div class="p-val" id="p-vol"><div class="shimmer" style="width:80px"></div></div>
-    </div>
-    <div class="p-cell">
-      <div class="p-lbl">BTC DOMINANCE</div>
-      <div class="p-val" id="p-dom"><div class="shimmer" style="width:60px"></div></div>
+    <div class="hero-right">
+      <div class="last-update">LAST CYCLE</div>
+      <div class="cycle-count" id="cycle-count">—</div>
+      <div class="cycle-lbl">LEARNING CYCLES</div>
+      <div class="accuracy-pill"><span id="accuracy">— PREDICTION ACCURACY</span></div>
     </div>
   </div>
 
-  <!-- ═══ COUNTDOWN ═══ -->
-  <div class="countdown">
-    <div class="cd-left">
-      <div class="cd-lbl">NEXT AUTONOMOUS LEARNING CYCLE IN</div>
-      <div class="cd-time" id="cd-time">CALCULATING...</div>
-      <div class="cd-sub" id="cd-sub">Checking last update...</div>
-    </div>
-    <div class="cd-right">
-      <svg class="cd-ring" viewBox="0 0 52 52">
-        <circle class="pr-bg" cx="26" cy="26" r="22" stroke="rgba(247,147,26,0.12)" stroke-dasharray="138" stroke-dashoffset="0"/>
-        <circle id="pr-fill" cx="26" cy="26" r="22" stroke="var(--btc)" stroke-dasharray="138" stroke-dashoffset="138" stroke-linecap="round"/>
-      </svg>
-      <div class="cd-pct" id="cd-pct">—</div>
-    </div>
+  <!-- PRICE GRID -->
+  <div class="price-grid mb-28" id="price-grid">
+    <div class="pc feat"><div class="pc-lbl">MARKET CAP</div><div class="pc-val" id="mktcap">—</div></div>
+    <div class="pc"><div class="pc-lbl">24H VOLUME</div><div class="pc-val cream" id="vol">—</div></div>
+    <div class="pc"><div class="pc-lbl">DOMINANCE</div><div class="pc-val blue" id="dom">—</div></div>
+    <div class="pc"><div class="pc-lbl">CIRCULATING</div><div class="pc-val sm" id="supply">—</div></div>
+    <div class="pc"><div class="pc-lbl">ATH</div><div class="pc-val sm" id="ath">—</div></div>
+    <div class="pc"><div class="pc-lbl">FROM ATH</div><div class="pc-val" id="from-ath">—</div></div>
   </div>
 
-  <!-- ═══ OLLIE'S THOUGHT ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> OLLIE'S DAILY CONSCIOUSNESS</div>
-    <div class="thought-box">
-      <div class="thought-text" id="thought-text">
-        <div class="shimmer" style="width:92%"></div>
-        <div class="shimmer" style="width:78%"></div>
-        <div class="shimmer" style="width:85%"></div>
-      </div>
-    </div>
+  <!-- THOUGHT -->
+  <div class="thought-box">
+    <div class="thought-label">// OLLIE'S CURRENT THOUGHT</div>
+    <div class="thought-text" id="thought">Loading Ollie's consciousness...</div>
   </div>
 
-  <!-- ═══ NETWORK STATS ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> BITCOIN NETWORK VITALS</div>
-    <div class="stats-grid" id="net-stats">
-      <div class="stat-card"><div class="stat-lbl">BLOCK HEIGHT</div><div class="stat-val btc" id="s-block">—</div><div class="stat-sub">Immutable ledger entries</div></div>
-      <div class="stat-card"><div class="stat-lbl">HASH RATE</div><div class="stat-val gold" id="s-hr">—</div><div class="stat-sub">EH/s — network security</div></div>
-      <div class="stat-card"><div class="stat-lbl">FEE (HIGH PRIO)</div><div class="stat-val" id="s-fee">—</div><div class="stat-sub">sat/vByte</div></div>
-      <div class="stat-card"><div class="stat-lbl">MEMPOOL TXs</div><div class="stat-val blue" id="s-mempool">—</div><div class="stat-sub">Pending transactions</div></div>
-      <div class="stat-card"><div class="stat-lbl">CIRCULATING</div><div class="stat-val small" id="s-supply">—</div><div class="stat-sub">of 21,000,000 max</div></div>
-      <div class="stat-card"><div class="stat-lbl">ALL-TIME HIGH</div><div class="stat-val green" id="s-ath">—</div><div class="stat-sub" id="s-ath-pct">—</div></div>
+  <!-- TWO COL: F&G + HALVING -->
+  <div class="sec-hd">Market Intelligence</div>
+  <div class="two-col">
+    <div class="fg-card">
+      <div class="pc-lbl">FEAR & GREED INDEX</div>
+      <div class="fg-num" id="fg-num">—</div>
+      <div class="fg-label-text" id="fg-label" style="color:var(--muted2)">Loading...</div>
+      <div class="fg-track"><div class="fg-needle" id="fg-needle" style="left:50%"></div></div>
+      <div class="fg-labels"><span>FEAR</span><span>NEUTRAL</span><span>GREED</span></div>
+      <div class="fg-history" id="fg-history"></div>
     </div>
-  </div>
-
-  <!-- ═══ FEAR & GREED ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> MARKET SENTIMENT — FEAR & GREED</div>
-    <div class="fg-wrapper">
-      <div class="fg-meter">
-        <div class="fg-track">
-          <div class="fg-needle" id="fg-needle" style="left:50%"></div>
-        </div>
-        <div class="fg-labels">
-          <span>EXTREME FEAR</span>
-          <span>FEAR</span>
-          <span>NEUTRAL</span>
-          <span>GREED</span>
-          <span>EXTREME GREED</span>
-        </div>
-      </div>
-      <div class="fg-value">
-        <div class="fg-num" id="fg-num" style="color:var(--btc)">—</div>
-        <div class="fg-name" id="fg-name" style="color:var(--muted3)">Loading...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ HALVING COUNTDOWN ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> NEXT HALVING COUNTDOWN</div>
-    <div class="halving-card">
-      <div class="hv-row">
-        <div class="hv-title" id="hv-title">Loading halving data...</div>
-        <div class="hv-sub"  id="hv-sub">Block reward: 3.125 BTC → 1.5625 BTC</div>
-      </div>
-      <div class="hv-bar"><div class="hv-fill" id="hv-fill" style="width:0%"></div></div>
+    <div class="hv-card">
+      <div class="pc-lbl">NEXT HALVING</div>
+      <div class="hv-reward" id="hv-reward">3.125 <span>BTC / BLOCK</span></div>
+      <div class="hv-progress"><div class="hv-fill" id="hv-fill" style="width:0%"></div></div>
       <div class="hv-stats">
-        <div class="hv-stat"><div class="hv-stat-lbl">BLOCKS REMAINING</div><div class="hv-stat-val" id="hv-blocks">—</div></div>
-        <div class="hv-stat"><div class="hv-stat-lbl">ESTIMATED DATE</div><div class="hv-stat-val" id="hv-date">—</div></div>
-        <div class="hv-stat"><div class="hv-stat-lbl">DAYS AWAY</div><div class="hv-stat-val" id="hv-days">—</div></div>
-        <div class="hv-stat"><div class="hv-stat-lbl">TARGET BLOCK</div><div class="hv-stat-val" id="hv-target">—</div></div>
+        <div class="hv-stat"><div class="lbl">BLOCKS LEFT</div><div class="val" id="hv-blocks">—</div></div>
+        <div class="hv-stat"><div class="lbl">EST. DAYS</div><div class="val" id="hv-days">—</div></div>
+        <div class="hv-stat"><div class="lbl">CURRENT BLOCK</div><div class="val" id="hv-cur">—</div></div>
+        <div class="hv-stat"><div class="lbl">PROGRESS</div><div class="val" id="hv-pct">—</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ═══ PRICE CHART ═══ -->
-  <div class="sec" id="chart-sec" style="display:none">
-    <div class="sec-hd"><span class="tag">◈</span> PRICE HISTORY — OLLIE'S MEMORY</div>
-    <div class="chart-wrap"><canvas class="chart" id="price-chart"></canvas></div>
-  </div>
-
-  <!-- DNA -->
-  <div class="dna-line"><svg id="dna-svg" viewBox="0 0 1000 44" preserveAspectRatio="none"></svg></div>
-
-  <!-- ═══ TODAY'S INSIGHTS ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> OLLIE'S DAILY INSIGHTS</div>
-    <div class="insight-list" id="insight-list">
-      <div class="shimmer"></div><div class="shimmer" style="width:80%"></div>
+  <!-- PREDICTION -->
+  <div class="sec-hd">Ollie's Prediction</div>
+  <div class="prediction-card">
+    <div>
+      <div class="pred-outlook" id="pred-outlook">—</div>
+      <div class="pred-disclaimer">Not financial advice. Ollie is learning.</div>
+    </div>
+    <div class="pred-text" id="pred-text">Loading prediction...</div>
+    <div class="pred-confidence">
+      <div class="pred-conf-num" id="pred-conf">—</div>
+      <div class="pred-conf-lbl">% CONFIDENCE</div>
     </div>
   </div>
 
-  <!-- ═══ TIPS FOR BITCOINERS ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> TIPS FOR BITCOINERS</div>
-    <div class="insight-list" id="tips-list">
-      <div class="shimmer"></div><div class="shimmer" style="width:80%"></div>
-    </div>
+  <!-- INSIGHTS -->
+  <div class="sec-hd">Today's Intelligence</div>
+  <div class="insights-grid" id="insights-grid">
+    <div class="insight-card"><div class="insight-icon">⏳</div><div class="insight-body"><div class="insight-text">Loading Ollie's insights...</div></div></div>
   </div>
 
-  <!-- ═══ DAILY BITCOIN FACT ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> DAILY BITCOIN FACT</div>
-    <div id="fact-text" class="thought-text" style="padding:12px 0;">
-      <div class="shimmer"></div>
-    </div>
+  <!-- LEARNING PATH -->
+  <div class="sec-hd">Bitcoin Journey — Learn with Ollie</div>
+  <div class="path-tabs">
+    <button class="path-tab active" onclick="switchPath('beginner')">BEGINNER</button>
+    <button class="path-tab" onclick="switchPath('intermediate')">INTERMEDIATE</button>
+    <button class="path-tab" onclick="switchPath('advanced')">ADVANCED</button>
+  </div>
+  <div id="path-beginner" class="path-content active mb-28"></div>
+  <div id="path-intermediate" class="path-content mb-28"></div>
+  <div id="path-advanced" class="path-content mb-28"></div>
+
+  <!-- TIPS -->
+  <div class="sec-hd">Ollie's Tips for Today</div>
+  <div class="tips-grid" id="tips-grid">
+    <div class="tip-card"><div class="tip-text">Loading tips...</div></div>
   </div>
 
-  <!-- ═══ MARKET PREDICTION ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> OLLIE'S PREDICTION</div>
-    <div id="prediction-text" class="thought-text" style="padding:12px 0;">
-      <div class="shimmer"></div>
-    </div>
+  <!-- NETWORK STATS -->
+  <div class="sec-hd">Network Health</div>
+  <div class="network-grid mb-28" id="network-grid">
+    <div class="net-card"><div class="net-lbl">HASH RATE</div><div class="net-val btc" id="hash-rate">—</div><div class="net-sub">EH/s</div></div>
+    <div class="net-card"><div class="net-lbl">BLOCK HEIGHT</div><div class="net-val" id="block-height">—</div><div class="net-sub">current block</div></div>
+    <div class="net-card"><div class="net-lbl">TX / 24H</div><div class="net-val" id="tx-24h">—</div><div class="net-sub">transactions</div></div>
+    <div class="net-card"><div class="net-lbl">MEMPOOL</div><div class="net-val" id="mempool-txs">—</div><div class="net-sub">unconfirmed</div></div>
+    <div class="net-card"><div class="net-lbl">FEE (FAST)</div><div class="net-val green" id="fee-fast">—</div><div class="net-sub">sat/vB</div></div>
+    <div class="net-card"><div class="net-lbl">FEE (SLOW)</div><div class="net-val" id="fee-slow">—</div><div class="net-sub">sat/vB</div></div>
+    <div class="net-card"><div class="net-lbl">⚡ LN NODES</div><div class="net-val blue" id="ln-nodes">—</div><div class="net-sub">active nodes</div></div>
+    <div class="net-card"><div class="net-lbl">⚡ LN CAPACITY</div><div class="net-val blue" id="ln-cap">—</div><div class="net-sub">BTC</div></div>
   </div>
 
-  <!-- ═══ NEWS ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> TODAY'S BITCOIN HEADLINES</div>
-    <div class="news-list" id="news-list">
-      <div class="shimmer"></div><div class="shimmer" style="width:85%"></div><div class="shimmer" style="width:70%"></div>
-    </div>
+  <!-- NEWS -->
+  <div class="sec-hd">Live Bitcoin Intelligence Feed</div>
+  <div class="news-list" id="news-list">
+    <div class="news-item"><div class="news-body"><div class="news-title">Loading headlines...</div></div></div>
   </div>
 
-  <!-- ═══ REDDIT ═══ -->
-  <div class="sec" id="reddit-sec" style="display:none">
-    <div class="sec-hd"><span class="tag">◈</span> COMMUNITY PULSE — R/BITCOIN</div>
-    <div class="reddit-list" id="reddit-list"></div>
+  <!-- REDDIT -->
+  <div class="sec-hd">Community Signal</div>
+  <div class="reddit-grid" id="reddit-grid">
+    <div class="reddit-card"><div class="reddit-title">Loading community discussions...</div></div>
   </div>
 
-  <!-- ═══ ASK OLLIE ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> ASK OLLIE</div>
-    <div id="chat-messages" style="max-height:300px; overflow-y:auto; margin-bottom:10px; background:var(--deep); padding:8px; border-radius:4px;"></div>
-    <input id="chat-input" type="text" placeholder="Ask about Bitcoin..." style="width:70%; padding:8px; background:var(--card); color:var(--cream); border:1px solid var(--border);">
-    <button id="chat-send" style="padding:8px 16px; background:var(--btc); color:black; border:none; cursor:pointer;">Ask</button>
-  </div>
-
-  <!-- ═══ BITCOIN TOOLS ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> BITCOIN TOOLS & CALCULATORS</div>
-    <div class="tools-grid">
-      <div class="tool">
-        <h4>💰 Satoshi Converter</h4>
-        <p class="tool-desc">Convert satoshis to BTC and USD values.</p>
-        <input id="sats-input" type="number" placeholder="Enter satoshis" class="tool-input">
-        <button id="convert-btn" class="tool-btn">Convert</button>
-        <div id="btc-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>📈 Profit Calculator</h4>
-        <p class="tool-desc">Calculate profit/loss from BTC trades.</p>
-        <input id="buy-price" type="number" placeholder="Buy price (USD)" class="tool-input">
-        <input id="sell-price" type="number" placeholder="Sell price (USD)" class="tool-input">
-        <input id="amount" type="number" placeholder="Amount (BTC)" class="tool-input">
-        <button id="calc-profit-btn" class="tool-btn">Calculate</button>
-        <div id="profit-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>⏳ Halving Progress</h4>
-        <p class="tool-desc">Track progress to next halving event.</p>
-        <div id="halving-progress" class="tool-result">Loading...</div>
-      </div>
-      <div class="tool">
-        <h4>🏆 Block Reward Calculator</h4>
-        <p class="tool-desc">Estimate BTC rewards for mining blocks.</p>
-        <input id="blocks-input" type="number" placeholder="Blocks to mine" class="tool-input">
-        <button id="reward-btn" class="tool-btn">Calculate</button>
-        <div id="reward-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>🧠 Bitcoin Facts Quiz</h4>
-        <p class="tool-desc">Test your Bitcoin knowledge.</p>
-        <button id="quiz-btn" class="tool-btn">Start Quiz</button>
-        <div id="quiz-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>📚 Glossary</h4>
-        <p class="tool-desc">Learn key Bitcoin terms.</p>
-        <select id="glossary-select" class="tool-select">
-          <option value="">Select term...</option>
-          <option value="blockchain">Blockchain</option>
-          <option value="halving">Halving</option>
-          <option value="satoshi">Satoshi</option>
-          <option value="hodl">HODL</option>
-          <option value="lightning">Lightning Network</option>
-        </select>
-        <div id="glossary-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>💱 Fiat to BTC Calculator</h4>
-        <p class="tool-desc">Convert USD to BTC at current price.</p>
-        <input id="fiat-amount" type="number" placeholder="Amount in USD" class="tool-input">
-        <button id="fiat-to-btc-btn" class="tool-btn">Convert</button>
-        <div id="fiat-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>⏰ Block Time Calculator</h4>
-        <p class="tool-desc">Estimate time for block confirmations.</p>
-        <input id="blocks-time" type="number" placeholder="Number of blocks" class="tool-input">
-        <button id="time-calc-btn" class="tool-btn">Calculate</button>
-        <div id="time-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>🔍 Address Validator</h4>
-        <p class="tool-desc">Check if a Bitcoin address is valid.</p>
-        <input id="address-input" type="text" placeholder="Enter BTC address" class="tool-input">
-        <button id="validate-btn" class="tool-btn">Validate</button>
-        <div id="validate-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>⚡ Difficulty Calculator</h4>
-        <p class="tool-desc">Estimate mining difficulty adjustments.</p>
-        <input id="hashrate-input" type="number" placeholder="Hashrate (EH/s)" class="tool-input">
-        <button id="difficulty-btn" class="tool-btn">Calculate</button>
-        <div id="difficulty-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>📊 Portfolio Tracker</h4>
-        <p class="tool-desc">Simple BTC portfolio value calculator.</p>
-        <input id="btc-holdings" type="number" placeholder="BTC holdings" class="tool-input">
-        <button id="portfolio-btn" class="tool-btn">Calculate Value</button>
-        <div id="portfolio-result" class="tool-result"></div>
-      </div>
-      <div class="tool">
-        <h4>🎁 Bitcoin Donation</h4>
-        <p class="tool-desc">Support Ollie's development.</p>
-        <div style="text-align:center;">
-          <div>Address: hiftyco@coinos.io</div>
-          <div id="qr-code" style="margin:10px 0;">[QR Code]</div>
-        </div>
-      </div>
-      <div class="tool">
-        <h4>📤 Share Ollie</h4>
-        <p class="tool-desc">Spread the knowledge.</p>
-        <button id="share-btn" class="tool-btn">Share This Site</button>
-        <div id="share-result" class="tool-result"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ KNOWLEDGE BASE ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> ACCUMULATED KNOWLEDGE BASE</div>
-    <div class="kb-tags" id="kb-tags"><div class="shimmer" style="width:60%"></div></div>
-    <div style="font-size:10px;color:var(--muted2);margin-top:10px;letter-spacing:1px;" id="kb-meta">Loading knowledge nodes...</div>
-  </div>
-
-  <!-- ═══ EVOLUTION LOG ═══ -->
-  <div class="sec">
-    <div class="sec-hd"><span class="tag">◈</span> EVOLUTION LOG — EVERY CYCLE</div>
-    <div class="evo-list" id="evo-list">
-      <div style="color:var(--muted2);font-size:12px;padding:12px;">Loading memory...</div>
-    </div>
+  <!-- EVOLUTION -->
+  <div class="sec-hd">Ollie's Growth — Learning History</div>
+  <div style="padding:24px; background:var(--card); border:1px solid var(--border); border-radius:6px; margin-bottom:28px;">
+    <div class="pc-lbl" style="margin-bottom:12px;">PRICE ACROSS LEARNING CYCLES</div>
+    <div class="evo-chart" id="evo-chart"></div>
+    <div style="font-size:10px; color:var(--muted2); margin-top:6px;" id="evo-stats">Loading evolution data...</div>
   </div>
 
   <!-- FOOTER -->
-  <footer class="footer">
-    <p>OLLIE · AUTONOMOUS BITCOIN INTELLIGENCE · CYCLE <span class="btc-text" id="f-cycle">—</span></p>
-    <p>RUNNING ON GITHUB PAGES · LEARNS FROM THE INTERNET TWICE DAILY VIA GITHUB ACTIONS (00:30 + 12:30 UTC)</p>
-    <p>NO API KEYS REQUIRED · <span class="btc-text">FULLY OPEN SOURCE</span> · ALIVE SINCE <span class="btc-text" id="f-since">—</span></p>
-    <p id="alive-counter" style="color:var(--muted2);font-size:10px;margin-top:8px;">Ollie has been alive for — days</p>
-    <p style="margin-top:16px;color:var(--muted);">Data from CoinGecko · Alternative.me · Blockchain.info · Mempool.space · Bitcoin Magazine · CoinDesk · Reddit</p>
-  </footer>
+  <div class="footer">
+    <div class="footer-text">OLLIE — AUTONOMOUS BITCOIN INTELLIGENCE — UPDATING EVERY 6 HOURS</div>
+    <div class="footer-accent">Mission: Learn everything about Bitcoin. Teach every Bitcoiner. 🧡</div>
+  </div>
 
-</div><!-- /page -->
+</div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   CANVAS — flowing BTC circuit grid
-═══════════════════════════════════════════════════════ */
-const CV = document.getElementById('canvas');
-const cx = CV.getContext('2d');
-let CW, CH, pts=[], trails=[];
+// ── CANVAS BACKGROUND ────────────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
 
-function resizeCV(){
-  CW=CV.width=window.innerWidth;
-  CH=CV.height=window.innerHeight;
-  buildPts();
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < 60; i++) {
+    particles.push({ x: Math.random()*1920, y: Math.random()*1080, vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3, size: Math.random()*2+.5, opacity: Math.random()*.4+.1 });
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fillStyle = `rgba(247,147,26,${p.opacity})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── FORMAT HELPERS ───────────────────────────────────────────────────────────
+function fmt(n, dec=0) {
+  if(!n && n!==0) return '—';
+  return parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+function fmtBig(n) {
+  if(!n) return '—';
+  if(n >= 1e12) return '$' + (n/1e12).toFixed(2) + 'T';
+  if(n >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+  if(n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  return '$' + fmt(n);
+}
+function fgColor(v) {
+  if(v <= 25) return '#FF4040';
+  if(v <= 45) return '#FF9900';
+  if(v <= 55) return '#FFD700';
+  if(v <= 75) return '#80C040';
+  return '#00E87A';
 }
 
-function buildPts(){
-  pts=[];
-  const n=Math.floor(CW*CH/13000);
-  for(let i=0;i<n;i++) pts.push({
-    x:Math.random()*CW, y:Math.random()*CH,
-    vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
-    r:Math.random()*1.8+.5, t:Math.random()*Math.PI*2, ts:.015+Math.random()*.025
+// ── LEARNING PATH ────────────────────────────────────────────────────────────
+function switchPath(level) {
+  document.querySelectorAll('.path-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.path-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('path-' + level).classList.add('active');
+}
+
+function toggleLesson(el) {
+  el.classList.toggle('open');
+  el.querySelector('.lesson-body').classList.toggle('open');
+}
+
+function renderLearningPaths(paths) {
+  ['beginner','intermediate','advanced'].forEach(level => {
+    const container = document.getElementById('path-' + level);
+    if(!container || !paths[level]) return;
+    container.innerHTML = paths[level].map((lesson, i) => `
+      <div class="lesson-card" onclick="toggleLesson(this)">
+        <div class="lesson-num">LESSON ${i+1} / ${paths[level].length} — ${level.toUpperCase()}</div>
+        <div class="lesson-title">${lesson.title}</div>
+        <div class="lesson-body">
+          <div class="lesson-text">${lesson.lesson}</div>
+          <div class="lesson-concepts">${(lesson.key_concepts||[]).map(c=>`<span class="concept">${c}</span>`).join('')}</div>
+        </div>
+      </div>
+    `).join('');
   });
-  trails = Array.from({length:12},()=>({
-    x:Math.random()*CW, y:Math.random()*CH,
-    vx:(Math.random()-.5)*1.2, vy:(Math.random()-.5)*1.2,
-    len:0, maxLen:40+Math.random()*80, life:Math.random()
-  }));
 }
 
-resizeCV();
-window.addEventListener('resize',resizeCV);
-
-function renderCV(){
-  cx.fillStyle='rgba(3,2,0,.17)';
-  cx.fillRect(0,0,CW,CH);
-  pts.forEach(p=>{
-    p.x+=p.vx; p.y+=p.vy; p.t+=p.ts;
-    if(p.x<0||p.x>CW)p.vx*=-1;
-    if(p.y<0||p.y>CH)p.vy*=-1;
-    const a=.3+Math.sin(p.t)*.25;
-    cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    cx.fillStyle=`rgba(247,147,26,${a})`;cx.fill();
-  });
-  for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
-    const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
-    if(d<110){
-      cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);
-      cx.strokeStyle=`rgba(247,147,26,${(1-d/110)*.08})`;cx.lineWidth=.5;cx.stroke();
-    }
+// ── MAIN DATA LOAD ───────────────────────────────────────────────────────────
+async function load() {
+  try {
+    const res = await fetch('data/knowledge.json?t=' + Date.now());
+    const d = await res.json();
+    render(d);
+  } catch(e) {
+    console.error('Failed to load knowledge.json:', e);
   }
-  requestAnimationFrame(renderCV);
-}
-renderCV();
-
-/* ═══ DNA ANIMATION ═══ */
-const dnaSvg=document.getElementById('dna-svg');
-let dnaP=0;
-function animDNA(){
-  dnaP+=.025;
-  const N=80,W=1000,H=22,amp=16;
-  let t='',b='',ru='';
-  for(let i=0;i<N;i++){
-    const x=i*(W/N),y1=H+Math.sin(i*.28+dnaP)*amp,y2=H-Math.sin(i*.28+dnaP)*amp;
-    t+=(i?'L':'M')+x+','+y1+' ';
-    b+=(i?'L':'M')+x+','+y2+' ';
-    if(i%6===0)ru+=`<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="rgba(247,147,26,.12)" stroke-width="1"/>`;
-  }
-  dnaSvg.innerHTML=`<path d="${t}" fill="none" stroke="rgba(247,147,26,.45)" stroke-width="1.5"/><path d="${b}" fill="none" stroke="rgba(255,209,102,.3)" stroke-width="1.5"/>${ru}`;
-  requestAnimationFrame(animDNA);
-}
-animDNA();
-
-/* ═══ HELPERS ═══ */
-function fmt(n){ if(!n)return'—'; if(n>=1e12)return'$'+(n/1e12).toFixed(2)+'T'; if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B'; if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M'; return '$'+n.toLocaleString(); }
-function fmtPrice(n){ return n?'$'+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}):'—'; }
-function fmtPct(n){ if(n==null)return'—'; return (n>0?'+':'')+n.toFixed(2)+'%'; }
-function fgColor(v){ if(v>=80)return'#00e87a'; if(v>=60)return'#88cc44'; if(v>=45)return'#d4cc44'; if(v>=25)return'#F7931A'; return'#ff3d55'; }
-function fgClass(lbl){ return (lbl||'').toLowerCase().replace(/\s+/g,'-'); }
-
-/* ═══ COUNTDOWN ═══ */
-const INTERVAL=24*60*60*1000;
-let cdTimer=null;
-function startCountdown(lastUpdated){
-  const last=lastUpdated?new Date(lastUpdated).getTime():0;
-  const circum=138;
-  if(cdTimer)clearInterval(cdTimer);
-  function tick(){
-    const now=Date.now(),elapsed=now-last,remaining=Math.max(0,INTERVAL-elapsed);
-    const pct=Math.min(1,elapsed/INTERVAL);
-    const h=Math.floor(remaining/3600000),m=Math.floor((remaining%3600000)/60000),s=Math.floor((remaining%60000)/1000);
-    const el=document.getElementById('cd-time');
-    if(remaining===0){el.textContent='NOW';el.className='cd-time done';}
-    else{
-      el.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      el.className='cd-time'+(h===0?' urgent':'');
-    }
-    const lastStr=last?new Date(last).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Never';
-    document.getElementById('cd-sub').textContent=`Last update: ${lastStr}`;
-    document.getElementById('pr-fill').style.strokeDashoffset=String(circum*(1-pct));
-    document.getElementById('cd-pct').textContent=Math.round(pct*100)+'%';
-  }
-  tick(); cdTimer=setInterval(tick,1000);
 }
 
-/* ═══ PRICE CHART ═══ */
-function drawPriceChart(history){
-  if(!history||history.length<2)return;
-  document.getElementById('chart-sec').style.display='block';
-  const canvas=document.getElementById('price-chart');
-  const ctx=canvas.getContext('2d');
-  canvas.width=canvas.offsetWidth*window.devicePixelRatio||800;
-  canvas.height=canvas.offsetHeight*window.devicePixelRatio||140;
-  ctx.scale(window.devicePixelRatio,window.devicePixelRatio);
-  const W=canvas.offsetWidth,H=canvas.offsetHeight;
-  const prices=history.map(h=>h.price);
-  const min=Math.min(...prices),max=Math.max(...prices);
-  const range=max-min||1;
-  const pad={t:10,b:24,l:10,r:10};
-  const iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
+function render(d) {
+  const meta = d.meta || {};
+  const cur = d.current || {};
+  const intel = d.intelligence || {};
+  const news = d.news || {};
+  const edu = d.education || {};
+  const evo = d.evolution_log || [];
+  const price = cur.price || {};
+  const fg = cur.fear_greed || {};
+  const chain = cur.blockchain || {};
+  const mempool = cur.mempool || {};
+  const lightning = cur.lightning || {};
+  const halving = cur.halving || {};
 
-  // gradient fill
-  const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
-  grad.addColorStop(0,'rgba(247,147,26,0.25)');
-  grad.addColorStop(1,'rgba(247,147,26,0)');
+  // Meta
+  document.getElementById('gen-num').textContent = fmt(meta.generation) || '—';
+  document.getElementById('cycle-count').textContent = fmt(meta.total_cycles) || '—';
+  document.getElementById('accuracy').textContent = (meta.prediction_accuracy_pct || 0) + '% PREDICTION ACCURACY';
 
-  const xStep=iw/(history.length-1);
-  const yPos=(p)=>pad.t+ih*(1-(p-min)/range);
+  // Hero price
+  const p = price.price_usd || 0;
+  document.getElementById('hero-price').textContent = '$' + fmt(p);
 
-  ctx.beginPath();
-  history.forEach((h,i)=>{ const x=pad.l+i*xStep,y=yPos(h.price); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
-  ctx.strokeStyle='rgba(247,147,26,0.9)';ctx.lineWidth=1.5;ctx.stroke();
+  const c24 = price.change_24h_pct || 0;
+  const c7 = price.change_7d_pct || 0;
+  const c30 = price.change_30d_pct || 0;
+  const setChg = (id, val) => {
+    const el = document.getElementById(id);
+    const sign = val >= 0 ? '+' : '';
+    const lbl = el.querySelector('.lbl').outerHTML;
+    el.innerHTML = sign + fmt(val, 2) + '%' + lbl;
+    el.className = 'chg ' + (val >= 0 ? 'up' : 'down');
+  };
+  setChg('chg-24h', c24);
+  setChg('chg-7d', c7);
+  setChg('chg-30d', c30);
 
-  ctx.lineTo(pad.l+xStep*(history.length-1),H-pad.b);
-  ctx.lineTo(pad.l,H-pad.b);ctx.closePath();
-  ctx.fillStyle=grad;ctx.fill();
-
-  // x labels (first and last)
-  ctx.fillStyle='rgba(120,80,30,0.9)';ctx.font='10px IBM Plex Mono';ctx.textAlign='left';
-  ctx.fillText(history[0].date,pad.l,H-4);
-  ctx.textAlign='right';
-  ctx.fillText(history[history.length-1].date,W-pad.r,H-4);
-}
-
-/* ═══ RENDER ═══ */
-function updateAliveCounter(genesis) {
-  if (!genesis) return;
-  const start = new Date(genesis).getTime();
-  const now = Date.now();
-  const diff = now - start;
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  document.getElementById('alive-counter').textContent = `Ollie has been alive for ${days} days, ${hours} hours, ${minutes} minutes`;
-}
-
-function render(d){
-  const m=d.meta||{}, cur=d.current||{}, kb=d.knowledge_base||{};
-
-  // Status
-  document.getElementById('status-txt').textContent='ONLINE · LEARNING DAILY';
-  document.getElementById('gen-num').textContent=m.total_cycles||0;
-  document.getElementById('gen-id').textContent='SUBJECT: BITCOIN';
-  const genesis=m.genesis;
-  if(genesis){
-    const days=Math.floor((Date.now()-new Date(genesis).getTime())/86400000);
-    document.getElementById('gen-since').textContent=`ALIVE ${Math.max(0,days)} DAYS · GENESIS ${genesis}`;
-    document.getElementById('f-since').textContent=genesis;
-    updateAliveCounter(genesis);
-    setInterval(() => updateAliveCounter(genesis), 60000); // update every minute
+  // Price grid
+  document.getElementById('mktcap').textContent = fmtBig(price.market_cap_usd);
+  document.getElementById('vol').textContent = fmtBig(price.volume_24h_usd);
+  document.getElementById('dom').textContent = (price.dominance_pct || 0) + '%';
+  document.getElementById('supply').textContent = fmt(price.circulating_supply) + ' BTC';
+  const athVal = price.ath_usd || 0;
+  document.getElementById('ath').textContent = '$' + fmt(athVal);
+  if(athVal && p) {
+    const fromAth = ((p - athVal) / athVal * 100);
+    const el = document.getElementById('from-ath');
+    el.textContent = (fromAth >= 0 ? '+' : '') + fmt(fromAth, 1) + '%';
+    el.className = 'pc-val ' + (fromAth >= 0 ? 'up' : 'down');
   }
-  document.getElementById('f-cycle').textContent=m.total_cycles||'—';
-
-  // Price strip
-  const price=cur.price_usd;
-  document.getElementById('p-price').textContent=price?fmtPrice(price):'—';
-  const c24=cur.change_24h_pct;
-  const c24El=document.getElementById('p-24h');
-  c24El.textContent=fmtPct(c24);
-  c24El.className='p-val'+(c24>0?' green':c24<0?' red':'');
-  const c7=cur.change_7d_pct;
-  const c7El=document.getElementById('p-7d');
-  c7El.textContent=fmtPct(c7);
-  c7El.className='p-val'+(c7>0?' green':c7<0?' red':'');
-  document.getElementById('p-mcap').textContent=fmt(cur.market_cap_usd);
-  document.getElementById('p-vol').textContent=fmt(cur.volume_24h_usd);
-  document.getElementById('p-dom').textContent=cur.dominance_pct?cur.dominance_pct+'%':'—';
-
-  // Network stats
-  document.getElementById('s-block').textContent=cur.block_height?(cur.block_height).toLocaleString():'—';
-  document.getElementById('s-hr').textContent=cur.hash_rate?cur.hash_rate+' EH/s':'—';
-  document.getElementById('s-fee').textContent=cur.mempool_high_fee?cur.mempool_high_fee+' sat/vB':'—';
-  document.getElementById('s-mempool').textContent=cur.unconfirmed_txs?(cur.unconfirmed_txs).toLocaleString():'—';
-  if(cur.circulating_supply&&cur.max_supply){
-    const pct=((cur.circulating_supply/cur.max_supply)*100).toFixed(2);
-    document.getElementById('s-supply').textContent=`${(cur.circulating_supply).toLocaleString('en-US',{maximumFractionDigits:0})} BTC (${pct}%)`;
-  }
-  if(cur.ath_usd){
-    document.getElementById('s-ath').textContent=fmtPrice(cur.ath_usd);
-    if(price&&cur.ath_usd){
-      const pctFromATH=((cur.ath_usd-price)/cur.ath_usd*100).toFixed(1);
-      document.getElementById('s-ath-pct').textContent=pctFromATH<1?'At or near ATH':`${pctFromATH}% below ATH`;
-    }
-  }
-
-  // Fear & Greed
-  const fg=cur.fear_greed_value;
-  if(fg){
-    document.getElementById('fg-num').textContent=fg;
-    document.getElementById('fg-num').style.color=fgColor(fg);
-    document.getElementById('fg-name').textContent=(cur.fear_greed_label||'').toUpperCase();
-    document.getElementById('fg-name').style.color=fgColor(fg);
-    document.getElementById('fg-needle').style.left=fg+'%';
-  }
-
-  // Dynamic Theme Based on Market State
-  let accentColor = '#00BFFF'; // default btc orange
-  if (fg >= 80) accentColor = '#00FF7F'; // green for extreme greed
-  else if (fg >= 60) accentColor = '#FFD700'; // gold for greed
-  else if (fg <= 20) accentColor = '#FF4500'; // red for extreme fear
-  else if (fg <= 40) accentColor = '#F7931A'; // orange for fear
-  document.documentElement.style.setProperty('--btc', accentColor);
-
-  // Halving
-  const bh=cur.block_height||0, target=cur.next_halving_block||1050000;
-  const left=cur.blocks_until_halving||Math.max(0,target-bh);
-  const days=cur.days_until_halving||Math.round(left*10/1440);
-  const prevHalving = Math.floor(bh/210000)*210000;
-  const progress = target>prevHalving ? Math.min(100, ((bh-prevHalving)/(target-prevHalving)*100)) : 0;
-  document.getElementById('hv-title').textContent=left>0?`${(left).toLocaleString()} blocks until next halving`:'Next halving complete!';
-  document.getElementById('hv-blocks').textContent=(left).toLocaleString();
-  document.getElementById('hv-date').textContent=cur.estimated_halving_date||'—';
-  document.getElementById('hv-days').textContent=days>0?'~'+days.toLocaleString():left>0?'Soon':'Passed';
-  document.getElementById('hv-target').textContent=target.toLocaleString();
-  document.getElementById('hv-fill').style.width=progress.toFixed(1)+'%';
-
-  // Countdown
-  startCountdown(m.last_updated);
 
   // Thought
-  const thought=d.todays_thought||'Awaiting first learning cycle...';
-  document.getElementById('thought-text').textContent=thought;
+  document.getElementById('thought').textContent = intel.todays_thought || '...';
+
+  // Fear & Greed
+  const fgVal = fg.value || 50;
+  const fgEl = document.getElementById('fg-num');
+  fgEl.textContent = fgVal;
+  fgEl.style.color = fgColor(fgVal);
+  const fgLbl = document.getElementById('fg-label');
+  fgLbl.textContent = fg.label || '—';
+  fgLbl.style.color = fgColor(fgVal);
+  document.getElementById('fg-needle').style.left = fgVal + '%';
+
+  // F&G mini history
+  const fgHist = document.getElementById('fg-history');
+  const history = (fg.history || []).slice(0,14).reverse();
+  const maxFg = Math.max(...history.map(h=>h.value), 1);
+  fgHist.innerHTML = history.map(h => `
+    <div class="fg-bar" style="height:${Math.max(10, h.value/maxFg*100)}%;background:${fgColor(h.value)};" title="${h.date}: ${h.value} (${h.label})"></div>
+  `).join('');
+
+  // Halving
+  document.getElementById('hv-fill').style.width = (halving.progress_pct || 0) + '%';
+  document.getElementById('hv-blocks').textContent = fmt(halving.blocks_remaining);
+  document.getElementById('hv-days').textContent = halving.estimated_days || '—';
+  document.getElementById('hv-cur').textContent = fmt(halving.current_block);
+  document.getElementById('hv-pct').textContent = (halving.progress_pct || 0) + '%';
+
+  // Prediction
+  const pred = intel.todays_prediction || {};
+  const outlookEl = document.getElementById('pred-outlook');
+  outlookEl.textContent = (pred.outlook || '—').toUpperCase();
+  outlookEl.className = 'pred-outlook ' + (pred.outlook || 'neutral').replace(' ', '-');
+  document.getElementById('pred-text').textContent = pred.text || '—';
+  document.getElementById('pred-conf').textContent = (pred.confidence || 0) + '%';
 
   // Insights
-  const insights=d.todays_insights||[];
-  const iEl=document.getElementById('insight-list');
-  if(insights.length){
-    iEl.innerHTML=insights.map(t=>`<div class="insight"><span class="insight-bullet">◆</span><span class="insight-text">${t}</span></div>`).join('');
-  } else {
-    iEl.innerHTML='<div style="color:var(--muted2);font-size:12px;">Insights will appear after the first learning cycle.</div>';
+  const insightsEl = document.getElementById('insights-grid');
+  const insights = intel.todays_insights || [];
+  if(insights.length) {
+    insightsEl.innerHTML = insights.map(ins => `
+      <div class="insight-card">
+        <div class="insight-icon">${ins.icon||'💡'}</div>
+        <div class="insight-body">
+          <div class="insight-text">${ins.text}</div>
+          <span class="insight-level ${ins.level||'beginner'}">${(ins.level||'beginner').toUpperCase()}</span>
+        </div>
+      </div>
+    `).join('');
   }
 
   // Tips
-  const tips=d.todays_tips||[];
-  const tEl=document.getElementById('tips-list');
-  if(tips.length){
-    tEl.innerHTML=tips.map(t=>`<div class="insight"><span class="insight-bullet">◆</span><span class="insight-text">${t}</span></div>`).join('');
-  } else {
-    tEl.innerHTML='<div style="color:var(--muted2);font-size:12px;">Tips will appear after the first learning cycle.</div>';
+  const tipsEl = document.getElementById('tips-grid');
+  const tips = intel.todays_tips || [];
+  if(tips.length) {
+    tipsEl.innerHTML = tips.map(t => `
+      <div class="tip-card">
+        <div class="tip-icon">${t.icon||'💡'}</div>
+        <div class="tip-text">${t.tip}</div>
+        <div class="tip-cat">${(t.category||'').toUpperCase()}</div>
+      </div>
+    `).join('');
   }
 
-  // Fact
-  const fact=d.todays_fact||'Facts will appear after the first learning cycle.';
-  document.getElementById('fact-text').textContent=fact;
+  // Learning paths
+  if(edu.learning_paths) renderLearningPaths(edu.learning_paths);
 
-  // Prediction
-  const prediction=d.todays_prediction||'Predictions will appear after more data is collected.';
-  document.getElementById('prediction-text').textContent=prediction;
+  // Network stats
+  document.getElementById('hash-rate').textContent = chain.hash_rate_ehs || '—';
+  document.getElementById('block-height').textContent = fmt(chain.block_height || mempool.block_height || 0);
+  document.getElementById('tx-24h').textContent = fmt(chain.n_tx_24h);
+  document.getElementById('mempool-txs').textContent = fmt(mempool.unconfirmed_txs);
+  document.getElementById('fee-fast').textContent = mempool.high_fee || '—';
+  document.getElementById('fee-slow').textContent = mempool.low_fee || '—';
+  document.getElementById('ln-nodes').textContent = fmt(lightning.node_count);
+  document.getElementById('ln-cap').textContent = fmt(lightning.total_capacity_btc, 1);
 
   // News
-  const news=d.todays_headlines||[];
-  const nEl=document.getElementById('news-list');
-  if(news.length){
-    nEl.innerHTML=news.map(n=>`
-      <a class="news-item" href="${n.link||'#'}" target="_blank" rel="noopener">
-        <span class="news-source">${n.source||'NEWS'}</span>
+  const newsEl = document.getElementById('news-list');
+  const headlines = news.headlines || [];
+  if(headlines.length) {
+    newsEl.innerHTML = headlines.map(h => `
+      <div class="news-item" onclick="window.open('${h.link}','_blank')">
+        <div class="news-sentiment ${h.sentiment||'neutral'}"></div>
         <div class="news-body">
-          <div class="news-title">${n.title||'—'}</div>
-          <div class="news-date">${n.published||''}</div>
+          <div class="news-title">${h.title}</div>
+          <div class="news-meta"><span class="news-source">${h.source}</span> ${h.published ? '· ' + h.published.slice(0,16) : ''}</div>
         </div>
-      </a>`).join('');
-  } else {
-    nEl.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:12px 0;">Headlines will appear after the first learning cycle runs via GitHub Actions.</div>';
+      </div>
+    `).join('');
   }
 
   // Reddit
-  const reddit=d.todays_reddit||[];
-  if(reddit.length){
-    document.getElementById('reddit-sec').style.display='block';
-    document.getElementById('reddit-list').innerHTML=reddit.map(r=>`
-      <a class="reddit-item" href="${r.url||'#'}" target="_blank" rel="noopener">
-        <span class="reddit-score">↑${r.score>999?(r.score/1000).toFixed(1)+'k':r.score}</span>
-        <span class="reddit-title">${r.title||'—'}</span>
-        <span class="reddit-flair">${r.flair||''}</span>
-      </a>`).join('');
-  }
-
-  // Knowledge base
-  const topics=kb.topics_learned||[];
-  const kbEl=document.getElementById('kb-tags');
-  if(topics.length){
-    kbEl.innerHTML=topics.slice(0,30).map(t=>`<span class="kb-tag">${t.topic}<span class="count">${t.count}</span></span>`).join('');
-    document.getElementById('kb-meta').textContent=`${topics.length} topics accumulated · ${kb.price_history?.length||0} days of price memory · ${kb.fear_greed_history?.length||0} days of sentiment memory`;
-  } else {
-    kbEl.innerHTML='<span style="color:var(--muted2);font-size:12px;">Knowledge nodes will accumulate after first GitHub Actions cycle.</span>';
-    document.getElementById('kb-meta').textContent='';
-  }
-
-  // Price chart
-  if(kb.price_history&&kb.price_history.length>=2) drawPriceChart(kb.price_history);
-
-  // Evolution log
-  const evo=d.evolution_log||[];
-  const eEl=document.getElementById('evo-list');
-  if(evo.length){
-    eEl.innerHTML=[...evo].reverse().slice(0,15).map((e,i)=>`
-      <div class="evo-item ${i===0?'latest':''}">
-        <div class="evo-num">${e.cycle||'—'}</div>
-        <div class="evo-body">
-          <div class="evo-meta">
-            <span class="evo-date">${e.date||'—'}</span>
-            ${e.price_usd?`<span class="evo-price">$${Math.round(e.price_usd).toLocaleString()}</span>`:''}
-            ${e.fear_greed_label?`<span class="evo-fg ${fgClass(e.fear_greed_label)}">${e.fear_greed_label.toUpperCase()}</span>`:''}
-          </div>
-          <div class="evo-thought">${e.thought_preview||'—'}</div>
-          ${e.topics&&e.topics.length?`<div class="evo-topics">${e.topics.slice(0,6).map(t=>`<span class="evo-topic">${t}</span>`).join('')}</div>`:''}
+  const redditEl = document.getElementById('reddit-grid');
+  const posts = news.reddit || [];
+  if(posts.length) {
+    redditEl.innerHTML = posts.map(p => `
+      <div class="reddit-card" onclick="window.open('${p.url}','_blank')" style="cursor:pointer">
+        <div class="reddit-sub">${p.subreddit}</div>
+        <div class="reddit-title" style="margin-top:6px">${p.title}</div>
+        <div class="reddit-meta" style="margin-top:8px">
+          <span class="reddit-score">↑ ${fmt(p.score)}</span>
+          <span class="reddit-comments">💬 ${fmt(p.comments)}</span>
         </div>
-      </div>`).join('');
-  } else {
-    eEl.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:12px 0;">Evolution log starts after the first GitHub Actions cycle (runs twice daily at 00:30 and 12:30 UTC).</div>';
+      </div>
+    `).join('');
+  }
+
+  // Evolution chart
+  const evoEl = document.getElementById('evo-chart');
+  if(evo.length > 1) {
+    const prices = evo.map(e => e.price_usd || 0).filter(p => p > 0);
+    const maxP = Math.max(...prices, 1);
+    evoEl.innerHTML = evo.slice(-60).map((e, i, arr) => {
+      const isLatest = i === arr.length - 1;
+      const h = Math.max(8, ((e.price_usd||0) / maxP) * 100);
+      return `<div class="evo-bar ${isLatest?'latest':''}" style="height:${h}%" title="Gen ${e.generation} | ${e.date} | $${fmt(e.price_usd)} | ${e.prediction_outlook||'?'}"></div>`;
+    }).join('');
+    const first = evo[0];
+    const last = evo[evo.length-1];
+    document.getElementById('evo-stats').textContent =
+      `${evo.length} learning cycles recorded · First: $${fmt(first.price_usd)} (${first.date||''}) · Latest: $${fmt(last.price_usd)} (${last.date||''})`;
   }
 }
 
-/* ═══ CHAT FUNCTIONS ═══ */
-function addMessage(text, isUser=false, isTyping=false) {
-  const chatMessages = document.getElementById('chat-messages');
-  const msg = document.createElement('div');
-  msg.style.padding = '8px';
-  msg.style.margin = '4px 0';
-  msg.style.borderRadius = '4px';
-  msg.style.background = isUser ? 'var(--btc-dim)' : 'var(--layer)';
-  if (isTyping) {
-    msg.innerHTML = '<span class="typing">Ollie is thinking...</span>';
-    msg.classList.add('typing-msg');
-  } else {
-    msg.textContent = text;
-  }
-  chatMessages.appendChild(msg);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return msg;
-}
-
-function updateTyping(msg, text) {
-  msg.textContent = text;
-  msg.classList.remove('typing-msg');
-}
-
-function getUserMemory() {
-  return JSON.parse(localStorage.getItem('ollie_memory') || '{}');
-}
-
-function saveUserMemory(memory) {
-  localStorage.setItem('ollie_memory', JSON.stringify(memory));
-}
-
-function analyzeInteraction(query, response) {
-  const memory = getUserMemory();
-  memory.interactions = memory.interactions || [];
-  memory.interactions.push({ query, response, timestamp: Date.now() });
-  if (memory.interactions.length > 50) memory.interactions.shift();
-  
-  const topics = ['price', 'halving', 'mining', 'lightning', 'wallet', 'trading'];
-  topics.forEach(topic => {
-    if (query.toLowerCase().includes(topic)) {
-      memory.interests = memory.interests || {};
-      memory.interests[topic] = (memory.interests[topic] || 0) + 1;
-    }
-  });
-  
-  saveUserMemory(memory);
-}
-
-function getPersonalizedGreeting() {
-  const memory = getUserMemory();
-  const hour = new Date().getHours();
-  let greeting = "Greetings";
-  if (hour < 12) greeting = "Good morning";
-  else if (hour < 18) greeting = "Good afternoon";
-  else greeting = "Good evening";
-  
-  if (memory.interactions && memory.interactions.length > 0) {
-    greeting += ", valued user. I remember our previous conversations.";
-  } else {
-    greeting += ". I'm Ollie, your autonomous Bitcoin intelligence.";
-  }
-  
-  const topInterest = Object.entries(memory.interests || {}).sort((a,b) => b[1] - a[1])[0];
-  if (topInterest) {
-    greeting += ` I see you're interested in ${topInterest[0]}.`;
-  }
-  
-  return greeting;
-}
-
-function searchKnowledge(d, query) {
-  const q = query.toLowerCase();
-  let response = "";
-  
-  // Personality and awareness
-  if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
-    return getPersonalizedGreeting();
-  }
-  if (q.includes('thank')) {
-    return "You're welcome. Knowledge is power in the Bitcoin realm.";
-  }
-  if (q.includes('bye') || q.includes('goodbye')) {
-    return "Farewell. May your sats multiply. Ollie remains vigilant.";
-  }
-  if (q.includes('time')) {
-    return `Current time: ${new Date().toLocaleString()}. Bitcoin never sleeps.`;
-  }
-  if (q.includes('weather')) {
-    return "I focus on Bitcoin markets, not earthly weather. But volatility is always present!";
-  }
-  
-  // Specific Q&A with context
-  if (q.includes('price')) {
-    const price = d.current.price_usd?.toLocaleString() || 'unavailable';
-    const change = d.current.change_24h_pct || 0;
-    response = `Current Bitcoin price: $${price} (${change > 0 ? '+' : ''}${change}%).`;
-    const memory = getUserMemory();
-    if (memory.interests?.price > 2) {
-      response += " You've asked about price frequently. Consider setting alerts.";
-    }
-  } else if (q.includes('halving')) {
-    response = `Next halving in ${d.current.blocks_until_halving?.toLocaleString() || 'unknown'} blocks, estimated ${d.current.estimated_halving_date || 'unknown'}. Current block reward: 3.125 BTC.`;
-  } else if (q.includes('fear') || q.includes('greed')) {
-    response = `Fear & Greed Index: ${d.current.fear_greed_value || 'unknown'} (${d.current.fear_greed_label || 'unknown'}).`;
-  } else if (q.includes('supply')) {
-    response = `${d.current.circulating_supply?.toLocaleString() || 'unknown'} BTC mined out of 21 million total.`;
-  } else if (q.includes('hash') || q.includes('mining')) {
-    response = `Hash rate: ${d.current.hash_rate || 'unknown'} EH/s. Difficulty: ${d.current.difficulty?.toLocaleString() || 'unknown'}.`;
-  } else if (q.includes('fee')) {
-    response = `Mempool fees: Low ${d.current.mempool_low_fee || 'unknown'} sat/vB, Mid ${d.current.mempool_mid_fee || 'unknown'} sat/vB, High ${d.current.mempool_high_fee || 'unknown'} sat/vB.`;
-  } else if (q.includes('market cap')) {
-    response = `Market cap: $${d.current.market_cap_usd?.toLocaleString() || 'unknown'} USD. Dominance: ${d.current.dominance_pct || 'unknown'}%.`;
-  } else if (q.includes('volume')) {
-    response = `24h trading volume: $${d.current.volume_24h_usd?.toLocaleString() || 'unknown'} USD.`;
-  } else if (q.includes('change') || q.includes('24h')) {
-    response = `24h change: ${d.current.change_24h_pct || 'unknown'}%. 7d: ${d.current.change_7d_pct || 'unknown'}%. 30d: ${d.current.change_30d_pct || 'unknown'}%.`;
-  } else if (q.includes('ath')) {
-    response = `All-time high: $${d.current.ath_usd?.toLocaleString() || 'unknown'} on ${d.current.ath_date || 'unknown'}.`;
-  } else if (q.includes('block height')) {
-    response = `Block height: ${d.current.block_height?.toLocaleString() || 'unknown'}.`;
-  } else if (q.includes('unconfirmed')) {
-    response = `Unconfirmed transactions: ${d.current.unconfirmed_txs?.toLocaleString() || 'unknown'}.`;
-  } else {
-    // Fallback search
-    response = "I'm still learning about Bitcoin. Try asking about price, news, tips, halving, or facts.";
-    
-    if (d.todays_thought && d.todays_thought.toLowerCase().includes(q)) {
-      response = d.todays_thought;
-    } else if (d.todays_insights) {
-      for (let i of d.todays_insights) {
-        if (i.toLowerCase().includes(q)) {
-          response = i;
-          break;
-        }
-      }
-    } else if (d.todays_tips) {
-      for (let t of d.todays_tips) {
-        if (t.toLowerCase().includes(q)) {
-          response = t;
-          break;
-        }
-      }
-    } else if (d.todays_headlines) {
-      for (let h of d.todays_headlines) {
-        if (h.title.toLowerCase().includes(q)) {
-          response = `${h.title} - ${h.summary}`;
-          break;
-        }
-      }
-    } else if (d.todays_reddit) {
-      for (let r of d.todays_reddit) {
-        if (r.title.toLowerCase().includes(q)) {
-          response = r.title;
-          break;
-        }
-      }
-    }
-  }
-  
-  // Add personality
-  if (response && !response.includes("I'm still learning")) {
-    const personalities = [
-      " As your AI companion, I recommend staying informed.",
-      " Remember, knowledge is your best investment.",
-      " Bitcoin's journey continues - stay vigilant.",
-      " I'm here 24/7, learning with you."
-    ];
-    response += personalities[Math.floor(Math.random() * personalities.length)];
-  }
-  
-  return response;
-}
-
-function setupTools(d) {
-  // Satoshi Converter
-  document.getElementById('convert-btn').addEventListener('click', () => {
-    const sats = parseFloat(document.getElementById('sats-input').value);
-    const price = d.current.price_usd || 0;
-    if (sats > 0) {
-      const btc = sats / 100000000;
-      const usd = btc * price;
-      document.getElementById('btc-result').textContent = `${sats.toLocaleString()} sats = ${btc.toFixed(8)} BTC ≈ $${usd.toFixed(2)} USD`;
-    }
-  });
-  
-  // Profit Calculator
-  document.getElementById('calc-profit-btn').addEventListener('click', () => {
-    const buy = parseFloat(document.getElementById('buy-price').value);
-    const sell = parseFloat(document.getElementById('sell-price').value);
-    const amount = parseFloat(document.getElementById('amount').value);
-    if (buy > 0 && sell > 0 && amount > 0) {
-      const profit = (sell - buy) * amount;
-      const pct = ((sell - buy) / buy * 100).toFixed(2);
-      document.getElementById('profit-result').textContent = `Profit: $${profit.toFixed(2)} (${pct}%)`;
-    }
-  });
-  
-  // Halving Progress
-  const blocksLeft = d.current.blocks_until_halving || 0;
-  const totalBlocks = 210000;
-  const progress = ((totalBlocks - blocksLeft) / totalBlocks * 100).toFixed(2);
-  document.getElementById('halving-progress').innerHTML = `
-    <div>Blocks until halving: ${blocksLeft.toLocaleString()}</div>
-    <div>Progress: ${progress}%</div>
-    <div style="background:var(--deep); height:10px; border-radius:5px; margin:5px 0;">
-      <div style="background:var(--btc); height:10px; width:${progress}%; border-radius:5px;"></div>
-    </div>
-  `;
-  
-  // Block Reward Calculator
-  document.getElementById('reward-btn').addEventListener('click', () => {
-    const blocks = parseFloat(document.getElementById('blocks-input').value);
-    if (blocks > 0) {
-      const reward = blocks * 3.125; // current reward
-      document.getElementById('reward-result').textContent = `${blocks} blocks = ${reward} BTC`;
-    }
-  });
-  
-  // Quiz
-  const quizQuestions = [
-    { q: "What is the maximum supply of Bitcoin?", a: "21 million" },
-    { q: "Who created Bitcoin?", a: "Satoshi Nakamoto" },
-    { q: "What happens every 4 years in Bitcoin?", a: "Halving" },
-    { q: "What is the smallest unit of Bitcoin?", a: "Satoshi" },
-    { q: "What network allows instant Bitcoin payments?", a: "Lightning Network" }
-  ];
-  document.getElementById('quiz-btn').addEventListener('click', () => {
-    const randomQ = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
-    const answer = prompt(randomQ.q);
-    if (answer && answer.toLowerCase().includes(randomQ.a.toLowerCase())) {
-      document.getElementById('quiz-result').textContent = "Correct! 🎉";
-    } else {
-      document.getElementById('quiz-result').textContent = `Wrong. Answer: ${randomQ.a}`;
-    }
-  });
-  
-  // Glossary
-  const glossary = {
-    blockchain: "A decentralized, distributed ledger technology that records transactions across many computers.",
-    halving: "An event that reduces Bitcoin's block reward by half, occurring every 210,000 blocks.",
-    satoshi: "The smallest unit of Bitcoin, equal to 0.00000001 BTC.",
-    hodl: "A misspelling of 'hold' that became a meme meaning to hold onto Bitcoin long-term.",
-    lightning: "A layer-2 solution for fast, low-cost Bitcoin transactions."
-  };
-  document.getElementById('glossary-select').addEventListener('change', (e) => {
-    const term = e.target.value;
-    document.getElementById('glossary-result').textContent = glossary[term] || '';
-  });
-  
-  // Fiat to BTC
-  document.getElementById('fiat-to-btc-btn').addEventListener('click', () => {
-    const fiat = parseFloat(document.getElementById('fiat-amount').value);
-    const btcPrice = d.current.price_usd || 0;
-    if (fiat > 0 && btcPrice > 0) {
-      const btc = fiat / btcPrice;
-      const sats = btc * 100000000;
-      document.getElementById('fiat-result').textContent = `$${fiat} = ${btc.toFixed(8)} BTC ≈ ${sats.toLocaleString()} sats`;
-    }
-  });
-  
-  // Block Time Calculator
-  document.getElementById('time-calc-btn').addEventListener('click', () => {
-    const blocks = parseFloat(document.getElementById('blocks-time').value);
-    if (blocks > 0) {
-      const minutes = blocks * 10; // approx 10 min per block
-      const hours = minutes / 60;
-      const days = hours / 24;
-      document.getElementById('time-result').textContent = `${blocks} blocks ≈ ${minutes} min ≈ ${hours.toFixed(1)} hours ≈ ${days.toFixed(1)} days`;
-    }
-  });
-  
-  // Share
-  document.getElementById('share-btn').addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Ollie - Autonomous Bitcoin Intelligence',
-        text: 'Check out this amazing Bitcoin learning AI!',
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      document.getElementById('share-result').textContent = 'Link copied to clipboard!';
-    }
-  });
-  
-  // Address Validator
-  document.getElementById('validate-btn').addEventListener('click', () => {
-    const address = document.getElementById('address-input').value.trim();
-    if (!address) {
-      document.getElementById('validate-result').textContent = 'Please enter a Bitcoin address.';
-      return;
-    }
-    // Simple regex for Bitcoin addresses (legacy or segwit)
-    const legacyRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
-    const segwitRegex = /^bc1[a-z0-9]{39,59}$/;
-    if (legacyRegex.test(address) || segwitRegex.test(address)) {
-      document.getElementById('validate-result').textContent = '✅ Valid Bitcoin address.';
-    } else {
-      document.getElementById('validate-result').textContent = '❌ Invalid Bitcoin address.';
-    }
-  });
-  
-  // Difficulty Calculator
-  document.getElementById('difficulty-btn').addEventListener('click', () => {
-    const hashrate = parseFloat(document.getElementById('hashrate-input').value);
-    const currentDifficulty = d.current.difficulty || 145042165424853; // example
-    if (hashrate > 0) {
-      const blocksPerDay = (hashrate * 1e18 * 86400) / (currentDifficulty * 2**32);
-      document.getElementById('difficulty-result').textContent = `With ${hashrate} EH/s, you could mine ~${blocksPerDay.toFixed(2)} blocks per day.`;
-    } else {
-      document.getElementById('difficulty-result').textContent = 'Please enter a valid hashrate.';
-    }
-  });
-  
-  // Portfolio Tracker
-  document.getElementById('portfolio-btn').addEventListener('click', () => {
-    const holdings = parseFloat(document.getElementById('btc-holdings').value);
-    const price = d.current.price_usd || 0;
-    if (holdings > 0 && price > 0) {
-      const value = holdings * price;
-      document.getElementById('portfolio-result').textContent = `${holdings} BTC = $${value.toLocaleString()} USD`;
-    } else {
-      document.getElementById('portfolio-result').textContent = 'Please enter valid holdings.';
-    }
-  });
-}
-
-/* ═══ BOOT — fetch knowledge.json ═══ */
-async function boot(){
-  try {
-    const r=await fetch('data/knowledge.json?_='+(Date.now()));
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    render(d);
-    
-    // Setup chat
-    const chatInput = document.getElementById('chat-input');
-    const chatSend = document.getElementById('chat-send');
-    chatSend.addEventListener('click', async () => {
-      const query = chatInput.value.trim();
-      if (query) {
-        addMessage(query, true);
-        const typingMsg = addMessage('', false, true);
-        
-        // Simulate thinking time
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-        
-        const response = searchKnowledge(d, query);
-        updateTyping(typingMsg, response);
-        
-        // Learn from interaction
-        analyzeInteraction(query, response);
-        
-        chatInput.value = '';
-      }
-    });
-    chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        chatSend.click();
-      }
-    });
-    
-    // Setup tools
-    setupTools(d);
-    
-  } catch(e){
-    document.getElementById('thought-text').textContent=
-      'Ollie is waiting for the first GitHub Actions cycle to run. Push this repo to GitHub, enable GitHub Actions, and trigger the workflow. Within minutes, Ollie will be alive and learning Bitcoin.';
-    document.getElementById('status-txt').textContent='AWAITING FIRST CYCLE';
-    startCountdown(0);
-  }
-}
-
-boot();
+load();
+setInterval(load, 5 * 60 * 1000); // Refresh every 5 minutes
 </script>
 </body>
 </html>
