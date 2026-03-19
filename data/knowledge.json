@@ -1,133 +1,727 @@
 {
   "meta": {
-    "genesis": "2026-03-19",
-    "name": "Ollie",
-    "subject": "Bitcoin",
-    "total_cycles": 1,
-    "last_updated": "2026-03-19T15:14:12.432432+00:00",
-    "version": "2.0",
-    "status": "active"
+    "version": "3.1",
+    "generation": 1,
+    "last_updated": "2026-03-19T20:08:25.220066+00:00",
+    "last_updated_human": "March 19, 2026 at 20:08 UTC",
+    "update_cycle": "every 6 hours",
+    "mission": "Learn everything about Bitcoin. Teach and guide every Bitcoiner on their journey.",
+    "prediction_accuracy_pct": 0,
+    "days_alive": 6284,
+    "total_cycles": 1
   },
   "current": {
-    "price_usd": 69678,
-    "market_cap_usd": 1396968485402,
-    "volume_24h_usd": 47428546566,
-    "change_24h_pct": -1.99,
-    "change_7d_pct": -0.38,
-    "change_30d_pct": 4.15,
-    "ath_usd": 126080,
-    "ath_date": "2025-10-06T18:57:42.558Z",
-    "circulating_supply": 20003043.0,
-    "max_supply": 21000000,
-    "dominance_pct": 56.3,
-    "fear_greed_value": 23,
-    "fear_greed_label": "Extreme Fear",
-    "block_height": 941313,
-    "hash_rate": 1052.67,
-    "difficulty": 145042165424853,
-    "mempool_low_fee": 1,
-    "mempool_mid_fee": 4,
-    "mempool_high_fee": 4,
-    "unconfirmed_txs": 31671,
-    "next_halving_block": 1050000,
-    "blocks_until_halving": 108687,
-    "estimated_halving_date": "2028-04-12",
-    "days_until_halving": 755.0
+    "price": {
+      "price_usd": 70253,
+      "market_cap_usd": 1405776323619,
+      "volume_24h_usd": 47028133631,
+      "change_24h_pct": -0.58,
+      "change_7d_pct": 0.6,
+      "change_30d_pct": 3.63,
+      "ath_usd": 126080,
+      "ath_date": "2025-10-06T18:57:42.558Z",
+      "from_ath_pct": -44.3,
+      "circulating_supply": 20003043.0,
+      "max_supply": 21000000,
+      "dominance_pct": 56.5,
+      "source": "coingecko"
+    },
+    "fear_greed": {
+      "value": 23,
+      "label": "Extreme Fear",
+      "history": [
+        {
+          "date": "2026-03-19",
+          "value": 23,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-18",
+          "value": 26,
+          "label": "Fear"
+        },
+        {
+          "date": "2026-03-17",
+          "value": 28,
+          "label": "Fear"
+        },
+        {
+          "date": "2026-03-16",
+          "value": 23,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-15",
+          "value": 15,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-14",
+          "value": 16,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-13",
+          "value": 15,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-12",
+          "value": 18,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-11",
+          "value": 15,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-10",
+          "value": 13,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-09",
+          "value": 8,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-08",
+          "value": 12,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-07",
+          "value": 12,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-06",
+          "value": 18,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-05",
+          "value": 22,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-04",
+          "value": 10,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-03",
+          "value": 14,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-02",
+          "value": 10,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-03-01",
+          "value": 14,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-28",
+          "value": 11,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-27",
+          "value": 13,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-26",
+          "value": 11,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-25",
+          "value": 11,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-24",
+          "value": 8,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-23",
+          "value": 5,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-22",
+          "value": 9,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-21",
+          "value": 8,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-20",
+          "value": 7,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-19",
+          "value": 9,
+          "label": "Extreme Fear"
+        },
+        {
+          "date": "2026-02-18",
+          "value": 8,
+          "label": "Extreme Fear"
+        }
+      ]
+    },
+    "blockchain": {
+      "block_height": 941331,
+      "hash_rate_ehs": 987.78,
+      "difficulty": 145042165424853,
+      "miners_revenue_usd": 0.0,
+      "n_tx_24h": 451156
+    },
+    "mempool": {
+      "low_fee": 3,
+      "mid_fee": 4,
+      "high_fee": 4,
+      "unconfirmed_txs": 39173,
+      "block_height": 941331
+    },
+    "lightning": {
+      "node_count": 17366,
+      "channel_count": 40364,
+      "total_capacity_btc": 4826.88
+    },
+    "halving": {
+      "current_reward_btc": 3.125,
+      "next_block": 1050000,
+      "current_block": 941331,
+      "blocks_remaining": 108669,
+      "estimated_days": 754.6,
+      "progress_pct": 48.25
+    }
   },
-  "knowledge_base": {
-    "topics_learned": [
+  "intelligence": {
+    "todays_thought": "$70,253 per Bitcoin today. 108,669 blocks until the next supply halving. The clock ticks. The math doesn't change. 21 million, forever.",
+    "todays_prediction": {
+      "outlook": "cautiously bullish",
+      "text": "Slight positive edge. Hash rate strong 987.78 EH/s. Stay patient.",
+      "confidence": 35,
+      "score": 1,
+      "signals": [
+        "Hash rate strong 987.78 EH/s"
+      ]
+    },
+    "todays_insights": [
       {
-        "topic": "Institutional Adoption",
-        "count": 1,
-        "first_seen": "2026-03-19",
-        "last_seen": "2026-03-19"
+        "type": "price",
+        "icon": "\u2696\ufe0f",
+        "text": "BTC consolidating at $70,253. Low volatility often precedes large moves. The coil tightens.",
+        "level": "intermediate"
       },
       {
-        "topic": "Central Banks",
-        "count": 1,
-        "first_seen": "2026-03-19",
-        "last_seen": "2026-03-19"
+        "type": "dominance",
+        "icon": "\u20bf",
+        "text": "Bitcoin dominance at 56.5%. Capital concentrating in BTC \u2014 often seen in early-to-mid bull cycles.",
+        "level": "advanced"
+      },
+      {
+        "type": "sentiment",
+        "icon": "\ud83d\ude30",
+        "text": "Fear at 23/100 (Extreme Fear). Smart money accumulates during fear. Dollar-cost averaging through fear is a time-tested strategy.",
+        "level": "beginner"
+      },
+      {
+        "type": "network",
+        "icon": "\u26cf\ufe0f",
+        "text": "Hash rate: 987.78 EH/s. Record territory \u2014 Miners are deploying massive capital to secure Bitcoin. They vote with their hardware.",
+        "level": "intermediate"
+      },
+      {
+        "type": "fact",
+        "icon": "\ud83e\udde0",
+        "text": "Over 400 million people globally are estimated to own some Bitcoin as of 2024.",
+        "level": "beginner"
       }
     ],
-    "price_history": [
+    "todays_tips": [
       {
-        "date": "2026-03-19",
-        "price": 69678,
-        "change_24h": -1.99,
-        "market_cap": 1396968485402
+        "icon": "\ud83e\uddee",
+        "tip": "Think in satoshis, not dollars. 1 sat = $0.0007 today. When Bitcoin reaches $1M, that same sat = $0.01. Stack sats.",
+        "category": "mindset"
+      },
+      {
+        "icon": "\ud83c\udf0d",
+        "tip": "Bitcoin is borderless money. Try sending BTC internationally and compare it to a wire transfer. No forms. No waiting. No permission needed.",
+        "category": "education"
+      },
+      {
+        "icon": "\ud83d\udc8e",
+        "tip": "The market is in extreme fear right now. History says: this is when long-term wealth is built. Stay humble, stack sats, zoom out.",
+        "category": "strategy"
       }
     ],
-    "fear_greed_history": [
+    "todays_fact": "Over 400 million people globally are estimated to own some Bitcoin as of 2024."
+  },
+  "news": {
+    "headlines": [
       {
-        "date": "2026-03-19",
-        "value": 23,
-        "label": "Extreme Fear"
+        "title": "Despite a 47% Price Drop, Bitcoin Traders Aren\u2019t Selling",
+        "link": "https://bitcoinmagazine.com/featured/despite-a-47-price-drop-bitcoin-selling",
+        "published": "Thu, 19 Mar 2026 19:37:24 +0000",
+        "summary": "Bitcoin Magazine\n\nDespite a 47% Price Drop, Bitcoin Traders Aren\u2019t Selling\nA survey of U.S. Bitcoin holders and crypto subreddit posts found that despite anxiety and market turbulence, most investors (69%) held onto their Bitcoin, with only 8% panic ",
+        "source": "Bitcoin Magazine",
+        "sentiment": "negative",
+        "relevance": 3
+      },
+      {
+        "title": "Bitcoin drops 10% to threaten new retest of 'unreliable' BTC price support",
+        "link": "https://cointelegraph.com/news/bitcoin-drops-10-threaten-retest-unreliable-btc-price-support?utm_source=rss_feed&utm_medium=rss_category_markets&utm_campaign=rss_partner_inbound",
+        "published": "Thu, 19 Mar 2026 17:09:53 +0000",
+        "summary": "Bitcoin brought its latest correction from local highs to near 10% as skepticism over long-term BTC price support grew louder.",
+        "source": "Cointelegraph Markets",
+        "sentiment": "negative",
+        "relevance": 3
+      },
+      {
+        "title": "Bybit launches yield-bearing tokenized gold, expanding RWA yield market",
+        "link": "https://cointelegraph.com/news/bybit-yield-tokenized-gold-xaut-rwa-trend?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+        "published": "Thu, 19 Mar 2026 19:50:37 +0000",
+        "summary": "The crypto exchange is offering a yield product tied to Tether Gold (XAUT), signaling a shift toward turning traditionally passive assets like gold into income-generating instruments.",
+        "source": "Cointelegraph",
+        "sentiment": "neutral",
+        "relevance": 2
+      },
+      {
+        "title": "Bitcoin bull market vibes emerge, but confirmation is missing: Glassnode",
+        "link": "https://cointelegraph.com/news/bitcoin-bull-market-vibes-emerge-but-confirmation-is-missing-glassnode?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+        "published": "Thu, 19 Mar 2026 18:30:00 +0000",
+        "summary": "Bitcoin markets have started to turn bullish again, but data shows that a key \u201cbull market threshold\u201d has not been established yet.",
+        "source": "Cointelegraph",
+        "sentiment": "positive",
+        "relevance": 2
+      },
+      {
+        "title": "BTC Falls Below $69K Amid Iranian and Qatari Gas Field Strikes",
+        "link": "https://news.bitcoin.com/btc-falls-below-69k-amid-iranian-and-qatari-gas-field-strikes/",
+        "published": "Thu, 19 Mar 2026 18:45:38 +0000",
+        "summary": "Bitcoin fell below $69,000 amid a global sell-off driven by escalating Middle East tensions that also caused energy prices to surge. Geopolitical Tension Sparks Market Turmoil Bitcoin ( BTC) plummeted below the $69,000 mark Thursday afternoon, swept ",
+        "source": "Bitcoin.com",
+        "sentiment": "negative",
+        "relevance": 2
+      },
+      {
+        "title": "Bitcoin tests old 2021 top as gold falls to six-week lows under $4.7K",
+        "link": "https://cointelegraph.com/news/bitcoin-tests-old-2021-top-gold-falls-six-week-lows-under-4-7k?utm_source=rss_feed&utm_medium=rss_category_markets&utm_campaign=rss_partner_inbound",
+        "published": "Thu, 19 Mar 2026 12:36:15 +0000",
+        "summary": "Bitcoin price correction reversed at $69,500, preserving a new higher BTC trading range as gold led a post-Fed macro asset sell-off.",
+        "source": "Cointelegraph Markets",
+        "sentiment": "negative",
+        "relevance": 2
+      },
+      {
+        "title": "Adam Back Confirmed As A Bitcoin 2026 Speaker",
+        "link": "https://bitcoinmagazine.com/conference/adam-back-confirmed-as-a-bitcoin-2026-speaker",
+        "published": "Thu, 19 Mar 2026 20:07:00 +0000",
+        "summary": "Bitcoin Magazine\n\nAdam Back Confirmed As A Bitcoin 2026 Speaker\nAdam Back has been officially confirmed as a speaker at Bitcoin 2026, returning to the conference as one of the few people in the world whose contributions to Bitcoin predate Bitcoin its",
+        "source": "Bitcoin Magazine",
+        "sentiment": "neutral",
+        "relevance": 1
+      },
+      {
+        "title": "Morgan Stanley Bitcoin Trust to Trade as MSBT on NYSE Arca",
+        "link": "https://bitcoinmagazine.com/news/morgan-stanley-bitcoin-to-trade-as-msbt",
+        "published": "Thu, 19 Mar 2026 18:10:33 +0000",
+        "summary": "Bitcoin Magazine\n\nMorgan Stanley Bitcoin Trust to Trade as MSBT on NYSE Arca\nMorgan Stanley's spot Bitcoin ETF will trade under the ticker MSBT on NYSE Arca.\nThis post Morgan Stanley Bitcoin Trust to Trade as MSBT on NYSE Arca first appeared on Bitco",
+        "source": "Bitcoin Magazine",
+        "sentiment": "neutral",
+        "relevance": 1
+      },
+      {
+        "title": "Animoca invests in Ava Labs to boost Avalanche adoption in Asia, Middle East",
+        "link": "https://cointelegraph.com/news/animoca-brands-invests-in-avax-partners-with-ava-labs-to-expand-avalanche-in-asia-and-middle-east?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+        "published": "Thu, 19 Mar 2026 19:31:48 +0000",
+        "summary": "The Web3 company will provide capital, advisory support and business development to help Avalanche projects scale, with a focus on real-world assets and digital identity.",
+        "source": "Cointelegraph",
+        "sentiment": "positive",
+        "relevance": 1
+      },
+      {
+        "title": "Wall Street heavyweight Cantor among investment banks pitching FalconX for its potential IPO",
+        "link": "https://www.coindesk.com/business/2026/03/18/wall-street-heavyweight-cantor-among-investment-banks-pitching-falconx-for-its-potential-ipo",
+        "published": "Thu, 19 Mar 2026 19:23:09 +0000",
+        "summary": "Crypto trading firm FalconX's CEO has previously said it is considering a public listing.",
+        "source": "CoinDesk",
+        "sentiment": "negative",
+        "relevance": 1
+      },
+      {
+        "title": "Bitcoin holds $69,000 as gold tumbles and oil spikes, but one analyst says stay on sidelines",
+        "link": "https://www.coindesk.com/markets/2026/03/19/bitcoin-holds-usd69-000-as-gold-tumbles-oil-spikes-but-analyst-says-stay-on-sidelines",
+        "published": "Thu, 19 Mar 2026 16:54:28 +0000",
+        "summary": "While bitcoin has shown relative strength against gold since the war in Iran broke out, investors are better off holding off \"dry powder\" while prices swing wildly on headlines, said Wintermute's Bryan Tan.",
+        "source": "CoinDesk",
+        "sentiment": "neutral",
+        "relevance": 1
+      },
+      {
+        "title": "ETF Giant Challenges Tether and Paxos With Framework for Tokenized Gold",
+        "link": "https://decrypt.co/361750/etf-giant-challenges-tether-paxos-framework-tokenized-gold",
+        "published": "Thu, 19 Mar 2026 18:26:16 +0000",
+        "summary": "The World Gold Council, established in 1987, counts 29 members across the gold mining industry.",
+        "source": "Decrypt",
+        "sentiment": "positive",
+        "relevance": 1
       }
+    ],
+    "discussions": [
+      {
+        "title": "94k Bitcoin (1B USD) transferred from unknown wallet to unknown wallet",
+        "score": 1430,
+        "comments": 680,
+        "url": "https://news.ycombinator.com/item?id=20919958",
+        "source": "Hacker News"
+      },
+      {
+        "title": "A from-scratch tour of Bitcoin in Python",
+        "score": 1208,
+        "comments": 277,
+        "url": "https://news.ycombinator.com/item?id=27593772",
+        "source": "Hacker News"
+      },
+      {
+        "title": "The Face Behind Bitcoin?",
+        "score": 1165,
+        "comments": 678,
+        "url": "https://news.ycombinator.com/item?id=7353283",
+        "source": "Hacker News"
+      },
+      {
+        "title": "OpenAI's GPT-3 may be the biggest thing since Bitcoin",
+        "score": 1079,
+        "comments": 526,
+        "url": "https://news.ycombinator.com/item?id=23885684",
+        "source": "Hacker News"
+      },
+      {
+        "title": "How we recovered $300k of Bitcoin",
+        "score": 998,
+        "comments": 198,
+        "url": "https://news.ycombinator.com/item?id=22774057",
+        "source": "Hacker News"
+      },
+      {
+        "title": "Ending Bitcoin Support",
+        "score": 989,
+        "comments": 625,
+        "url": "https://news.ycombinator.com/item?id=16216329",
+        "source": "Hacker News"
+      },
+      {
+        "title": "Cambridge Bitcoin Electricity Consumption Index",
+        "score": 982,
+        "comments": 1812,
+        "url": "https://news.ycombinator.com/item?id=26088455",
+        "source": "Hacker News"
+      },
+      {
+        "title": "Bitcoin Gold Hit by Double Spend Attack, Exchanges Lose Millions",
+        "score": 973,
+        "comments": 531,
+        "url": "https://news.ycombinator.com/item?id=17138356",
+        "source": "Hacker News"
+      }
+    ],
+    "bip_updates": [
+      {
+        "message": "Add BIP446: OP_TEMPLATEHASH, BIP448: Taproot-native (Re)bindable Transactions (#1974)\n\nCo-authored-by: Antoine Poinsot <",
+        "date": "2026-03-17",
+        "sha": "2778442"
+      },
+      {
+        "message": "BIP-128: exact specification for the checksum calculation (#2121)",
+        "date": "2026-03-16",
+        "sha": "351ceef"
+      },
+      {
+        "message": "Merge pull request #2087 from theStack/bip352-vendor-secp256k1lab\n\nBIP-352: vendor secp256k1lab and use it for reference",
+        "date": "2026-03-06",
+        "sha": "b382728"
+      },
+      {
+        "message": "BIP-352: mention secp256k1lab in BIP text\n\nalso fix a small grammar nit (s/are provided/is provided/)",
+        "date": "2026-01-16",
+        "sha": "249bdef"
+      },
+      {
+        "message": "BIP32: edits by ddustin for clarity (picks up PR785) (#1903)\n\nCo-authored-by: Dusty Daemon <dustinpaystaxes@gmail.com>\nC",
+        "date": "2026-03-05",
+        "sha": "c0644a0"
+      }
+    ]
+  },
+  "education": {
+    "learning_paths": {
+      "beginner": [
+        {
+          "title": "What is Bitcoin?",
+          "lesson": "Bitcoin is digital money that no government, bank, or corporation controls. It runs on a decentralized network of thousands of computers worldwide. Anyone can use it, anywhere, without permission.",
+          "key_concepts": [
+            "decentralization",
+            "peer-to-peer",
+            "digital scarcity",
+            "permissionless"
+          ]
+        },
+        {
+          "title": "Why Does Bitcoin Matter?",
+          "lesson": "Bitcoin solves the double-spend problem without requiring trust in a third party \u2014 for the first time in human history. It's censorship-resistant money that can't be inflated away or easily confiscated.",
+          "key_concepts": [
+            "trustlessness",
+            "censorship resistance",
+            "sound money",
+            "store of value"
+          ]
+        },
+        {
+          "title": "How to Get Your First Bitcoin",
+          "lesson": "You can buy Bitcoin on exchanges like Coinbase, Kraken, or Strike. The most important next step: move it to your own wallet. 'Not your keys, not your coins' is the golden rule.",
+          "key_concepts": [
+            "exchanges",
+            "wallets",
+            "self-custody",
+            "seed phrase"
+          ]
+        },
+        {
+          "title": "Storing Bitcoin Safely",
+          "lesson": "A hardware wallet (Ledger, Coldcard, Trezor) keeps your private keys offline. Write your 12-24 word seed phrase on paper or metal \u2014 never store it digitally. Back it up in 2+ secure locations.",
+          "key_concepts": [
+            "hardware wallet",
+            "cold storage",
+            "seed phrase",
+            "backup",
+            "security"
+          ]
+        },
+        {
+          "title": "Bitcoin vs. Fiat Money",
+          "lesson": "Fiat currency loses purchasing power through inflation \u2014 the dollar has lost 98% of its value since 1913. Bitcoin has a fixed supply of 21 million. It cannot be inflated. It is the hardest money ever created.",
+          "key_concepts": [
+            "inflation",
+            "fixed supply",
+            "hard money",
+            "purchasing power"
+          ]
+        },
+        {
+          "title": "Understanding Satoshis",
+          "lesson": "1 Bitcoin = 100,000,000 satoshis (sats). You don't need to buy a whole Bitcoin. Most people start by stacking sats. Think in sats \u2014 it reframes your entire perspective.",
+          "key_concepts": [
+            "satoshis",
+            "sats",
+            "divisibility",
+            "stacking"
+          ]
+        }
+      ],
+      "intermediate": [
+        {
+          "title": "The Blockchain Explained",
+          "lesson": "Every Bitcoin transaction is recorded on a public ledger. Blocks are chained together cryptographically using SHA-256 hashes \u2014 once written, history is practically immutable forever.",
+          "key_concepts": [
+            "blockchain",
+            "SHA-256",
+            "merkle tree",
+            "immutability",
+            "hash"
+          ]
+        },
+        {
+          "title": "Mining & Proof of Work",
+          "lesson": "Miners compete to solve a cryptographic puzzle. The winner adds the next block and earns freshly minted BTC plus transaction fees. This secures the network and issues new supply.",
+          "key_concepts": [
+            "mining",
+            "proof of work",
+            "difficulty",
+            "hash rate",
+            "block reward"
+          ]
+        },
+        {
+          "title": "The Halving Cycle",
+          "lesson": "Every 210,000 blocks (~4 years), the block reward halves. This creates programmatic supply shocks. Combined with growing demand, halvings have historically preceded major price appreciation.",
+          "key_concepts": [
+            "halving",
+            "supply shock",
+            "block reward",
+            "cycles",
+            "scarcity"
+          ]
+        },
+        {
+          "title": "Lightning Network",
+          "lesson": "Lightning enables instant, near-free Bitcoin payments by opening off-chain payment channels. Two parties can transact millions of times without touching the main chain. It scales Bitcoin to billions.",
+          "key_concepts": [
+            "lightning",
+            "payment channels",
+            "routing",
+            "liquidity",
+            "HTLC"
+          ]
+        },
+        {
+          "title": "Bitcoin Wallets Deep Dive",
+          "lesson": "HD wallets derive unlimited addresses from one seed phrase using BIP32/BIP39. Your seed phrase IS your Bitcoin \u2014 it restores all funds on any compatible wallet, forever.",
+          "key_concepts": [
+            "HD wallet",
+            "BIP32",
+            "BIP39",
+            "derivation path",
+            "xpub",
+            "seed phrase"
+          ]
+        },
+        {
+          "title": "Transaction Fees & Mempool",
+          "lesson": "Miners prioritize transactions by fee rate (sat/vByte). The mempool is the waiting room for unconfirmed transactions. During congestion fees spike \u2014 during quiet times you can transact for 1-2 sats/vByte.",
+          "key_concepts": [
+            "mempool",
+            "fee rate",
+            "sat/vbyte",
+            "RBF",
+            "CPFP",
+            "congestion"
+          ]
+        }
+      ],
+      "advanced": [
+        {
+          "title": "UTXO Model",
+          "lesson": "Bitcoin doesn't use account balances \u2014 it uses Unspent Transaction Outputs (UTXOs). Understanding UTXO selection is key to optimizing fees, privacy, and wallet management.",
+          "key_concepts": [
+            "UTXO",
+            "coin selection",
+            "change outputs",
+            "consolidation",
+            "fee optimization"
+          ]
+        },
+        {
+          "title": "Taproot & Schnorr Signatures",
+          "lesson": "Taproot (BIP340-342, activated Nov 2021) enables key aggregation, more private multisig, and efficient complex scripts. Schnorr signatures are smaller and allow signature aggregation.",
+          "key_concepts": [
+            "taproot",
+            "schnorr",
+            "MAST",
+            "scriptpath",
+            "keypath",
+            "BIP340"
+          ]
+        },
+        {
+          "title": "Bitcoin Script",
+          "lesson": "Bitcoin's stack-based scripting language enables complex spending conditions: multisig, timelocks (CSV/CLTV), HTLCs for Lightning. Intentionally not Turing-complete for security.",
+          "key_concepts": [
+            "script",
+            "multisig",
+            "timelock",
+            "CLTV",
+            "CSV",
+            "HTLC",
+            "opcodes"
+          ]
+        },
+        {
+          "title": "Running a Full Node",
+          "lesson": "A full node downloads and independently verifies every block since genesis. You trust nobody \u2014 you verify everything. It protects you and strengthens the network. Start with Umbrel on a Raspberry Pi.",
+          "key_concepts": [
+            "full node",
+            "verification",
+            "SPV",
+            "pruning",
+            "IBD",
+            "Bitcoin Core"
+          ]
+        },
+        {
+          "title": "On-Chain Analytics",
+          "lesson": "Reading the blockchain reveals market psychology: HODL waves show conviction, SOPR measures profit-taking, exchange flows track institutional moves, NVT compares value to usage.",
+          "key_concepts": [
+            "SOPR",
+            "HODL waves",
+            "realized cap",
+            "NVT",
+            "MVRV",
+            "exchange flows"
+          ]
+        },
+        {
+          "title": "Privacy in Bitcoin",
+          "lesson": "Bitcoin is pseudonymous, not anonymous. CoinJoin, PayJoin, and Lightning improve privacy. Avoid address reuse. Use Tor. Understand chain analysis to protect yourself.",
+          "key_concepts": [
+            "coinjoin",
+            "payjoin",
+            "address reuse",
+            "chain analysis",
+            "privacy",
+            "tor"
+          ]
+        }
+      ]
+    },
+    "all_facts": [
+      "Bitcoin's genesis block contains: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks.' \u2014 Satoshi's message to the world.",
+      "Only 21 million Bitcoin will ever exist. ~3-4 million are estimated lost forever, making scarcity even more extreme.",
+      "Satoshi Nakamoto's identity remains unknown. Their ~1.1M BTC wallet has never moved \u2014 the greatest HODLer of all time.",
+      "The Lightning Network enables Bitcoin payments in milliseconds with fees of fractions of a cent.",
+      "Bitcoin mining uses over 50% renewable energy \u2014 more than almost any other industry globally.",
+      "The first real-world Bitcoin purchase: 10,000 BTC for two pizzas on May 22, 2010. Bitcoin Pizza Day is celebrated every year.",
+      "Bitcoin's SHA-256 cryptography would take longer than the age of the universe to brute-force with classical computers.",
+      "Every ~4 years, the block reward halves. This programmatic supply shock has historically preceded massive bull markets.",
+      "Bitcoin has 99.99% uptime since January 3, 2009 \u2014 more reliable than any bank in human history.",
+      "El Salvador was the first country to adopt Bitcoin as legal tender in September 2021.",
+      "The UTXO model makes Bitcoin transactions verifiable, auditable, and more privacy-preserving than account-based systems.",
+      "Bitcoin's difficulty adjusts every 2016 blocks (~2 weeks) to maintain 10-minute block times \u2014 automatically.",
+      "There are more possible Bitcoin private keys than atoms in the observable universe. Your wallet is mathematically unbreakable.",
+      "A Bitcoin transaction is irreversible by design \u2014 no chargebacks, no reversals, no third party needed.",
+      "Bitcoin Script is intentionally not Turing-complete, making it more secure than smart contract platforms.",
+      "The total value of all gold ever mined is ~$13 trillion. Bitcoin's market cap has exceeded $1 trillion multiple times.",
+      "Running a Bitcoin full node costs ~$300 in hardware and gives you complete financial sovereignty.",
+      "Taproot (activated Nov 2021) makes Bitcoin transactions more private, efficient, and powerful.",
+      "Over 400 million people globally are estimated to own some Bitcoin as of 2024.",
+      "Bitcoin's whitepaper is only 9 pages. Satoshi solved a decades-old computer science problem with elegant simplicity."
     ]
   },
   "evolution_log": [
     {
-      "cycle": 1,
+      "generation": 1,
+      "timestamp": "2026-03-19T20:08:25.220066+00:00",
       "date": "2026-03-19",
-      "timestamp": "2026-03-19T15:14:12.432432+00:00",
-      "price_usd": 69678,
-      "change_24h": -1.99,
-      "fear_greed_value": 23,
-      "fear_greed_label": "Extreme Fear",
-      "block_height": 941313,
-      "topics": [
-        "Institutional Adoption",
-        "Central Banks"
-      ],
-      "headline_count": 4,
-      "thought_preview": "On March 19, 2026, Bitcoin dipped to $69,678. Extreme fear dominates — the capitulation phase tests the faithful. Today, the world is discus..."
+      "cycle_utc": "20:00",
+      "price_usd": 70253,
+      "fg_value": 23,
+      "headlines_absorbed": 12,
+      "insights_generated": 5,
+      "prediction_outlook": "cautiously bullish",
+      "hash_rate_ehs": 987.78
     }
   ],
-  "todays_thought": "On March 19, 2026, Bitcoin dipped to $69,678. Extreme fear dominates — the capitulation phase tests the faithful. Today, the world is discussing: \"5 Ways the Fed’s Basel III Pivot Unlocks Institutional Bitcoin Custody\". We are 108,687 blocks from the next halving — the mathematical scarcity event that reshapes Bitcoin's economy. Block 941,313 was sealed in the chain today. Every block is irreversible proof that this network has never stopped — not for banks, not for governments, not for anything.",
-  "todays_headlines": [
+  "price_history": [
     {
-      "title": "5 Ways the Fed’s Basel III Pivot Unlocks Institutional Bitcoin Custody",
-      "link": "https://bitcoinmagazine.com/bitcoin-for-corporations/5-ways-fed-basel-pivot-unlocks-institutional-bitcoin",
-      "published": "Thu, 19 Mar 2026 14:17:29 +0000",
-      "summary": "Bitcoin Magazine\n\n5 Ways the Fed’s Basel III Pivot Unlocks Institutional Bitcoin Custody\nFed proposal cuts bank capital by 4.8% and fixes custody risk rules, clearing a major regulatory hurdle for ins",
-      "source": "Bitcoin Magazine"
-    },
-    {
-      "title": "Strive (ASST) Accumulates 13,600 Bitcoin Despite $393 Million Loss in First Six Months as Public Company",
-      "link": "https://bitcoinmagazine.com/news/strive-asst-accumulates-13600-bitcoin",
-      "published": "Thu, 19 Mar 2026 14:16:47 +0000",
-      "summary": "Bitcoin Magazine\n\nStrive (ASST) Accumulates 13,600 Bitcoin Despite $393 Million Loss in First Six Months as Public Company\nStrive, Inc. reported that it held 13,628 Bitcoin as of March 17, 2026, placi",
-      "source": "Bitcoin Magazine"
-    },
-    {
-      "title": "BTQ Deploys First Working BIP 360 Implementation on Bitcoin Quantum Testnet",
-      "link": "https://bitcoinmagazine.com/news/btq-deploys-first-bip-360-quantum",
-      "published": "Thu, 19 Mar 2026 13:14:26 +0000",
-      "summary": "Bitcoin Magazine\n\nBTQ Deploys First Working BIP 360 Implementation on Bitcoin Quantum Testnet\nBTQ Technologies has launched the first working BIP 360 implementation on its Bitcoin Quantum testnet, ena",
-      "source": "Bitcoin Magazine"
-    },
-    {
-      "title": "Bitcoin Price Slides Below $70,000 as Oil Spikes, Fed Hold Tightens Financial Conditions",
-      "link": "https://bitcoinmagazine.com/markets/bitcoin-price-slides-70000-oil-spikes",
-      "published": "Thu, 19 Mar 2026 12:38:59 +0000",
-      "summary": "Bitcoin Magazine\n\nBitcoin Price Slides Below $70,000 as Oil Spikes, Fed Hold Tightens Financial Conditions\nBitcoin price fell below $70,000 on Thursday as rising energy costs and a steady Federal Rese",
-      "source": "Bitcoin Magazine"
+      "ts": "2026-03-19 20:00",
+      "p": 70253,
+      "c": -0.58,
+      "fg": 23
     }
-  ],
-  "todays_reddit": [],
-  "todays_insights": [
-    "Bitcoin is 44.7% below its ATH of $126,080 — currently in drawdown.",
-    "95.25% of all Bitcoin that will ever exist has been mined (20,003,043 BTC out of 21,000,000).",
-    "Market sentiment: Extreme Fear (23/100). Historically, extremes signal reversals.",
-    "Hash rate stands at 1052.7 EH/s — measuring the total computational security of the network.",
-    "Next halving: 108,687 blocks away (~755 days). Block reward will drop from 3.125 to 1.5625 BTC.",
-    "Mempool is quiet: fees as low as 1 sat/vByte."
-  ],
-  "todays_tips": [
-    "Extreme Fear: This could be a buying opportunity, but only if it aligns with your long-term strategy.",
-    "Lower fees mean this is a good time to batch on-chain transactions or use Lightning for smaller payments.",
-    "Always do your own research. Bitcoin is about financial sovereignty — learn, stack sats, and HODL."
-  ],
-  "todays_fact": "Bitcoin halvings occur roughly every 4 years and cut the new supply issuance in half, reinforcing scarcity.",
-  "todays_prediction": "Short-term momentum is neutral, but low Fear & Greed suggests this bear market could still have room. (Not financial advice.)"
+  ]
 }
