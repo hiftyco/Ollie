@@ -6,7 +6,7 @@
 ## How It Works
 
 ```
-Every 24 hours at 00:30 UTC:
+Every 24 hours at 00:30 UTC (with a midday refresh at 12:30 UTC):
   GitHub Actions triggers → learn.py runs → fetches from 8 free sources →
   synthesizes insights → commits data/knowledge.json → GitHub Pages serves it
 ```

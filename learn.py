@@ -328,19 +328,47 @@ def get_reddit():
 # ── INSIGHT ENGINE ────────────────────────────────────────────────────────────
 
 def compute_halving(block_height):
-    """Compute blocks until next halving and estimated date."""
-    next_halving = NEXT_HALVING_BLOCK
+    """Compute blocks until the next halving and estimate the date.
+
+    This is a lightweight approximation and does not rely on hard-coded future halving blocks.
+    """
+    if block_height is None:
+        block_height = 0
+    if block_height < 0:
+        block_height = 0
+
+    halving_interval = 210000
+    epoch = block_height // halving_interval
+    next_halving = (epoch + 1) * halving_interval
     blocks_left = max(0, next_halving - block_height)
+
     # ~10 min per block
     days_left = blocks_left * 10 / 1440
     halving_date = (datetime.now(timezone.utc) + timedelta(days=days_left)).strftime("%Y-%m-%d")
-    pct_mined = round((block_height / 21000000 * 100) * 100 / 100, 4)
-    btc_mined = round(block_height * HALVING_BLOCK_REWARD_NOW * 0.0001, 0)  # rough
+
+    def estimate_mined(height):
+        reward = 50.0
+        remaining = height
+        total = 0.0
+        while remaining > 0 and reward > 1e-8:
+            epoch_blocks = min(remaining, halving_interval)
+            total += epoch_blocks * reward
+            remaining -= epoch_blocks
+            reward /= 2
+        return total
+
+    btc_mined = round(estimate_mined(block_height), 2)
+    pct_mined = round(btc_mined / 21000000 * 100, 4) if btc_mined else 0
+
     return {
         "next_halving_block": next_halving,
         "blocks_until_halving": blocks_left,
         "estimated_halving_date": halving_date if blocks_left > 0 else "Completed",
         "days_until_halving": round(days_left, 0),
+        "btc_mined": btc_mined,
+        "pct_mined": pct_mined,
+        "halving_interval": halving_interval,
+        "current_epoch": epoch,
     }
 
 def extract_topics(headlines, reddit_posts):
@@ -530,47 +558,8 @@ def generate_tips(price_data, fg, blockchain, mempool, halving_info, topics):
 
     tips.append("Always do your own research. Bitcoin is about financial sovereignty - learn, stack sats, and HODL.")
 
-def generate_tips(price_data, fg, blockchain, mempool, halving_info, topics):
-    """Generate helpful tips for Bitcoiners based on current data."""
-    tips = []
+    return tips
 
-    if fg:
-        val = fg['value']
-        if val >= 75:
-            tips.append("Extreme Greed: Markets are euphoric. Consider taking profits or setting stop-losses.")
-        elif val <= 25:
-            tips.append("Extreme Fear: This could be a buying opportunity. Remember, fear is your friend in crypto.")
-        elif val >= 55:
-            tips.append("Greed is creeping in. Stay disciplined and don't FOMO into bad positions.")
-        elif val <= 45:
-            tips.append("Fear levels rising. Focus on long-term fundamentals over short-term noise.")
-
-    if price_data:
-        change = price_data.get("change_24h_pct", 0)
-        if change > 10:
-            tips.append("Big green day! Congrats to those who held. But remember, volatility is Bitcoin's nature.")
-        elif change < -10:
-            tips.append("Red day ahead. If you're long-term, this is just noise. Dollar-cost average if you believe.")
-
-    if halving_info:
-        days = halving_info.get("days_until_halving", 0)
-        if days < 100:
-            tips.append(f"Halving approaching in ~{int(days)} days. Historically, halvings lead to bull runs. Prepare your stack.")
-
-    if mempool:
-        high = mempool.get("high_fee", 0)
-        if high > 50:
-            tips.append("High fees! If sending, consider batching transactions or using Lightning Network.")
-
-    if "Halving" in topics:
-        tips.append("Halving discussion heating up. Remember, halvings reduce new supply by 50%, historically bullish.")
-
-    if "ETF" in topics:
-        tips.append("ETF news circulating. Spot ETFs could bring institutional money, but don't forget self-custody.")
-
-    tips.append("Always do your own research. Bitcoin is about financial sovereignty - learn, stack sats, and HODL.")
-
-    return tips[:5]
 
 def generate_daily_fact():
     """Return a random educational fact about Bitcoin."""
@@ -589,6 +578,62 @@ def generate_daily_fact():
     import random
     random.seed(datetime.now().strftime("%Y-%m-%d"))  # daily fact
     return random.choice(facts)
+
+
+def generate_prediction(price_data, fg, kb):
+    """Generate a short, heuristic prediction based on momentum and sentiment."""
+    if not price_data:
+        return "Insufficient data to form a prediction."
+
+    price = price_data.get("price_usd", 0)
+    history = kb.get("price_history", []) if kb else []
+
+    # short-term momentum vs 7-day average
+    momentum = None
+    if len(history) >= 7:
+        last7 = [h.get("price", 0) for h in history[-7:]]
+        if all(last7):
+            avg7 = sum(last7) / len(last7)
+            momentum = (price - avg7) / avg7 * 100
+
+    # RSI-based signal
+    rsi = None
+    if len(history) >= 30:
+        prices = [h.get("price", 0) for h in history[-30:]]
+        rsi = calculate_rsi(prices)
+
+    sentiment = fg.get("value", 50) if fg else 50
+
+    parts = []
+    if momentum is not None:
+        if momentum > 3:
+            parts.append("Price is above the 7-day average, suggesting short-term bullish momentum.")
+        elif momentum < -3:
+            parts.append("Price is below the 7-day average, indicating short-term pressure.")
+        else:
+            parts.append("Price is trading near the 7-day average, signaling consolidation.")
+
+    if rsi is not None:
+        if rsi > 70:
+            parts.append(f"RSI at {rsi} suggests overbought conditions; a pullback could happen.")
+        elif rsi < 30:
+            parts.append(f"RSI at {rsi} suggests oversold conditions; a bounce may be due.")
+        else:
+            parts.append(f"RSI of {rsi} indicates neutral momentum.")
+
+    if sentiment is not None:
+        if sentiment >= 70:
+            parts.append("Fear & Greed is high, which often precedes consolidation or pullbacks.")
+        elif sentiment <= 30:
+            parts.append("Fear & Greed is low, which can present buying opportunities for the patient.")
+        else:
+            parts.append("Market sentiment is moderate.")
+
+    if not parts:
+        return "Prediction requires more data; check back after Ollie has more history."
+
+    return " ".join(parts) + " (Not financial advice.)"
+
 
 def calculate_rsi(prices, period=14):
     """Calculate RSI for price series."""

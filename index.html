@@ -839,8 +839,8 @@ function render(d){
   const bh=cur.block_height||0, target=cur.next_halving_block||1050000;
   const left=cur.blocks_until_halving||Math.max(0,target-bh);
   const days=cur.days_until_halving||Math.round(left*10/1440);
-  const prevHalving=840000;
-  const progress=bh>prevHalving?Math.min(100,((bh-prevHalving)/(target-prevHalving)*100)):0;
+  const prevHalving = Math.floor(bh/210000)*210000;
+  const progress = target>prevHalving ? Math.min(100, ((bh-prevHalving)/(target-prevHalving)*100)) : 0;
   document.getElementById('hv-title').textContent=left>0?`${(left).toLocaleString()} blocks until next halving`:'Next halving complete!';
   document.getElementById('hv-blocks').textContent=(left).toLocaleString();
   document.getElementById('hv-date').textContent=cur.estimated_halving_date||'—';
