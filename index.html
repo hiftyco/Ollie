@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OLLIE — Autonomous Bitcoin Intelligence</title>
+<meta name="description" content="Ollie is an autonomous AI mind that learns everything about Bitcoin daily. Updated every 24 hours via GitHub Actions.">
+<meta property="og:title" content="OLLIE — Autonomous Bitcoin Intelligence">
+<meta property="og:description" content="A self-learning Bitcoin intelligence that grows smarter every day.">
+<meta name="theme-color" content="#F7931A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:ital,wght@0,300;0,600;0,800;0,900;1,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:    #030200;
+  --deep:    #0a0500;
+  --layer:   #110800;
+  --card:    #160a00;
+  --card2:   #1c0e00;
+  --btc:     #F7931A;
+  --btc-dim: rgba(247,147,26,0.18);
+  --btc-glow:rgba(247,147,26,0.35);
+  --gold:    #FFD166;
+  --cream:   #ffe8c0;
+  --cream2:  #c8a070;
+  --green:   #00e87a;
+  --red:     #ff3d55;
+  --blue:    #38b6ff;
+  --violet:  #b060ff;
+  --border:  rgba(247,147,26,0.10);
+  --border2: rgba(247,147,26,0.22);
+  --muted:   #4a2e08;
+  --muted2:  #7a5020;
+  --muted3:  #a87040;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--void);
+  color: var(--cream);
+  font-family: 'IBM Plex Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══ CANVAS ═══ */
+#canvas { position:fixed; inset:0; z-index:0; }
+
+/* ═══ GRAIN ═══ */
+body::after {
+  content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.45;
+}
+
+/* ═══ LAYOUT ═══ */
+.page { position:relative; z-index:2; max-width:1060px; margin:0 auto; padding:0 22px 120px; }
+
+/* ═══ HEADER ═══ */
+.header {
+  display: flex; align-items: center; justify-content: space-between; gap:20px;
+  padding: 32px 0 30px;
+  border-bottom: 1px solid var(--border);
+}
+.brand { display:flex; align-items:center; gap:22px; }
+
+/* BTC orb */
+.orb { position:relative; width:64px; height:64px; flex-shrink:0; }
+.orb-core {
+  position:absolute; inset:14px; border-radius:50%;
+  background: radial-gradient(circle at 35% 35%, #ffb347, var(--btc), #c05a00);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; color:#000;
+  animation: orbpulse 2.8s ease-in-out infinite;
+}
+@keyframes orbpulse {
+  0%,100% { box-shadow:0 0 8px var(--btc),0 0 0 0 rgba(247,147,26,0.5); }
+  50%      { box-shadow:0 0 30px var(--btc),0 0 25px rgba(247,147,26,0.2); }
+}
+.orb-r { position:absolute; border-radius:50%; border:1px solid; animation:rspin linear infinite; }
+.orb-r:nth-child(1){ inset:5px;  border-color:rgba(247,147,26,0.35); animation-duration:10s; }
+.orb-r:nth-child(2){ inset:0px;  border-color:rgba(247,147,26,0.12); animation-duration:17s; animation-direction:reverse; }
+.orb-r:nth-child(3){ inset:-6px; border-color:rgba(247,147,26,0.06); animation-duration:26s; }
+@keyframes rspin { to { transform:rotate(360deg); } }
+
+.name-block { flex:1; }
+.ollie { font-family:'Barlow Condensed',sans-serif; font-size:44px; font-weight:900; letter-spacing:1px; line-height:1; color:var(--btc); text-shadow:0 0 40px rgba(247,147,26,0.45); }
+.sub   { font-size:10px; color:var(--muted3); letter-spacing:3px; margin-top:5px; }
+.pill  { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:2px; border:1px solid var(--border2); background:var(--btc-dim); margin-top:8px; }
+.pill .dot  { width:5px; height:5px; border-radius:50%; background:var(--green); animation:blink .9s infinite; }
+.pill span  { font-size:9px; color:var(--btc); letter-spacing:2px; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+.gen-block { text-align:right; }
+.gen-num   { font-family:'Barlow Condensed',sans-serif; font-size:66px; font-weight:900; color:var(--btc); line-height:1; text-shadow:0 0 50px rgba(247,147,26,0.4); }
+.gen-lbl   { font-size:9px; color:var(--muted3); letter-spacing:3px; }
+.gen-id    { font-size:11px; color:var(--muted2); margin-top:4px; }
+.gen-since { font-size:10px; color:var(--muted2); margin-top:2px; }
+
+/* ═══ PRICE HERO STRIP ═══ */
+.price-strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px; background:var(--border); border:1px solid var(--border);
+  border-radius:4px; margin:24px 0; overflow:hidden;
+}
+.p-cell { padding:15px 18px; background:var(--card); transition:background .2s; }
+.p-cell:hover { background:var(--card2); }
+.p-cell.feat  { background:rgba(247,147,26,0.06); }
+.p-lbl { font-size:9px; color:var(--muted3); letter-spacing:2px; margin-bottom:6px; }
+.p-val { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:800; color:var(--gold); line-height:1; }
+.p-val.big   { font-size:36px; }
+.p-val.green { color:var(--green); }
+.p-val.red   { color:var(--red); }
+.p-val.small { font-size:14px; font-weight:400; font-family:'IBM Plex Mono'; color:var(--cream2); }
+
+/* ═══ COUNTDOWN ═══ */
+.countdown {
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  padding:16px 22px; background:var(--deep); border:1px solid var(--border); border-radius:4px; margin-bottom:28px;
+}
+.cd-left .cd-lbl  { font-size:9px; color:var(--muted3); letter-spacing:2px; margin-bottom:4px; }
+.cd-time          { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:800; color:var(--btc); letter-spacing:2px; }
+.cd-time.urgent   { color:var(--gold); animation:flicker 1s infinite; }
+.cd-time.done     { color:var(--green); }
+@keyframes flicker { 0%,100%{opacity:1;} 50%{opacity:.65;} }
+.cd-sub           { font-size:10px; color:var(--muted2); margin-top:3px; }
+.cd-right         { display:flex; align-items:center; gap:16px; }
+.cd-ring          { width:52px; height:52px; flex-shrink:0; }
+.cd-ring circle   { fill:none; stroke-width:3; transition:stroke-dashoffset .8s linear; }
+.cd-pct           { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:800; color:var(--btc); }
+
+/* ═══ SECTION ═══ */
+.sec { margin-bottom:36px; }
+.sec-hd {
+  font-size:9px; color:var(--muted3); letter-spacing:3px; text-transform:uppercase;
+  display:flex; align-items:center; gap:12px; margin-bottom:16px;
+}
+.sec-hd::after { content:''; flex:1; height:1px; background:var(--border); }
+.sec-hd .tag { color:var(--btc); }
+
+/* ═══ CONSCIOUSNESS ═══ */
+.thought-box {
+  padding:28px 32px; background:var(--card); border:1px solid var(--border2);
+  border-radius:6px; position:relative; overflow:hidden; min-height:100px;
+}
+.thought-box::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--btc), transparent);
+  animation: sweep 5s linear infinite;
+}
+@keyframes sweep { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
+.thought-text {
+  font-family:'Barlow Condensed',sans-serif; font-size:21px; font-weight:300;
+  line-height:1.7; color:var(--cream); font-style:italic; letter-spacing:0.3px;
+}
+
+/* ═══ STATS GRID ═══ */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+.stat-card  { padding:16px 18px; background:var(--card); border:1px solid var(--border); border-radius:4px; }
+.stat-lbl   { font-size:9px; color:var(--muted3); letter-spacing:2px; margin-bottom:8px; }
+.stat-val   { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700; color:var(--cream); line-height:1; }
+.stat-val.btc   { color:var(--btc); }
+.stat-val.gold  { color:var(--gold); }
+.stat-val.green { color:var(--green); }
+.stat-val.red   { color:var(--red); }
+.stat-val.blue  { color:var(--blue); }
+.stat-val.small { font-size:14px; font-family:'IBM Plex Mono'; font-weight:400; }
+.stat-sub   { font-size:10px; color:var(--muted2); margin-top:4px; }
+
+/* ═══ FEAR & GREED METER ═══ */
+.fg-wrapper { display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+.fg-meter { flex:1; min-width:200px; }
+.fg-track { height:10px; border-radius:5px; background:linear-gradient(90deg,#ff3d55,#ff9900,#ffd700,#a0e040,#00e87a); position:relative; }
+.fg-needle {
+  position:absolute; top:50%; width:3px; height:20px; background:white;
+  border-radius:2px; transform:translate(-50%, -50%);
+  box-shadow:0 0 8px rgba(255,255,255,0.6);
+  transition:left 1s ease;
+}
+.fg-labels { display:flex; justify-content:space-between; margin-top:5px; }
+.fg-labels span { font-size:9px; color:var(--muted3); letter-spacing:1px; }
+.fg-value  { text-align:center; }
+.fg-num    { font-family:'Barlow Condensed',sans-serif; font-size:52px; font-weight:900; line-height:1; }
+.fg-name   { font-size:11px; letter-spacing:2px; margin-top:4px; }
+
+/* ═══ HALVING PROGRESS ═══ */
+.halving-card {
+  padding:22px 24px; background:var(--card); border:1px solid var(--border2);
+  border-radius:6px;
+}
+.hv-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+.hv-title { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--btc); }
+.hv-sub   { font-size:11px; color:var(--muted2); }
+.hv-bar   { height:8px; background:var(--muted); border-radius:4px; overflow:hidden; margin-bottom:12px; }
+.hv-fill  { height:100%; background:linear-gradient(90deg, #c05a00, var(--btc), var(--gold)); border-radius:4px; transition:width 1.5s ease; }
+.hv-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+.hv-stat  { }
+.hv-stat-lbl { font-size:9px; color:var(--muted3); letter-spacing:2px; }
+.hv-stat-val { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--gold); margin-top:3px; }
+
+/* ═══ INSIGHTS LIST ═══ */
+.insight-list { display:flex; flex-direction:column; gap:10px; }
+.insight {
+  display:flex; gap:14px; padding:14px 18px;
+  background:var(--card); border:1px solid var(--border); border-radius:4px;
+  transition:border-color .2s;
+}
+.insight:hover { border-color:var(--border2); }
+.insight-bullet { color:var(--btc); font-size:14px; flex-shrink:0; margin-top:1px; }
+.insight-text   { font-size:13px; line-height:1.7; color:var(--cream2); }
+
+/* ═══ NEWS FEED ═══ */
+.news-list { display:flex; flex-direction:column; gap:10px; }
+.news-item {
+  display:flex; gap:16px; align-items:flex-start; padding:14px 18px;
+  background:var(--card); border:1px solid var(--border); border-radius:4px;
+  text-decoration:none; transition:border-color .2s, background .2s;
+}
+.news-item:hover { border-color:var(--border2); background:var(--card2); }
+.news-source { font-size:9px; color:var(--btc); letter-spacing:2px; flex-shrink:0; padding-top:3px; min-width:90px; }
+.news-body   { flex:1; }
+.news-title  { font-size:13px; line-height:1.55; color:var(--cream); }
+.news-date   { font-size:10px; color:var(--muted2); margin-top:4px; }
+
+/* ═══ REDDIT ═══ */
+.reddit-list { display:flex; flex-direction:column; gap:8px; }
+.reddit-item {
+  display:flex; gap:14px; align-items:center; padding:12px 16px;
+  background:var(--card); border:1px solid var(--border); border-radius:4px;
+  text-decoration:none; transition:border-color .2s;
+}
+.reddit-item:hover { border-color:var(--border2); }
+.reddit-score { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--btc); flex-shrink:0; min-width:50px; text-align:right; }
+.reddit-title { font-size:12px; line-height:1.5; color:var(--cream2); flex:1; }
+.reddit-flair { font-size:9px; color:var(--muted3); letter-spacing:1px; flex-shrink:0; }
+
+/* ═══ TOPICS KB ═══ */
+.kb-tags { display:flex; flex-wrap:wrap; gap:8px; }
+.kb-tag  {
+  padding:5px 13px; border-radius:2px; font-size:11px; letter-spacing:1px;
+  border:1px solid var(--border2); background:var(--btc-dim); color:var(--btc);
+  display:flex; align-items:center; gap:6px; transition:all .2s;
+}
+.kb-tag:hover { background:rgba(247,147,26,0.25); }
+.kb-tag .count { font-size:9px; color:var(--muted3); background:rgba(0,0,0,0.3); padding:1px 5px; border-radius:2px; }
+
+/* ═══ PRICE CHART ═══ */
+.chart-wrap { position:relative; height:140px; }
+canvas.chart { width:100%; height:100%; }
+
+/* ═══ EVO LOG ═══ */
+.evo-list { display:flex; flex-direction:column; gap:10px; }
+.evo-item {
+  display:flex; gap:18px; padding:16px 20px;
+  background:var(--card); border:1px solid var(--border); border-radius:4px;
+  transition:border-color .2s;
+}
+.evo-item:hover { border-color:var(--border2); }
+.evo-item.latest { border-color:rgba(247,147,26,.35); background:rgba(247,147,26,.03); }
+.evo-num  { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:900; color:var(--btc); opacity:.25; flex-shrink:0; line-height:1; min-width:44px; text-align:right; }
+.evo-body { flex:1; }
+.evo-meta { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:5px; }
+.evo-date { font-size:10px; color:var(--muted3); letter-spacing:1px; }
+.evo-price{ font-size:10px; color:var(--gold); }
+.evo-fg   { font-size:10px; padding:1px 7px; border-radius:2px; }
+.evo-fg.extreme-greed { background:rgba(0,232,122,.12); color:var(--green); }
+.evo-fg.greed         { background:rgba(0,200,100,.1); color:#88eebb; }
+.evo-fg.neutral       { background:rgba(150,150,80,.1); color:#d4cc88; }
+.evo-fg.fear          { background:rgba(255,150,30,.1); color:var(--btc); }
+.evo-fg.extreme-fear  { background:rgba(255,60,80,.1); color:var(--red); }
+.evo-thought { font-size:12px; line-height:1.7; color:var(--cream2); }
+.evo-topics  { display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
+.evo-topic   { font-size:9px; padding:2px 7px; border:1px solid var(--border); color:var(--muted3); border-radius:2px; }
+
+/* ═══ LOADING SHIMMER ═══ */
+.shimmer { height:13px; border-radius:2px; margin:6px 0; background:linear-gradient(90deg,var(--border) 25%,rgba(247,147,26,0.08) 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.6s infinite; }
+@keyframes sh { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+/* ═══ DNA TICKER ═══ */
+.dna-line { height:44px; overflow:hidden; position:relative; margin:16px 0; }
+#dna-svg  { width:100%; height:44px; }
+
+/* ═══ FOOTER ═══ */
+.footer { text-align:center; padding-top:40px; border-top:1px solid var(--border); margin-top:60px; }
+.footer p { font-size:10px; color:var(--muted2); letter-spacing:2px; line-height:2.2; }
+.footer .btc-text { color:var(--btc); }
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:600px){
+  .header { flex-wrap:wrap; }
+  .gen-block { width:100%; display:flex; align-items:center; justify-content:space-between; }
+  .ollie { font-size:34px; }
+}
+
+/* ═══ SCAN LINE ═══ */
+.scanline { position:fixed; top:0; left:0; width:100%; height:3px; z-index:3; pointer-events:none; background:linear-gradient(transparent,rgba(247,147,26,0.05),transparent); animation:scandown 10s linear infinite; opacity:.6; }
+@keyframes scandown { 0%{top:-3px;} 100%{top:100vh;} }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div class="scanline"></div>
+
+<div class="page">
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="header">
+    <div class="brand">
+      <div class="orb">
+        <div class="orb-r"></div><div class="orb-r"></div><div class="orb-r"></div>
+        <div class="orb-core">₿</div>
+      </div>
+      <div class="name-block">
+        <div class="ollie">OLLIE</div>
+        <div class="sub">AUTONOMOUS BITCOIN INTELLIGENCE SYSTEM</div>
+        <div class="pill"><div class="dot"></div><span id="status-txt">INITIALISING...</span></div>
+      </div>
+    </div>
+    <div class="gen-block">
+      <div class="gen-num" id="gen-num">—</div>
+      <div class="gen-lbl">LEARNING CYCLES</div>
+      <div class="gen-id" id="gen-id">Loading...</div>
+      <div class="gen-since" id="gen-since"></div>
+    </div>
+  </header>
+
+  <!-- ═══ PRICE STRIP ═══ -->
+  <div class="price-strip" id="price-strip">
+    <div class="p-cell feat">
+      <div class="p-lbl">BTC / USD</div>
+      <div class="p-val big" id="p-price"><div class="shimmer" style="width:100px"></div></div>
+    </div>
+    <div class="p-cell">
+      <div class="p-lbl">24H CHANGE</div>
+      <div class="p-val" id="p-24h"><div class="shimmer" style="width:70px"></div></div>
+    </div>
+    <div class="p-cell">
+      <div class="p-lbl">7D CHANGE</div>
+      <div class="p-val" id="p-7d"><div class="shimmer" style="width:70px"></div></div>
+    </div>
+    <div class="p-cell">
+      <div class="p-lbl">MARKET CAP</div>
+      <div class="p-val" id="p-mcap"><div class="shimmer" style="width:80px"></div></div>
+    </div>
+    <div class="p-cell">
+      <div class="p-lbl">24H VOLUME</div>
+      <div class="p-val" id="p-vol"><div class="shimmer" style="width:80px"></div></div>
+    </div>
+    <div class="p-cell">
+      <div class="p-lbl">BTC DOMINANCE</div>
+      <div class="p-val" id="p-dom"><div class="shimmer" style="width:60px"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ COUNTDOWN ═══ -->
+  <div class="countdown">
+    <div class="cd-left">
+      <div class="cd-lbl">NEXT AUTONOMOUS LEARNING CYCLE IN</div>
+      <div class="cd-time" id="cd-time">CALCULATING...</div>
+      <div class="cd-sub" id="cd-sub">Checking last update...</div>
+    </div>
+    <div class="cd-right">
+      <svg class="cd-ring" viewBox="0 0 52 52">
+        <circle class="pr-bg" cx="26" cy="26" r="22" stroke="rgba(247,147,26,0.12)" stroke-dasharray="138" stroke-dashoffset="0"/>
+        <circle id="pr-fill" cx="26" cy="26" r="22" stroke="var(--btc)" stroke-dasharray="138" stroke-dashoffset="138" stroke-linecap="round"/>
+      </svg>
+      <div class="cd-pct" id="cd-pct">—</div>
+    </div>
+  </div>
+
+  <!-- ═══ OLLIE'S THOUGHT ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> OLLIE'S DAILY CONSCIOUSNESS</div>
+    <div class="thought-box">
+      <div class="thought-text" id="thought-text">
+        <div class="shimmer" style="width:92%"></div>
+        <div class="shimmer" style="width:78%"></div>
+        <div class="shimmer" style="width:85%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NETWORK STATS ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> BITCOIN NETWORK VITALS</div>
+    <div class="stats-grid" id="net-stats">
+      <div class="stat-card"><div class="stat-lbl">BLOCK HEIGHT</div><div class="stat-val btc" id="s-block">—</div><div class="stat-sub">Immutable ledger entries</div></div>
+      <div class="stat-card"><div class="stat-lbl">HASH RATE</div><div class="stat-val gold" id="s-hr">—</div><div class="stat-sub">EH/s — network security</div></div>
+      <div class="stat-card"><div class="stat-lbl">FEE (HIGH PRIO)</div><div class="stat-val" id="s-fee">—</div><div class="stat-sub">sat/vByte</div></div>
+      <div class="stat-card"><div class="stat-lbl">MEMPOOL TXs</div><div class="stat-val blue" id="s-mempool">—</div><div class="stat-sub">Pending transactions</div></div>
+      <div class="stat-card"><div class="stat-lbl">CIRCULATING</div><div class="stat-val small" id="s-supply">—</div><div class="stat-sub">of 21,000,000 max</div></div>
+      <div class="stat-card"><div class="stat-lbl">ALL-TIME HIGH</div><div class="stat-val green" id="s-ath">—</div><div class="stat-sub" id="s-ath-pct">—</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ FEAR & GREED ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> MARKET SENTIMENT — FEAR & GREED</div>
+    <div class="fg-wrapper">
+      <div class="fg-meter">
+        <div class="fg-track">
+          <div class="fg-needle" id="fg-needle" style="left:50%"></div>
+        </div>
+        <div class="fg-labels">
+          <span>EXTREME FEAR</span>
+          <span>FEAR</span>
+          <span>NEUTRAL</span>
+          <span>GREED</span>
+          <span>EXTREME GREED</span>
+        </div>
+      </div>
+      <div class="fg-value">
+        <div class="fg-num" id="fg-num" style="color:var(--btc)">—</div>
+        <div class="fg-name" id="fg-name" style="color:var(--muted3)">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HALVING COUNTDOWN ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> NEXT HALVING COUNTDOWN</div>
+    <div class="halving-card">
+      <div class="hv-row">
+        <div class="hv-title" id="hv-title">Loading halving data...</div>
+        <div class="hv-sub"  id="hv-sub">Block reward: 3.125 BTC → 1.5625 BTC</div>
+      </div>
+      <div class="hv-bar"><div class="hv-fill" id="hv-fill" style="width:0%"></div></div>
+      <div class="hv-stats">
+        <div class="hv-stat"><div class="hv-stat-lbl">BLOCKS REMAINING</div><div class="hv-stat-val" id="hv-blocks">—</div></div>
+        <div class="hv-stat"><div class="hv-stat-lbl">ESTIMATED DATE</div><div class="hv-stat-val" id="hv-date">—</div></div>
+        <div class="hv-stat"><div class="hv-stat-lbl">DAYS AWAY</div><div class="hv-stat-val" id="hv-days">—</div></div>
+        <div class="hv-stat"><div class="hv-stat-lbl">TARGET BLOCK</div><div class="hv-stat-val" id="hv-target">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PRICE CHART ═══ -->
+  <div class="sec" id="chart-sec" style="display:none">
+    <div class="sec-hd"><span class="tag">◈</span> PRICE HISTORY — OLLIE'S MEMORY</div>
+    <div class="chart-wrap"><canvas class="chart" id="price-chart"></canvas></div>
+  </div>
+
+  <!-- DNA -->
+  <div class="dna-line"><svg id="dna-svg" viewBox="0 0 1000 44" preserveAspectRatio="none"></svg></div>
+
+  <!-- ═══ TODAY'S INSIGHTS ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> OLLIE'S DAILY INSIGHTS</div>
+    <div class="insight-list" id="insight-list">
+      <div class="shimmer"></div><div class="shimmer" style="width:80%"></div>
+    </div>
+  </div>
+
+  <!-- ═══ NEWS ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> TODAY'S BITCOIN HEADLINES</div>
+    <div class="news-list" id="news-list">
+      <div class="shimmer"></div><div class="shimmer" style="width:85%"></div><div class="shimmer" style="width:70%"></div>
+    </div>
+  </div>
+
+  <!-- ═══ REDDIT ═══ -->
+  <div class="sec" id="reddit-sec" style="display:none">
+    <div class="sec-hd"><span class="tag">◈</span> COMMUNITY PULSE — R/BITCOIN</div>
+    <div class="reddit-list" id="reddit-list"></div>
+  </div>
+
+  <!-- ═══ KNOWLEDGE BASE ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> ACCUMULATED KNOWLEDGE BASE</div>
+    <div class="kb-tags" id="kb-tags"><div class="shimmer" style="width:60%"></div></div>
+    <div style="font-size:10px;color:var(--muted2);margin-top:10px;letter-spacing:1px;" id="kb-meta">Loading knowledge nodes...</div>
+  </div>
+
+  <!-- ═══ EVOLUTION LOG ═══ -->
+  <div class="sec">
+    <div class="sec-hd"><span class="tag">◈</span> EVOLUTION LOG — EVERY CYCLE</div>
+    <div class="evo-list" id="evo-list">
+      <div style="color:var(--muted2);font-size:12px;padding:12px;">Loading memory...</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>OLLIE · AUTONOMOUS BITCOIN INTELLIGENCE · CYCLE <span class="btc-text" id="f-cycle">—</span></p>
+    <p>RUNNING ON GITHUB PAGES · LEARNS FROM THE INTERNET EVERY 24 HOURS VIA GITHUB ACTIONS</p>
+    <p>NO API KEYS REQUIRED · <span class="btc-text">FULLY OPEN SOURCE</span> · ALIVE SINCE <span class="btc-text" id="f-since">—</span></p>
+    <p style="margin-top:16px;color:var(--muted);">Data from CoinGecko · Alternative.me · Blockchain.info · Mempool.space · Bitcoin Magazine · CoinDesk · Reddit</p>
+  </footer>
+
+</div><!-- /page -->
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CANVAS — flowing BTC circuit grid
+═══════════════════════════════════════════════════════ */
+const CV = document.getElementById('canvas');
+const cx = CV.getContext('2d');
+let CW, CH, pts=[], trails=[];
+
+function resizeCV(){
+  CW=CV.width=window.innerWidth;
+  CH=CV.height=window.innerHeight;
+  buildPts();
+}
+
+function buildPts(){
+  pts=[];
+  const n=Math.floor(CW*CH/13000);
+  for(let i=0;i<n;i++) pts.push({
+    x:Math.random()*CW, y:Math.random()*CH,
+    vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
+    r:Math.random()*1.8+.5, t:Math.random()*Math.PI*2, ts:.015+Math.random()*.025
+  });
+  trails = Array.from({length:12},()=>({
+    x:Math.random()*CW, y:Math.random()*CH,
+    vx:(Math.random()-.5)*1.2, vy:(Math.random()-.5)*1.2,
+    len:0, maxLen:40+Math.random()*80, life:Math.random()
+  }));
+}
+
+resizeCV();
+window.addEventListener('resize',resizeCV);
+
+function renderCV(){
+  cx.fillStyle='rgba(3,2,0,.17)';
+  cx.fillRect(0,0,CW,CH);
+  pts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.t+=p.ts;
+    if(p.x<0||p.x>CW)p.vx*=-1;
+    if(p.y<0||p.y>CH)p.vy*=-1;
+    const a=.3+Math.sin(p.t)*.25;
+    cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    cx.fillStyle=`rgba(247,147,26,${a})`;cx.fill();
+  });
+  for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+    const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<110){
+      cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);
+      cx.strokeStyle=`rgba(247,147,26,${(1-d/110)*.08})`;cx.lineWidth=.5;cx.stroke();
+    }
+  }
+  requestAnimationFrame(renderCV);
+}
+renderCV();
+
+/* ═══ DNA ANIMATION ═══ */
+const dnaSvg=document.getElementById('dna-svg');
+let dnaP=0;
+function animDNA(){
+  dnaP+=.025;
+  const N=80,W=1000,H=22,amp=16;
+  let t='',b='',ru='';
+  for(let i=0;i<N;i++){
+    const x=i*(W/N),y1=H+Math.sin(i*.28+dnaP)*amp,y2=H-Math.sin(i*.28+dnaP)*amp;
+    t+=(i?'L':'M')+x+','+y1+' ';
+    b+=(i?'L':'M')+x+','+y2+' ';
+    if(i%6===0)ru+=`<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="rgba(247,147,26,.12)" stroke-width="1"/>`;
+  }
+  dnaSvg.innerHTML=`<path d="${t}" fill="none" stroke="rgba(247,147,26,.45)" stroke-width="1.5"/><path d="${b}" fill="none" stroke="rgba(255,209,102,.3)" stroke-width="1.5"/>${ru}`;
+  requestAnimationFrame(animDNA);
+}
+animDNA();
+
+/* ═══ HELPERS ═══ */
+function fmt(n){ if(!n)return'—'; if(n>=1e12)return'$'+(n/1e12).toFixed(2)+'T'; if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B'; if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M'; return '$'+n.toLocaleString(); }
+function fmtPrice(n){ return n?'$'+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}):'—'; }
+function fmtPct(n){ if(n==null)return'—'; return (n>0?'+':'')+n.toFixed(2)+'%'; }
+function fgColor(v){ if(v>=80)return'#00e87a'; if(v>=60)return'#88cc44'; if(v>=45)return'#d4cc44'; if(v>=25)return'#F7931A'; return'#ff3d55'; }
+function fgClass(lbl){ return (lbl||'').toLowerCase().replace(/\s+/g,'-'); }
+
+/* ═══ COUNTDOWN ═══ */
+const INTERVAL=24*60*60*1000;
+let cdTimer=null;
+function startCountdown(lastUpdated){
+  const last=lastUpdated?new Date(lastUpdated).getTime():0;
+  const circum=138;
+  if(cdTimer)clearInterval(cdTimer);
+  function tick(){
+    const now=Date.now(),elapsed=now-last,remaining=Math.max(0,INTERVAL-elapsed);
+    const pct=Math.min(1,elapsed/INTERVAL);
+    const h=Math.floor(remaining/3600000),m=Math.floor((remaining%3600000)/60000),s=Math.floor((remaining%60000)/1000);
+    const el=document.getElementById('cd-time');
+    if(remaining===0){el.textContent='NOW';el.className='cd-time done';}
+    else{
+      el.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      el.className='cd-time'+(h===0?' urgent':'');
+    }
+    const lastStr=last?new Date(last).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Never';
+    document.getElementById('cd-sub').textContent=`Last update: ${lastStr}`;
+    document.getElementById('pr-fill').style.strokeDashoffset=String(circum*(1-pct));
+    document.getElementById('cd-pct').textContent=Math.round(pct*100)+'%';
+  }
+  tick(); cdTimer=setInterval(tick,1000);
+}
+
+/* ═══ PRICE CHART ═══ */
+function drawPriceChart(history){
+  if(!history||history.length<2)return;
+  document.getElementById('chart-sec').style.display='block';
+  const canvas=document.getElementById('price-chart');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth*window.devicePixelRatio||800;
+  canvas.height=canvas.offsetHeight*window.devicePixelRatio||140;
+  ctx.scale(window.devicePixelRatio,window.devicePixelRatio);
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  const prices=history.map(h=>h.price);
+  const min=Math.min(...prices),max=Math.max(...prices);
+  const range=max-min||1;
+  const pad={t:10,b:24,l:10,r:10};
+  const iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
+
+  // gradient fill
+  const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+  grad.addColorStop(0,'rgba(247,147,26,0.25)');
+  grad.addColorStop(1,'rgba(247,147,26,0)');
+
+  const xStep=iw/(history.length-1);
+  const yPos=(p)=>pad.t+ih*(1-(p-min)/range);
+
+  ctx.beginPath();
+  history.forEach((h,i)=>{ const x=pad.l+i*xStep,y=yPos(h.price); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle='rgba(247,147,26,0.9)';ctx.lineWidth=1.5;ctx.stroke();
+
+  ctx.lineTo(pad.l+xStep*(history.length-1),H-pad.b);
+  ctx.lineTo(pad.l,H-pad.b);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+
+  // x labels (first and last)
+  ctx.fillStyle='rgba(120,80,30,0.9)';ctx.font='10px IBM Plex Mono';ctx.textAlign='left';
+  ctx.fillText(history[0].date,pad.l,H-4);
+  ctx.textAlign='right';
+  ctx.fillText(history[history.length-1].date,W-pad.r,H-4);
+}
+
+/* ═══ RENDER ═══ */
+function render(d){
+  const m=d.meta||{}, cur=d.current||{}, kb=d.knowledge_base||{};
+
+  // Status
+  document.getElementById('status-txt').textContent='ONLINE · LEARNING DAILY';
+  document.getElementById('gen-num').textContent=m.total_cycles||0;
+  document.getElementById('gen-id').textContent='SUBJECT: BITCOIN';
+  const genesis=m.genesis;
+  if(genesis){
+    const days=Math.floor((Date.now()-new Date(genesis).getTime())/86400000);
+    document.getElementById('gen-since').textContent=`ALIVE ${Math.max(0,days)} DAYS · GENESIS ${genesis}`;
+    document.getElementById('f-since').textContent=genesis;
+  }
+  document.getElementById('f-cycle').textContent=m.total_cycles||'—';
+
+  // Price strip
+  const price=cur.price_usd;
+  document.getElementById('p-price').textContent=price?fmtPrice(price):'—';
+  const c24=cur.change_24h_pct;
+  const c24El=document.getElementById('p-24h');
+  c24El.textContent=fmtPct(c24);
+  c24El.className='p-val'+(c24>0?' green':c24<0?' red':'');
+  const c7=cur.change_7d_pct;
+  const c7El=document.getElementById('p-7d');
+  c7El.textContent=fmtPct(c7);
+  c7El.className='p-val'+(c7>0?' green':c7<0?' red':'');
+  document.getElementById('p-mcap').textContent=fmt(cur.market_cap_usd);
+  document.getElementById('p-vol').textContent=fmt(cur.volume_24h_usd);
+  document.getElementById('p-dom').textContent=cur.dominance_pct?cur.dominance_pct+'%':'—';
+
+  // Network stats
+  document.getElementById('s-block').textContent=cur.block_height?(cur.block_height).toLocaleString():'—';
+  document.getElementById('s-hr').textContent=cur.hash_rate?cur.hash_rate+' EH/s':'—';
+  document.getElementById('s-fee').textContent=cur.mempool_high_fee?cur.mempool_high_fee+' sat/vB':'—';
+  document.getElementById('s-mempool').textContent=cur.unconfirmed_txs?(cur.unconfirmed_txs).toLocaleString():'—';
+  if(cur.circulating_supply&&cur.max_supply){
+    const pct=((cur.circulating_supply/cur.max_supply)*100).toFixed(2);
+    document.getElementById('s-supply').textContent=`${(cur.circulating_supply).toLocaleString('en-US',{maximumFractionDigits:0})} BTC (${pct}%)`;
+  }
+  if(cur.ath_usd){
+    document.getElementById('s-ath').textContent=fmtPrice(cur.ath_usd);
+    if(price&&cur.ath_usd){
+      const pctFromATH=((cur.ath_usd-price)/cur.ath_usd*100).toFixed(1);
+      document.getElementById('s-ath-pct').textContent=pctFromATH<1?'At or near ATH':`${pctFromATH}% below ATH`;
+    }
+  }
+
+  // Fear & Greed
+  const fg=cur.fear_greed_value;
+  if(fg){
+    document.getElementById('fg-num').textContent=fg;
+    document.getElementById('fg-num').style.color=fgColor(fg);
+    document.getElementById('fg-name').textContent=(cur.fear_greed_label||'').toUpperCase();
+    document.getElementById('fg-name').style.color=fgColor(fg);
+    document.getElementById('fg-needle').style.left=fg+'%';
+  }
+
+  // Halving
+  const bh=cur.block_height||0, target=cur.next_halving_block||1050000;
+  const left=cur.blocks_until_halving||Math.max(0,target-bh);
+  const days=cur.days_until_halving||Math.round(left*10/1440);
+  const prevHalving=840000;
+  const progress=bh>prevHalving?Math.min(100,((bh-prevHalving)/(target-prevHalving)*100)):0;
+  document.getElementById('hv-title').textContent=left>0?`${(left).toLocaleString()} blocks until next halving`:'Next halving complete!';
+  document.getElementById('hv-blocks').textContent=(left).toLocaleString();
+  document.getElementById('hv-date').textContent=cur.estimated_halving_date||'—';
+  document.getElementById('hv-days').textContent=days>0?'~'+days.toLocaleString():left>0?'Soon':'Passed';
+  document.getElementById('hv-target').textContent=target.toLocaleString();
+  document.getElementById('hv-fill').style.width=progress.toFixed(1)+'%';
+
+  // Countdown
+  startCountdown(m.last_updated);
+
+  // Thought
+  const thought=d.todays_thought||'Awaiting first learning cycle...';
+  document.getElementById('thought-text').textContent=thought;
+
+  // Insights
+  const insights=d.todays_insights||[];
+  const iEl=document.getElementById('insight-list');
+  if(insights.length){
+    iEl.innerHTML=insights.map(t=>`<div class="insight"><span class="insight-bullet">◆</span><span class="insight-text">${t}</span></div>`).join('');
+  } else {
+    iEl.innerHTML='<div style="color:var(--muted2);font-size:12px;">Insights will appear after the first learning cycle.</div>';
+  }
+
+  // News
+  const news=d.todays_headlines||[];
+  const nEl=document.getElementById('news-list');
+  if(news.length){
+    nEl.innerHTML=news.map(n=>`
+      <a class="news-item" href="${n.link||'#'}" target="_blank" rel="noopener">
+        <span class="news-source">${n.source||'NEWS'}</span>
+        <div class="news-body">
+          <div class="news-title">${n.title||'—'}</div>
+          <div class="news-date">${n.published||''}</div>
+        </div>
+      </a>`).join('');
+  } else {
+    nEl.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:12px 0;">Headlines will appear after the first learning cycle runs via GitHub Actions.</div>';
+  }
+
+  // Reddit
+  const reddit=d.todays_reddit||[];
+  if(reddit.length){
+    document.getElementById('reddit-sec').style.display='block';
+    document.getElementById('reddit-list').innerHTML=reddit.map(r=>`
+      <a class="reddit-item" href="${r.url||'#'}" target="_blank" rel="noopener">
+        <span class="reddit-score">↑${r.score>999?(r.score/1000).toFixed(1)+'k':r.score}</span>
+        <span class="reddit-title">${r.title||'—'}</span>
+        <span class="reddit-flair">${r.flair||''}</span>
+      </a>`).join('');
+  }
+
+  // Knowledge base
+  const topics=kb.topics_learned||[];
+  const kbEl=document.getElementById('kb-tags');
+  if(topics.length){
+    kbEl.innerHTML=topics.slice(0,30).map(t=>`<span class="kb-tag">${t.topic}<span class="count">${t.count}</span></span>`).join('');
+    document.getElementById('kb-meta').textContent=`${topics.length} topics accumulated · ${kb.price_history?.length||0} days of price memory · ${kb.fear_greed_history?.length||0} days of sentiment memory`;
+  } else {
+    kbEl.innerHTML='<span style="color:var(--muted2);font-size:12px;">Knowledge nodes will accumulate after first GitHub Actions cycle.</span>';
+    document.getElementById('kb-meta').textContent='';
+  }
+
+  // Price chart
+  if(kb.price_history&&kb.price_history.length>=2) drawPriceChart(kb.price_history);
+
+  // Evolution log
+  const evo=d.evolution_log||[];
+  const eEl=document.getElementById('evo-list');
+  if(evo.length){
+    eEl.innerHTML=[...evo].reverse().slice(0,15).map((e,i)=>`
+      <div class="evo-item ${i===0?'latest':''}">
+        <div class="evo-num">${e.cycle||'—'}</div>
+        <div class="evo-body">
+          <div class="evo-meta">
+            <span class="evo-date">${e.date||'—'}</span>
+            ${e.price_usd?`<span class="evo-price">$${Math.round(e.price_usd).toLocaleString()}</span>`:''}
+            ${e.fear_greed_label?`<span class="evo-fg ${fgClass(e.fear_greed_label)}">${e.fear_greed_label.toUpperCase()}</span>`:''}
+          </div>
+          <div class="evo-thought">${e.thought_preview||'—'}</div>
+          ${e.topics&&e.topics.length?`<div class="evo-topics">${e.topics.slice(0,6).map(t=>`<span class="evo-topic">${t}</span>`).join('')}</div>`:''}
+        </div>
+      </div>`).join('');
+  } else {
+    eEl.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:12px 0;">Evolution log starts after the first GitHub Actions cycle (runs daily at 00:30 UTC).</div>';
+  }
+}
+
+/* ═══ BOOT — fetch knowledge.json ═══ */
+async function boot(){
+  try {
+    const r=await fetch('data/knowledge.json?_='+(Date.now()));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    render(d);
+  } catch(e){
+    document.getElementById('thought-text').textContent=
+      'Ollie is waiting for the first GitHub Actions cycle to run. Push this repo to GitHub, enable GitHub Actions, and trigger the workflow. Within minutes, Ollie will be alive and learning Bitcoin.';
+    document.getElementById('status-txt').textContent='AWAITING FIRST CYCLE';
+    startCountdown(0);
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
