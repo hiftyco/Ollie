@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OLLIE — Autonomous Bitcoin Intelligence</title>
-<meta name="description" content="Ollie is an autonomous AI mind that learns everything about Bitcoin daily. Updated every 24 hours via GitHub Actions.">
+<meta name="description" content="Ollie is an autonomous AI mind that learns everything about Bitcoin daily. Updated twice daily via GitHub Actions.">
 <meta property="og:title" content="OLLIE — Autonomous Bitcoin Intelligence">
 <meta property="og:description" content="A self-learning Bitcoin intelligence that grows smarter every day.">
 <meta name="theme-color" content="#F7931A">
@@ -605,7 +605,7 @@ canvas.chart { width:100%; height:100%; }
   <!-- FOOTER -->
   <footer class="footer">
     <p>OLLIE · AUTONOMOUS BITCOIN INTELLIGENCE · CYCLE <span class="btc-text" id="f-cycle">—</span></p>
-    <p>RUNNING ON GITHUB PAGES · LEARNS FROM THE INTERNET EVERY 24 HOURS VIA GITHUB ACTIONS</p>
+    <p>RUNNING ON GITHUB PAGES · LEARNS FROM THE INTERNET TWICE DAILY VIA GITHUB ACTIONS (00:30 + 12:30 UTC)</p>
     <p>NO API KEYS REQUIRED · <span class="btc-text">FULLY OPEN SOURCE</span> · ALIVE SINCE <span class="btc-text" id="f-since">—</span></p>
     <p id="alive-counter" style="color:var(--muted2);font-size:10px;margin-top:8px;">Ollie has been alive for — days</p>
     <p style="margin-top:16px;color:var(--muted);">Data from CoinGecko · Alternative.me · Blockchain.info · Mempool.space · Bitcoin Magazine · CoinDesk · Reddit</p>
@@ -941,7 +941,7 @@ function render(d){
         </div>
       </div>`).join('');
   } else {
-    eEl.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:12px 0;">Evolution log starts after the first GitHub Actions cycle (runs daily at 00:30 UTC).</div>';
+    eEl.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:12px 0;">Evolution log starts after the first GitHub Actions cycle (runs twice daily at 00:30 and 12:30 UTC).</div>';
   }
 }
 
