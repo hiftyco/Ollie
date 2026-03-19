@@ -26,6 +26,8 @@ MAX_REDDIT = 8
 MAX_INSIGHTS = 10
 HALVING_BLOCK_REWARD_NOW = 3.125
 NEXT_HALVING_BLOCK = 1050000
+POSITIVE_WORDS = ["surge", "rally", "bull", "moon", "pump", "breakthrough", "adoption", "halving", "upgrade", "growth", "rise", "gain", "profit", "success", "innovation", "bullish", "optimism", "recovery"]
+NEGATIVE_WORDS = ["crash", "dump", "bear", "sell", "decline", "hack", "ban", "regulation", "fall", "loss", "drop", "fear", "panic", "scam", "exploit", "bearish", "pessimism", "crisis"]
 
 # ── HTTP HELPER ───────────────────────────────────────────────────────────────
 def fetch(url, timeout=15, headers=None, retries=3):
@@ -89,6 +91,75 @@ def get_coingecko_global():
             )
         }
     return {"dominance_pct": 0}
+
+def get_blockchain_price():
+    print("  Fetching Bitcoin price (blockchain.info)...")
+    data = fetch_json("https://blockchain.info/ticker")
+    if not data or "USD" not in data:
+        return None
+    usd = data["USD"]
+    return {
+        "price_usd": usd.get("last", 0),
+        "market_cap_usd": 0,
+        "volume_24h_usd": 0,
+        "change_24h_pct": 0,
+        "change_7d_pct": 0,
+        "change_30d_pct": 0,
+        "ath_usd": 0,
+        "ath_date": "",
+        "circulating_supply": 0,
+        "max_supply": 21000000,
+        "dominance_pct": 0,
+    }
+
+def get_coincap_price():
+    print("  Fetching Bitcoin price (coincap.io)...")
+    data = fetch_json("https://api.coincap.io/v2/assets/bitcoin")
+    if not data or "data" not in data:
+        return None
+    d = data["data"]
+    return {
+        "price_usd": float(d.get("priceUsd", 0)),
+        "market_cap_usd": float(d.get("marketCapUsd", 0)),
+        "volume_24h_usd": float(d.get("volumeUsd24Hr", 0)),
+        "change_24h_pct": round(float(d.get("changePercent24Hr", 0)), 2),
+        "change_7d_pct": 0,
+        "change_30d_pct": 0,
+        "ath_usd": 0,
+        "ath_date": "",
+        "circulating_supply": 0,
+        "max_supply": 21000000,
+        "dominance_pct": 0,
+    }
+
+def get_kraken_price():
+    print("  Fetching Bitcoin price (kraken.com)...")
+    data = fetch_json("https://api.kraken.com/0/public/Ticker?pair=XBTUSD")
+    if not data or "result" not in data or "XXBTZUSD" not in data["result"]:
+        return None
+    ticker = data["result"]["XXBTZUSD"]
+    price = float(ticker["c"][0])
+    return {
+        "price_usd": price,
+        "market_cap_usd": 0,
+        "volume_24h_usd": 0,
+        "change_24h_pct": 0,
+        "change_7d_pct": 0,
+        "change_30d_pct": 0,
+        "ath_usd": 0,
+        "ath_date": "",
+        "circulating_supply": 0,
+        "max_supply": 21000000,
+        "dominance_pct": 0,
+    }
+
+def get_price():
+    sources = [get_coingecko_price, get_blockchain_price, get_coincap_price, get_kraken_price]
+    for source in sources:
+        price_data = source()
+        if price_data and price_data["price_usd"] > 0:
+            return price_data
+    return None
 
 def get_fear_greed():
     print("  Fetching Fear & Greed Index (alternative.me)...")
@@ -190,6 +261,8 @@ def get_news():
         ("Bitcoin.com", "https://news.bitcoin.com/feed/"),
         ("The Block", "https://www.theblock.co/rss.xml"),
         ("Bitcoin Stack Exchange", "https://bitcoin.stackexchange.com/feeds"),
+        ("Cointelegraph Markets", "https://cointelegraph.com/rss/category/markets/"),
+        ("Bitcoin Magazine Opinion", "https://bitcoinmagazine.com/.rss/category/opinion/"),
     ]
 
     for source, url in feeds:
@@ -201,7 +274,21 @@ def get_news():
             print(f"    Got {len(items)} headlines from {source}")
         time.sleep(0.5)
 
-    return all_items[:MAX_HEADLINES]
+    # Sentiment Analysis from Headlines
+    sentiment_score = 0
+    count = 0
+    for item in all_items[:20]:  # analyze first 20 headlines
+        title_lower = item["title"].lower()
+        pos = sum(1 for w in POSITIVE_WORDS if w in title_lower)
+        neg = sum(1 for w in NEGATIVE_WORDS if w in title_lower)
+        sentiment_score += pos - neg
+        count += 1
+    if count > 0:
+        sentiment_score = round(sentiment_score / count, 2)
+    else:
+        sentiment_score = 0
+
+    return all_items[:MAX_HEADLINES], sentiment_score
 
 def get_reddit():
     print("  Fetching top Reddit posts (r/Bitcoin)...")
@@ -396,6 +483,10 @@ def generate_insights(price_data, fg, blockchain, mempool, halving_info, kb):
             insights.append("Price is 5% above 30-day average — bullish momentum.")
         elif price < avg_30d * 0.95:
             insights.append("Price is 5% below 30-day average — bearish pressure.")
+    
+    # Advanced insights
+    advanced = generate_advanced_insights(price_data, kb)
+    insights.extend(advanced)
 
     return insights[:MAX_INSIGHTS]
 
@@ -499,24 +590,53 @@ def generate_daily_fact():
     random.seed(datetime.now().strftime("%Y-%m-%d"))  # daily fact
     return random.choice(facts)
 
-def generate_prediction(price_data, fg, kb):
-    """Generate a simple market prediction based on trends."""
-    prediction = ""
-    price = price_data.get("price_usd", 0) if price_data else 0
-    fg_val = fg['value'] if fg else 50
-    price_history = kb.get("price_history", [])
-    if len(price_history) >= 7:
-        recent_prices = [p["price"] for p in price_history[-7:]]
-        avg_7d = sum(recent_prices) / len(recent_prices)
-        if price > avg_7d and fg_val < 40:
-            prediction = "Bullish outlook: Price above 7-day average with low fear levels."
-        elif price < avg_7d and fg_val > 60:
-            prediction = "Bearish outlook: Price below 7-day average with high greed levels."
+def calculate_rsi(prices, period=14):
+    """Calculate RSI for price series."""
+    if len(prices) < period + 1:
+        return None
+    gains = []
+    losses = []
+    for i in range(1, len(prices)):
+        change = prices[i] - prices[i-1]
+        if change > 0:
+            gains.append(change)
+            losses.append(0)
         else:
-            prediction = "Neutral: Market conditions mixed, monitor closely."
-    else:
-        prediction = "Insufficient data for prediction."
-    return prediction
+            gains.append(0)
+            losses.append(abs(change))
+    
+    avg_gain = sum(gains[-period:]) / period
+    avg_loss = sum(losses[-period:]) / period
+    if avg_loss == 0:
+        return 100
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    return round(rsi, 2)
+
+def generate_advanced_insights(price_data, kb):
+    """Generate advanced technical insights."""
+    insights = []
+    price_history = kb.get("price_history", [])
+    if len(price_history) >= 30:
+        prices = [p["price"] for p in price_history[-30:]]
+        rsi = calculate_rsi(prices)
+        if rsi:
+            if rsi > 70:
+                insights.append(f"RSI at {rsi} - Overbought conditions, potential reversal.")
+            elif rsi < 30:
+                insights.append(f"RSI at {rsi} - Oversold conditions, potential bounce.")
+            else:
+                insights.append(f"RSI at {rsi} - Neutral momentum.")
+        
+        # Volume analysis if available
+        volumes = [p.get("market_cap", 0) for p in price_history[-7:]]  # using market_cap as proxy
+        if volumes:
+            avg_vol = sum(volumes) / len(volumes)
+            current_vol = volumes[-1]
+            if current_vol > avg_vol * 1.5:
+                insights.append("High volume day - Strong market interest.")
+    
+    return insights
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 
@@ -550,7 +670,7 @@ def main():
 
     # ── FETCH DATA ────────────────────────────────────────────────────────────
     print("\n[PHASE 1] Fetching market data...")
-    price_data = get_coingecko_price()
+    price_data = get_price()
     time.sleep(2)  # respect rate limits
     global_data = get_coingecko_global()
     time.sleep(2)
@@ -574,7 +694,7 @@ def main():
     time.sleep(1)
 
     print("\n[PHASE 4] Fetching news and Reddit...")
-    headlines = get_news()
+    headlines, sentiment = get_news()
     time.sleep(2)
     reddit_posts = get_reddit()
 
@@ -626,6 +746,7 @@ def main():
             "fear_greed_value": fg["value"],
             "fear_greed_label": fg["label"],
         })
+    current["sentiment_score"] = sentiment
     if blockchain:
         current.update({
             "block_height": blockchain.get("block_height", current.get("block_height", 0)),
@@ -670,6 +791,12 @@ def main():
             fg_history.append({"date": today, "value": fg["value"], "label": fg["label"]})
         if len(fg_history) > MAX_FG_HISTORY:
             fg_history[:] = fg_history[-MAX_FG_HISTORY:]
+
+    # Sentiment history
+    sentiment_history = kb.setdefault("sentiment_history", [])
+    sentiment_history.append({"date": today, "score": sentiment})
+    if len(sentiment_history) > MAX_FG_HISTORY:
+        sentiment_history.pop(0)
 
     # Topics
     topics_all = kb.setdefault("topics_learned", [])

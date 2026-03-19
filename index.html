@@ -607,6 +607,7 @@ canvas.chart { width:100%; height:100%; }
     <p>OLLIE · AUTONOMOUS BITCOIN INTELLIGENCE · CYCLE <span class="btc-text" id="f-cycle">—</span></p>
     <p>RUNNING ON GITHUB PAGES · LEARNS FROM THE INTERNET EVERY 24 HOURS VIA GITHUB ACTIONS</p>
     <p>NO API KEYS REQUIRED · <span class="btc-text">FULLY OPEN SOURCE</span> · ALIVE SINCE <span class="btc-text" id="f-since">—</span></p>
+    <p id="alive-counter" style="color:var(--muted2);font-size:10px;margin-top:8px;">Ollie has been alive for — days</p>
     <p style="margin-top:16px;color:var(--muted);">Data from CoinGecko · Alternative.me · Blockchain.info · Mempool.space · Bitcoin Magazine · CoinDesk · Reddit</p>
   </footer>
 
@@ -756,6 +757,17 @@ function drawPriceChart(history){
 }
 
 /* ═══ RENDER ═══ */
+function updateAliveCounter(genesis) {
+  if (!genesis) return;
+  const start = new Date(genesis).getTime();
+  const now = Date.now();
+  const diff = now - start;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  document.getElementById('alive-counter').textContent = `Ollie has been alive for ${days} days, ${hours} hours, ${minutes} minutes`;
+}
+
 function render(d){
   const m=d.meta||{}, cur=d.current||{}, kb=d.knowledge_base||{};
 
@@ -768,6 +780,8 @@ function render(d){
     const days=Math.floor((Date.now()-new Date(genesis).getTime())/86400000);
     document.getElementById('gen-since').textContent=`ALIVE ${Math.max(0,days)} DAYS · GENESIS ${genesis}`;
     document.getElementById('f-since').textContent=genesis;
+    updateAliveCounter(genesis);
+    setInterval(() => updateAliveCounter(genesis), 60000); // update every minute
   }
   document.getElementById('f-cycle').textContent=m.total_cycles||'—';
 
@@ -812,6 +826,14 @@ function render(d){
     document.getElementById('fg-name').style.color=fgColor(fg);
     document.getElementById('fg-needle').style.left=fg+'%';
   }
+
+  // Dynamic Theme Based on Market State
+  let accentColor = '#00BFFF'; // default btc orange
+  if (fg >= 80) accentColor = '#00FF7F'; // green for extreme greed
+  else if (fg >= 60) accentColor = '#FFD700'; // gold for greed
+  else if (fg <= 20) accentColor = '#FF4500'; // red for extreme fear
+  else if (fg <= 40) accentColor = '#F7931A'; // orange for fear
+  document.documentElement.style.setProperty('--btc', accentColor);
 
   // Halving
   const bh=cur.block_height||0, target=cur.next_halving_block||1050000;
