@@ -5,6 +5,9 @@ on:
     - cron: '30 18 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   learn:
     runs-on: ubuntu-latest
@@ -12,16 +15,20 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.12'
+
       - name: Run Ollie learning engine
         run: python learn.py
-      - name: Commit updated knowledge
+
+      - name: Commit and push knowledge
         run: |
-          git config --local user.email "ollie@bitcoin.ai"
+          git config --local user.email "ollie-ai@bitcoin.intelligence"
           git config --local user.name "Ollie AI"
           git add data/knowledge.json
-          git commit -m "🤖 Ollie cycle D — $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "No changes"
+          git diff --staged --quiet || git commit -m "🤖 Ollie Cycle D — $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
