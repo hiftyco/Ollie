@@ -1,35 +1,40 @@
 {
   "meta": {
     "version": "3.1",
-    "generation": 1,
-    "last_updated": "2026-03-19T20:08:25.220066+00:00",
-    "last_updated_human": "March 19, 2026 at 20:08 UTC",
+    "generation": 2,
+    "last_updated": "2026-03-20T17:27:22.985477+00:00",
+    "last_updated_human": "March 20, 2026 at 17:27 UTC",
     "update_cycle": "every 6 hours",
     "mission": "Learn everything about Bitcoin. Teach and guide every Bitcoiner on their journey.",
     "prediction_accuracy_pct": 0,
-    "days_alive": 6284,
-    "total_cycles": 1
+    "days_alive": 6285,
+    "total_cycles": 2
   },
   "current": {
     "price": {
-      "price_usd": 70253,
-      "market_cap_usd": 1405776323619,
-      "volume_24h_usd": 47028133631,
-      "change_24h_pct": -0.58,
-      "change_7d_pct": 0.6,
-      "change_30d_pct": 3.63,
+      "price_usd": 69718,
+      "market_cap_usd": 1395283123213,
+      "volume_24h_usd": 39493677864,
+      "change_24h_pct": 0.05,
+      "change_7d_pct": -3.08,
+      "change_30d_pct": 3.89,
       "ath_usd": 126080,
       "ath_date": "2025-10-06T18:57:42.558Z",
-      "from_ath_pct": -44.3,
+      "from_ath_pct": -44.7,
       "circulating_supply": 20003043.0,
       "max_supply": 21000000,
-      "dominance_pct": 56.5,
+      "dominance_pct": 56.3,
       "source": "coingecko"
     },
     "fear_greed": {
-      "value": 23,
+      "value": 11,
       "label": "Extreme Fear",
       "history": [
+        {
+          "date": "2026-03-20",
+          "value": 11,
+          "label": "Extreme Fear"
+        },
         {
           "date": "2026-03-19",
           "value": 23,
@@ -174,95 +179,91 @@
           "date": "2026-02-19",
           "value": 9,
           "label": "Extreme Fear"
-        },
-        {
-          "date": "2026-02-18",
-          "value": 8,
-          "label": "Extreme Fear"
         }
       ]
     },
     "blockchain": {
-      "block_height": 941331,
-      "hash_rate_ehs": 987.78,
+      "block_height": 941455,
+      "hash_rate_ehs": 966.15,
       "difficulty": 145042165424853,
       "miners_revenue_usd": 0.0,
-      "n_tx_24h": 451156
+      "n_tx_24h": 431999
     },
     "mempool": {
-      "low_fee": 3,
-      "mid_fee": 4,
-      "high_fee": 4,
-      "unconfirmed_txs": 39173,
-      "block_height": 941331
+      "low_fee": 1,
+      "mid_fee": 2,
+      "high_fee": 2,
+      "unconfirmed_txs": 29420,
+      "block_height": 941455
     },
     "lightning": {
-      "node_count": 17366,
-      "channel_count": 40364,
-      "total_capacity_btc": 4826.88
+      "node_count": 17391,
+      "channel_count": 40754,
+      "total_capacity_btc": 4877.76
     },
     "halving": {
       "current_reward_btc": 3.125,
       "next_block": 1050000,
-      "current_block": 941331,
-      "blocks_remaining": 108669,
-      "estimated_days": 754.6,
-      "progress_pct": 48.25
+      "current_block": 941455,
+      "blocks_remaining": 108545,
+      "estimated_days": 753.8,
+      "progress_pct": 48.31
     }
   },
   "intelligence": {
-    "todays_thought": "$70,253 per Bitcoin today. 108,669 blocks until the next supply halving. The clock ticks. The math doesn't change. 21 million, forever.",
+    "todays_thought": "Hash rate: 966.15 EH/s. The most powerful computational network in human history grows stronger every day. Miners bet their capital on Bitcoin's future. Watch what they do.",
     "todays_prediction": {
       "outlook": "cautiously bullish",
-      "text": "Slight positive edge. Hash rate strong 987.78 EH/s. Stay patient.",
+      "text": "Slight positive edge. Contrarian: extreme fear (11) \u00b7 Hash rate strong 966.15 EH/s. Stay patient.",
       "confidence": 35,
       "score": 1,
       "signals": [
-        "Hash rate strong 987.78 EH/s"
+        "Contrarian: extreme fear (11)",
+        "Hash rate strong 966.15 EH/s"
       ]
     },
     "todays_insights": [
       {
         "type": "price",
         "icon": "\u2696\ufe0f",
-        "text": "BTC consolidating at $70,253. Low volatility often precedes large moves. The coil tightens.",
+        "text": "BTC consolidating at $69,718. Low volatility often precedes large moves. The coil tightens.",
         "level": "intermediate"
       },
       {
         "type": "dominance",
         "icon": "\u20bf",
-        "text": "Bitcoin dominance at 56.5%. Capital concentrating in BTC \u2014 often seen in early-to-mid bull cycles.",
+        "text": "Bitcoin dominance at 56.3%. Capital concentrating in BTC \u2014 often seen in early-to-mid bull cycles.",
         "level": "advanced"
       },
       {
         "type": "sentiment",
-        "icon": "\ud83d\ude30",
-        "text": "Fear at 23/100 (Extreme Fear). Smart money accumulates during fear. Dollar-cost averaging through fear is a time-tested strategy.",
+        "icon": "\ud83d\ude31",
+        "text": "EXTREME FEAR at 11/100. Historically rare. Every previous extreme fear reading was followed by recovery for those who held. 'Be greedy when others are fearful.'",
         "level": "beginner"
       },
       {
         "type": "network",
         "icon": "\u26cf\ufe0f",
-        "text": "Hash rate: 987.78 EH/s. Record territory \u2014 Miners are deploying massive capital to secure Bitcoin. They vote with their hardware.",
+        "text": "Hash rate: 966.15 EH/s. Record territory \u2014 Miners are deploying massive capital to secure Bitcoin. They vote with their hardware.",
         "level": "intermediate"
       },
       {
         "type": "fact",
         "icon": "\ud83e\udde0",
-        "text": "Over 400 million people globally are estimated to own some Bitcoin as of 2024.",
+        "text": "Bitcoin's whitepaper is only 9 pages. Satoshi solved a decades-old computer science problem with elegant simplicity.",
         "level": "beginner"
       }
     ],
     "todays_tips": [
       {
-        "icon": "\ud83e\uddee",
-        "tip": "Think in satoshis, not dollars. 1 sat = $0.0007 today. When Bitcoin reaches $1M, that same sat = $0.01. Stack sats.",
-        "category": "mindset"
-      },
-      {
         "icon": "\ud83c\udf0d",
         "tip": "Bitcoin is borderless money. Try sending BTC internationally and compare it to a wire transfer. No forms. No waiting. No permission needed.",
         "category": "education"
+      },
+      {
+        "icon": "\ud83d\udd12",
+        "tip": "NEVER share your seed phrase \u2014 ever, with anyone, under any circumstances. Anyone who asks is a scammer. Full stop.",
+        "category": "security"
       },
       {
         "icon": "\ud83d\udc8e",
@@ -270,52 +271,70 @@
         "category": "strategy"
       }
     ],
-    "todays_fact": "Over 400 million people globally are estimated to own some Bitcoin as of 2024."
+    "todays_fact": "Bitcoin's whitepaper is only 9 pages. Satoshi solved a decades-old computer science problem with elegant simplicity."
   },
   "news": {
     "headlines": [
       {
-        "title": "Despite a 47% Price Drop, Bitcoin Traders Aren\u2019t Selling",
-        "link": "https://bitcoinmagazine.com/featured/despite-a-47-price-drop-bitcoin-selling",
-        "published": "Thu, 19 Mar 2026 19:37:24 +0000",
-        "summary": "Bitcoin Magazine\n\nDespite a 47% Price Drop, Bitcoin Traders Aren\u2019t Selling\nA survey of U.S. Bitcoin holders and crypto subreddit posts found that despite anxiety and market turbulence, most investors (69%) held onto their Bitcoin, with only 8% panic ",
-        "source": "Bitcoin Magazine",
+        "title": "Bitcoin's latest fear unlocked as rate hike bets rise and bond markets crumble",
+        "link": "https://www.coindesk.com/markets/2026/03/20/bitcoin-s-latest-fear-unlocked-as-rate-hikes-bets-rise-and-bond-markets-crumble",
+        "published": "Fri, 20 Mar 2026 14:51:48 +0000",
+        "summary": "For now, surging oil prices and persistent geopolitical tensions are driving inflation fears and weakening traditional safe-haven assets.",
+        "source": "CoinDesk",
+        "sentiment": "neutral",
+        "relevance": 3
+      },
+      {
+        "title": "BitFuFu leans further into cloud mining as revenue mix shifts, profitability swings to loss",
+        "link": "https://www.theblock.co/post/394507/bitfufu-leans-cloud-mining-revenue-mix-shifts-profitability-swings-loss?utm_source=rss&utm_medium=rss",
+        "published": "Fri, 20 Mar 2026 11:15:10 -0400",
+        "summary": "The cost of mining bitcoin has climbed substantially over the past year, and miners are looking for steadier revenue streams.",
+        "source": "The Block",
+        "sentiment": "neutral",
+        "relevance": 3
+      },
+      {
+        "title": "Class Action Lawsuits Hit Gemini as Exchange Growth Narrative Collapses Under Investor Scrutiny",
+        "link": "https://news.bitcoin.com/class-action-lawsuits-hit-gemini-as-exchange-growth-narrative-collapses-under-investor-scrutiny/",
+        "published": "Fri, 20 Mar 2026 16:30:11 +0000",
+        "summary": "Mounting investor losses are drawing scrutiny to Gemini as class action lawsuits allege the crypto exchange misled markets about its growth strategy and financial outlook, fueling a sharp post-IPO decline and eroding confidence. Class Action Lawsuits",
+        "source": "Bitcoin.com",
         "sentiment": "negative",
         "relevance": 3
       },
       {
-        "title": "Bitcoin drops 10% to threaten new retest of 'unreliable' BTC price support",
+        "title": "Bitcoin Price Holds $70,000 as War-Driven Inflation Fears Meet Defensive Market Positioning",
+        "link": "https://bitcoinmagazine.com/markets/bitcoin-price-holds-70000-amid-war",
+        "published": "Fri, 20 Mar 2026 12:46:32 +0000",
+        "summary": "Bitcoin Magazine\n\nBitcoin Price Holds $70,000 as War-Driven Inflation Fears Meet Defensive Market Positioning\nBitcoin price held near $70,000 as shifting Iran conflict risks and macro pressure weighed on markets, while derivatives and on-chain data s",
+        "source": "Bitcoin Magazine",
+        "sentiment": "negative",
+        "relevance": 2
+      },
+      {
+        "title": "What Happens to Bitcoin if Bank of America's 'Three Conditions' for Fed Rate Hikes Hit?",
+        "link": "https://decrypt.co/361919/what-happens-bitcoin-bank-america-conditions-fed-rate-hikes-hit",
+        "published": "Fri, 20 Mar 2026 16:54:48 +0000",
+        "summary": "Analysts acknowledged that Bitcoin would likely face pressure if the Fed hikes rates, but they highlighted the asset\u2019s recent resilience.",
+        "source": "Decrypt",
+        "sentiment": "negative",
+        "relevance": 2
+      },
+      {
+        "title": "Morning Minute: Bitcoin Rebounds as Oil Falls",
+        "link": "https://decrypt.co/361897/morning-minute-bitcoin-rebounds-as-oil-falls",
+        "published": "Fri, 20 Mar 2026 12:38:38 +0000",
+        "summary": "Crypto bounced as traders bet the Iran war may end sooner than feared, while prediction markets just had a blockbuster day.",
+        "source": "Decrypt",
+        "sentiment": "negative",
+        "relevance": 2
+      },
+      {
+        "title": "Bitcoin nears 10% drop as traders flag \u2018unreliable\u2019 support",
         "link": "https://cointelegraph.com/news/bitcoin-drops-10-threaten-retest-unreliable-btc-price-support?utm_source=rss_feed&utm_medium=rss_category_markets&utm_campaign=rss_partner_inbound",
         "published": "Thu, 19 Mar 2026 17:09:53 +0000",
         "summary": "Bitcoin brought its latest correction from local highs to near 10% as skepticism over long-term BTC price support grew louder.",
         "source": "Cointelegraph Markets",
-        "sentiment": "negative",
-        "relevance": 3
-      },
-      {
-        "title": "Bybit launches yield-bearing tokenized gold, expanding RWA yield market",
-        "link": "https://cointelegraph.com/news/bybit-yield-tokenized-gold-xaut-rwa-trend?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
-        "published": "Thu, 19 Mar 2026 19:50:37 +0000",
-        "summary": "The crypto exchange is offering a yield product tied to Tether Gold (XAUT), signaling a shift toward turning traditionally passive assets like gold into income-generating instruments.",
-        "source": "Cointelegraph",
-        "sentiment": "neutral",
-        "relevance": 2
-      },
-      {
-        "title": "Bitcoin bull market vibes emerge, but confirmation is missing: Glassnode",
-        "link": "https://cointelegraph.com/news/bitcoin-bull-market-vibes-emerge-but-confirmation-is-missing-glassnode?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
-        "published": "Thu, 19 Mar 2026 18:30:00 +0000",
-        "summary": "Bitcoin markets have started to turn bullish again, but data shows that a key \u201cbull market threshold\u201d has not been established yet.",
-        "source": "Cointelegraph",
-        "sentiment": "positive",
-        "relevance": 2
-      },
-      {
-        "title": "BTC Falls Below $69K Amid Iranian and Qatari Gas Field Strikes",
-        "link": "https://news.bitcoin.com/btc-falls-below-69k-amid-iranian-and-qatari-gas-field-strikes/",
-        "published": "Thu, 19 Mar 2026 18:45:38 +0000",
-        "summary": "Bitcoin fell below $69,000 amid a global sell-off driven by escalating Middle East tensions that also caused energy prices to surge. Geopolitical Tension Sparks Market Turmoil Bitcoin ( BTC) plummeted below the $69,000 mark Thursday afternoon, swept ",
-        "source": "Bitcoin.com",
         "sentiment": "negative",
         "relevance": 2
       },
@@ -329,6 +348,15 @@
         "relevance": 2
       },
       {
+        "title": "North Carolina Lawmakers Propose State Bitcoin Reserve",
+        "link": "https://bitcoinmagazine.com/news/north-carolina-propose-bitcoin-reserve",
+        "published": "Thu, 19 Mar 2026 21:34:26 +0000",
+        "summary": "Bitcoin Magazine\n\nNorth Carolina Lawmakers Propose State Bitcoin Reserve\nNorth Carolina lawmakers introduced legislation to create a state-controlled Bitcoin reserve.\u00a0\nThis post North Carolina Lawmakers Propose State Bitcoin Reserve first appeared on",
+        "source": "Bitcoin Magazine",
+        "sentiment": "neutral",
+        "relevance": 1
+      },
+      {
         "title": "Adam Back Confirmed As A Bitcoin 2026 Speaker",
         "link": "https://bitcoinmagazine.com/conference/adam-back-confirmed-as-a-bitcoin-2026-speaker",
         "published": "Thu, 19 Mar 2026 20:07:00 +0000",
@@ -338,48 +366,21 @@
         "relevance": 1
       },
       {
-        "title": "Morgan Stanley Bitcoin Trust to Trade as MSBT on NYSE Arca",
-        "link": "https://bitcoinmagazine.com/news/morgan-stanley-bitcoin-to-trade-as-msbt",
-        "published": "Thu, 19 Mar 2026 18:10:33 +0000",
-        "summary": "Bitcoin Magazine\n\nMorgan Stanley Bitcoin Trust to Trade as MSBT on NYSE Arca\nMorgan Stanley's spot Bitcoin ETF will trade under the ticker MSBT on NYSE Arca.\nThis post Morgan Stanley Bitcoin Trust to Trade as MSBT on NYSE Arca first appeared on Bitco",
-        "source": "Bitcoin Magazine",
-        "sentiment": "neutral",
-        "relevance": 1
-      },
-      {
-        "title": "Animoca invests in Ava Labs to boost Avalanche adoption in Asia, Middle East",
-        "link": "https://cointelegraph.com/news/animoca-brands-invests-in-avax-partners-with-ava-labs-to-expand-avalanche-in-asia-and-middle-east?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
-        "published": "Thu, 19 Mar 2026 19:31:48 +0000",
-        "summary": "The Web3 company will provide capital, advisory support and business development to help Avalanche projects scale, with a focus on real-world assets and digital identity.",
+        "title": "Market analyst sees further Bitcoin downside, flags $60K as key level",
+        "link": "https://cointelegraph.com/news/rastani-further-bitcoin-downside-60k-key-level?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+        "published": "Fri, 20 Mar 2026 16:25:20 +0000",
+        "summary": "In the latest Cointelegraph interview, professional trader Alessio Rastani warns that Bitcoin could fall below $60,000 before a meaningful bottom forms.",
         "source": "Cointelegraph",
-        "sentiment": "positive",
-        "relevance": 1
-      },
-      {
-        "title": "Wall Street heavyweight Cantor among investment banks pitching FalconX for its potential IPO",
-        "link": "https://www.coindesk.com/business/2026/03/18/wall-street-heavyweight-cantor-among-investment-banks-pitching-falconx-for-its-potential-ipo",
-        "published": "Thu, 19 Mar 2026 19:23:09 +0000",
-        "summary": "Crypto trading firm FalconX's CEO has previously said it is considering a public listing.",
-        "source": "CoinDesk",
-        "sentiment": "negative",
-        "relevance": 1
-      },
-      {
-        "title": "Bitcoin holds $69,000 as gold tumbles and oil spikes, but one analyst says stay on sidelines",
-        "link": "https://www.coindesk.com/markets/2026/03/19/bitcoin-holds-usd69-000-as-gold-tumbles-oil-spikes-but-analyst-says-stay-on-sidelines",
-        "published": "Thu, 19 Mar 2026 16:54:28 +0000",
-        "summary": "While bitcoin has shown relative strength against gold since the war in Iran broke out, investors are better off holding off \"dry powder\" while prices swing wildly on headlines, said Wintermute's Bryan Tan.",
-        "source": "CoinDesk",
         "sentiment": "neutral",
         "relevance": 1
       },
       {
-        "title": "ETF Giant Challenges Tether and Paxos With Framework for Tokenized Gold",
-        "link": "https://decrypt.co/361750/etf-giant-challenges-tether-paxos-framework-tokenized-gold",
-        "published": "Thu, 19 Mar 2026 18:26:16 +0000",
-        "summary": "The World Gold Council, established in 1987, counts 29 members across the gold mining industry.",
-        "source": "Decrypt",
-        "sentiment": "positive",
+        "title": "What happens to Bitcoin if oil price hits $180 per barrel?",
+        "link": "https://cointelegraph.com/news/what-happens-to-bitcoin-if-oil-price-hits-180-per-barrel?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+        "published": "Fri, 20 Mar 2026 15:53:33 +0000",
+        "summary": "A 70% oil spike could nearly double US inflation, slash rate-cut hopes, and deepen downside risks for Bitcoin prices in the coming months.",
+        "source": "Cointelegraph",
+        "sentiment": "neutral",
         "relevance": 1
       }
     ],
@@ -714,6 +715,18 @@
       "insights_generated": 5,
       "prediction_outlook": "cautiously bullish",
       "hash_rate_ehs": 987.78
+    },
+    {
+      "generation": 2,
+      "timestamp": "2026-03-20T17:27:22.985477+00:00",
+      "date": "2026-03-20",
+      "cycle_utc": "17:00",
+      "price_usd": 69718,
+      "fg_value": 11,
+      "headlines_absorbed": 12,
+      "insights_generated": 5,
+      "prediction_outlook": "cautiously bullish",
+      "hash_rate_ehs": 966.15
     }
   ],
   "price_history": [
@@ -722,6 +735,12 @@
       "p": 70253,
       "c": -0.58,
       "fg": 23
+    },
+    {
+      "ts": "2026-03-20 17:00",
+      "p": 69718,
+      "c": 0.05,
+      "fg": 11
     }
   ]
 }
