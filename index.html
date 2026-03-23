@@ -155,6 +155,43 @@ canvas#mc{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}canva
 .wr-card{flex:1;min-width:140px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:6px;position:relative;overflow:hidden}
 .wr-card::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--btc));opacity:.6}
 .wr-val{font-family:"Barlow Condensed",sans-serif;font-size:36px;font-weight:900;color:var(--violet);line-height:1}.wr-label{font-size:9px;color:var(--muted2);letter-spacing:2px;margin-top:4px}.wr-streak{font-size:10px;margin-top:3px}
+
+/* V7 ON-CHAIN + MACRO */
+.intel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px;margin-bottom:22px}
+.intel-card{padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:6px;position:relative;overflow:hidden;transition:all .2s}.intel-card:hover{background:var(--card2);border-color:var(--border2)}
+.intel-card::after{content:"";position:absolute;top:0;left:0;right:0;height:2px}.intel-card.onchain::after{background:linear-gradient(90deg,var(--blue),var(--violet))}.intel-card.macro::after{background:linear-gradient(90deg,var(--gold),var(--btc))}.intel-card.sentiment::after{background:linear-gradient(90deg,var(--green),var(--btc))}
+.ic-label{font-size:9px;color:var(--muted2);letter-spacing:2px;margin-bottom:6px}.ic-val{font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:900;line-height:1}.ic-sub{font-size:10px;color:var(--muted2);margin-top:4px}.ic-badge{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:2px;font-size:9px;letter-spacing:1px;border:1px solid}
+.ic-badge.undervalued{color:var(--green);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.06)}.ic-badge.overvalued{color:var(--red);border-color:rgba(255,59,59,.3);background:rgba(255,59,59,.06)}.ic-badge.fair{color:var(--gold);border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.05)}
+.ic-badge.bull{color:var(--green);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.06)}.ic-badge.bear{color:var(--red);border-color:rgba(255,59,59,.3)}.ic-badge.neutral2{color:var(--gold);border-color:rgba(255,215,0,.3)}
+/* CYCLE PHASE */
+.phase-card{padding:20px 24px;background:var(--card);border:1px solid var(--border2);border-radius:8px;margin-bottom:22px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.phase-emoji{font-size:44px;flex-shrink:0}.phase-body{flex:1;min-width:0}
+.phase-name{font-family:"Barlow Condensed",sans-serif;font-size:32px;font-weight:900;text-transform:uppercase;letter-spacing:2px;line-height:1;color:var(--btc)}
+.phase-desc{font-size:12px;color:var(--cream2);line-height:1.7;margin-top:6px}
+.phase-meta{font-size:9px;color:var(--muted2);letter-spacing:2px;margin-bottom:6px}
+/* COMPOSITE SENTIMENT */
+.comp-sent{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:22px}
+.cs-score{font-family:"Barlow Condensed",sans-serif;font-size:58px;font-weight:900;line-height:1;transition:color .6s}
+.cs-label{font-size:11px;letter-spacing:2px;margin-top:4px;transition:color .6s}
+.cs-bars{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+.cs-bar-row{display:flex;align-items:center;gap:10px}.cs-bar-name{font-size:9px;color:var(--muted2);width:100px;flex-shrink:0;letter-spacing:1px}.cs-bar-track{flex:1;height:6px;background:var(--muted);border-radius:3px;overflow:hidden}.cs-bar-fill{height:100%;border-radius:3px;transition:width 1.5s ease}.cs-bar-val{font-size:9px;color:var(--cream2);width:30px;text-align:right;flex-shrink:0}
+/* LEARNING GOALS */
+.goals-panel{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:22px}
+.goals-header{padding:13px 18px;background:linear-gradient(90deg,rgba(0,200,255,.08),transparent);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.goals-title{font-family:"Orbitron",monospace;font-size:10px;color:var(--blue);letter-spacing:3px}
+.goals-body{padding:14px 18px}.goal-item{padding:11px 14px;background:var(--card2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px}
+.goal-topic{font-size:9px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}.goal-text{font-size:12px;color:var(--cream2);line-height:1.6}
+.goal-badge{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:2px;font-size:9px;letter-spacing:1px;border:1px solid}.goal-badge.achieved{color:var(--green);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.06)}.goal-badge.pending{color:var(--gold);border-color:rgba(255,215,0,.3)}.goal-badge.failed{color:var(--red);border-color:rgba(255,59,59,.3)}
+/* GLOSSARY */
+.glossary-panel{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:22px}
+.gloss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-top:14px;max-height:340px;overflow-y:auto}.gloss-grid::-webkit-scrollbar{width:3px}.gloss-grid::-webkit-scrollbar-thumb{background:var(--border2)}
+.gloss-item{padding:10px 13px;background:var(--card2);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .2s}.gloss-item:hover{border-color:var(--border2);background:rgba(247,147,26,.06)}.gloss-item.active-term{border-color:var(--btc);background:rgba(247,147,26,.08)}
+.gloss-term{font-size:10px;color:var(--btc);font-weight:700;letter-spacing:1px;margin-bottom:4px}.gloss-def{font-size:11px;color:var(--cream2);line-height:1.6;display:none}.gloss-item.open .gloss-def{display:block}
+.gloss-search{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px 12px;color:var(--cream);font-family:"IBM Plex Mono",monospace;font-size:11px;outline:none;margin-bottom:10px}.gloss-search:focus{border-color:var(--border2)}
+/* SOURCE HEALTH */
+.src-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-bottom:22px}
+.src-item{padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:4px;transition:all .2s}.src-item:hover{background:var(--card2)}
+.src-name{font-size:9px;color:var(--muted3);letter-spacing:1px;margin-bottom:5px}.src-score{font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:900;line-height:1}.src-score.reliable{color:var(--green)}.src-score.degraded{color:var(--gold)}.src-score.unreliable{color:var(--red)}.src-status{font-size:9px;color:var(--muted2);margin-top:3px}
 </style></head><body>
 <canvas id="mc"></canvas><canvas id="pc"></canvas>
 <div class="scan"></div><div class="vig"></div>
@@ -303,6 +340,51 @@ canvas#mc{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}canva
   </div>
   <div class="pred-log-body" id="pred-log-body"><div class="ld" style="padding:16px"><span></span><span></span><span></span></div></div>
 </div>
+
+<div class="sh">Market Cycle Phase</div>
+<div class="phase-card" id="phase-card">
+  <div class="phase-emoji" id="phase-emoji">&#9881;&#65039;</div>
+  <div class="phase-body">
+    <div class="phase-meta">CURRENT BITCOIN MARKET CYCLE POSITION</div>
+    <div class="phase-name" id="phase-name">DETECTING...</div>
+    <div class="phase-desc" id="phase-desc">Analyzing on-chain data, price action, and sentiment...</div>
+  </div>
+</div>
+<div class="sh">On-Chain Analytics &middot; Network Intelligence</div>
+<div class="intel-grid" id="onchain-grid"><div class="ld"><span></span><span></span><span></span></div></div>
+<div class="sh">Composite Sentiment &middot; Multi-Factor Signal</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px" id="cs-wrapper">
+  <div class="comp-sent">
+    <div class="pl">COMPOSITE SCORE (5 FACTORS)</div>
+    <div class="cs-score" id="cs-score">-</div>
+    <div class="cs-label" id="cs-label">-</div>
+    <div class="cs-bars" id="cs-bars"></div>
+  </div>
+  <div class="intel-card macro" style="padding:18px">
+    <div class="ic-label">MACRO CONTEXT</div>
+    <div class="ic-val" id="macro-regime" style="font-size:20px;color:var(--gold)">-</div>
+    <div class="ic-sub" id="macro-regime-desc">-</div>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+      <div><div style="font-size:9px;color:var(--muted2);letter-spacing:2px;margin-bottom:3px">BTC DOMINANCE</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--btc)" id="macro-dom">-</div></div>
+      <div><div style="font-size:9px;color:var(--muted2);letter-spacing:2px;margin-bottom:3px">BTC/GOLD RATIO</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--gold)" id="macro-bgr">-</div></div>
+    </div>
+  </div>
+</div>
+<div class="sh">Ollie's Learning Goals &middot; This Cycle</div>
+<div class="goals-panel">
+  <div class="goals-header">
+    <div class="goals-title">ACTIVE STUDY TARGETS</div>
+    <div id="goals-rate" style="font-size:9px;color:var(--green)">-% goals achieved lifetime</div>
+  </div>
+  <div class="goals-body" id="goals-body"><div class="ld"><span></span><span></span><span></span></div></div>
+</div>
+<div class="sh">Bitcoin Glossary &middot; <span style="font-weight:400;color:var(--muted2)" id="gloss-count">- terms</span></div>
+<div class="glossary-panel">
+  <input class="gloss-search" id="gloss-search" placeholder="Search Bitcoin terms..." oninput="filterGloss(this.value)">
+  <div class="gloss-grid" id="gloss-grid"><div class="ld"><span></span><span></span><span></span></div></div>
+</div>
+<div class="sh">Data Source Health &middot; Reliability Monitor</div>
+<div class="src-grid" id="src-grid"><div class="ld"><span></span><span></span><span></span></div></div>
 <div class="footer"><div class="fl2">OLLIE v6.0 &mdash; SELF-IMPROVING LIVING BITCOIN ORGANISM &mdash; RUNS FOREVER</div><div class="fa2">Learns every 6h &middot; Self-critiques insights &middot; Bitcoin quiz &middot; Knowledge graph &middot; Growth metrics &middot; Proof-of-work game &middot; &#129505;</div><div class="fs">Zero API keys &middot; GitHub Actions &middot; Neural log every cycle &middot; Consciousness diary grows forever &middot; Never stops</div></div>
 </div>
 <script>
@@ -411,8 +493,103 @@ function render(d){
   let hb=el('health-bar');
   if(!hb){const hd=document.createElement('div');hd.id='health-bar';hd.className='health-bar';el('bm').parentNode.parentNode.insertBefore(hd,el('bm').parentNode.parentNode.firstChild);}
 
+
+  // === V7: CYCLE PHASE ===
+  const phase = (d.intelligence||{}).cycle_phase || {};
+  if(phase.phase) {
+    el('phase-emoji').textContent = phase.emoji || '⚙️';
+    el('phase-name').textContent = (phase.phase||'').toUpperCase();
+    el('phase-desc').textContent = phase.description || '';
+    const phaseColors = {accumulation:'var(--green)',disbelief:'var(--red)',awareness:'var(--btc)',excitement:'var(--gold)',euphoria:'#FF8800',anxiety:'#FFB347',neutral:'var(--muted3)'};
+    el('phase-name').style.color = phaseColors[phase.phase] || 'var(--btc)';
+  }
+
+  // === V7: ON-CHAIN ANALYTICS ===
+  const oc = (d.intelligence||{}).onchain_analytics || {};
+  const ocGrid = el('onchain-grid');
+  if(ocGrid && Object.keys(oc).length) {
+    const cards = [
+      {label:'STOCK-TO-FLOW', val: oc.stock_to_flow||'-', sub:'scarcity ratio', badge: oc.stock_to_flow > 100 ? 'ultra-scarce' : 'scarce', cls:'onchain', color:'var(--gold)'},
+      {label:'NVT SIGNAL', val: oc.nvt_signal||'-', sub:'network value vs txs', badge: oc.nvt_interpretation||'', cls:'onchain', color: oc.nvt_interpretation==='undervalued'?'var(--green)':oc.nvt_interpretation==='overvalued'?'var(--red)':'var(--gold)'},
+      {label:'DAILY SELL PRESSURE', val: oc.daily_sell_pressure_usd ? '$'+fmt(oc.daily_sell_pressure_usd) : '-', sub:'miner revenue USD/day', badge:'', cls:'onchain', color:'var(--cream)'},
+      {label:'ANNUAL INFLATION', val: (oc.annual_inflation_pct||0)+'%', sub:'new BTC per year', badge: oc.annual_inflation_pct < 1 ? 'ultra-low' : 'low', cls:'onchain', color:'var(--green)'},
+      {label:'TOTAL BTC MINED', val: oc.total_btc_mined ? fmt(oc.total_btc_mined) : '-', sub:'of 21,000,000 max', badge:'', cls:'onchain', color:'var(--btc)'},
+      {label:'BTC REMAINING', val: oc.btc_remaining ? fmt(oc.btc_remaining) : '-', sub:'never to exist yet', badge:'', cls:'onchain', color:'var(--violet)'},
+    ];
+    ocGrid.innerHTML = cards.map(c => '<div class="intel-card '+c.cls+'"><div class="ic-label">'+c.label+'</div><div class="ic-val" style="color:'+c.color+'">'+c.val+'</div><div class="ic-sub">'+c.sub+'</div>'+(c.badge?'<span class="ic-badge '+(c.cls==='onchain'?c.badge.includes('under')?'undervalued':c.badge.includes('over')?'overvalued':c.badge.includes('ultra')?'bull':'fair':'neutral2')+'">'+c.badge.toUpperCase()+'</span>':'')+'</div>').join('');
+  }
+
+  // === V7: COMPOSITE SENTIMENT ===
+  const cs = (d.intelligence||{}).composite_sentiment || {};
+  if(cs.composite_score !== undefined) {
+    const csv = cs.composite_score;
+    el('cs-score').textContent = csv;
+    el('cs-score').style.color = fgC(csv);
+    el('cs-label').textContent = (cs.label||'').toUpperCase() + ' · ' + ((cs.signal||'').toUpperCase());
+    el('cs-label').style.color = fgC(csv);
+    const comps = cs.components || {};
+    const barDefs = [
+      {key:'fear_greed', label:'FEAR/GREED', color:'var(--btc)'},
+      {key:'price_momentum', label:'PRICE MOM.', color:'var(--green)'},
+      {key:'news_sentiment', label:'NEWS', color:'var(--blue)'},
+      {key:'social_activity', label:'SOCIAL', color:'var(--violet)'},
+      {key:'miner_confidence', label:'MINERS', color:'var(--gold)'},
+    ];
+    el('cs-bars').innerHTML = barDefs.map(b => '<div class="cs-bar-row"><div class="cs-bar-name">'+b.label+'</div><div class="cs-bar-track"><div class="cs-bar-fill" style="width:'+(comps[b.key]||0)+'%;background:'+b.color+'"></div></div><div class="cs-bar-val">'+(comps[b.key]||0)+'</div></div>').join('');
+  }
+
+  // === V7: MACRO ===
+  const mc2 = (d.intelligence||{}).macro_context || {};
+  if(mc2.market_regime) {
+    el('macro-regime').textContent = (mc2.market_regime||'-').toUpperCase().replace(/_/g,' ');
+    el('macro-regime-desc').textContent = mc2.regime_description || '-';
+    el('macro-dom').textContent = (mc2.btc_dominance_pct||0) + '%';
+    el('macro-bgr').textContent = mc2.btc_gold_ratio ? mc2.btc_gold_ratio + 'x' : 'N/A';
+  }
+
+  // === V7: LEARNING GOALS ===
+  const lg = d.learning_goals || {};
+  const goals = lg.current_goals || [];
+  const prevGoals = lg.previous_goals_scored || [];
+  if(el('goals-rate')) el('goals-rate').textContent = (lg.goals_achieved_rate||0) + '% goals achieved lifetime';
+  const gb = el('goals-body');
+  if(gb) {
+    gb.innerHTML = goals.length ? goals.map(g => '<div class="goal-item"><div class="goal-topic">'+g.topic.replace(/_/g,' ').toUpperCase()+'</div><div class="goal-text">'+g.goal+'</div><span class="goal-badge pending">ACTIVE THIS CYCLE</span></div>').join('') +
+    (prevGoals.length ? '<div style="font-size:9px;color:var(--muted2);letter-spacing:2px;margin:12px 0 8px">PREVIOUS CYCLE RESULTS</div>' + prevGoals.slice(-3).map(g => '<div class="goal-item"><div class="goal-topic">'+g.topic.replace(/_/g,' ').toUpperCase()+'</div><div class="goal-text">'+g.goal+'</div><span class="goal-badge '+(g.achieved?'achieved':'failed')+'">'+(g.achieved?'ACHIEVED':'NOT YET')+'</span></div>').join('') : '')
+    : '<div style="color:var(--muted2);font-size:11px">Goals set next cycle.</div>';
+  }
+
+  // === V7: GLOSSARY ===
+  const gloss = (d.glossary||{}).terms || {};
+  const active = (d.glossary||{}).active_this_cycle || [];
+  if(el('gloss-count')) el('gloss-count').textContent = Object.keys(gloss).length + ' terms';
+  window._glossData = gloss;
+  window._activeTerms = active;
+  renderGloss(gloss, active, '');
+
+  // === V7: SOURCE HEALTH ===
+  const srcScores = (d.source_reliability||{}).source_scores || {};
+  const sg = el('src-grid');
+  if(sg && Object.keys(srcScores).length) {
+    sg.innerHTML = Object.entries(srcScores).map(([src, info]) =>
+      '<div class="src-item"><div class="src-name">'+src.toUpperCase()+'</div><div class="src-score '+(info.status||'')+'">'+info.score+'%</div><div class="src-status">'+(info.status||'-').toUpperCase()+'</div></div>'
+    ).join('');
+  }
+
   playLoad();
 }
 async function load(){try{const r=await fetch('data/knowledge.json?t='+Date.now());if(!r.ok)throw new Error(r.status);const d=await r.json();render(d);}catch(e){console.error('Load failed:',e);}}
 load();setInterval(load,5*60*1000);
+
+function renderGloss(terms, active, filter) {
+  const gg = el('gloss-grid');
+  if(!gg) return;
+  const entries = Object.entries(terms).filter(([t]) => !filter || t.toLowerCase().includes(filter.toLowerCase()) || (terms[t]||'').toLowerCase().includes(filter.toLowerCase()));
+  if(!entries.length){ gg.innerHTML = '<div style="color:var(--muted2);font-size:11px;padding:8px">No matching terms.</div>'; return; }
+  gg.innerHTML = entries.map(([term, def]) =>
+    '<div class="gloss-item'+(active.includes(term)?' active-term':'')+'" onclick="this.classList.toggle('open')"><div class="gloss-term">'+term+'</div><div class="gloss-def">'+def+'</div></div>'
+  ).join('');
+}
+function filterGloss(q) { renderGloss(window._glossData||{}, window._activeTerms||[], q); }
+
 </script></body></html>
