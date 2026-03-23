@@ -132,6 +132,29 @@ canvas#mc{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}canva
 .footer{text-align:center;padding:34px 0 16px;border-top:1px solid var(--border)}.fl2{font-size:10px;color:var(--muted2);letter-spacing:3px;margin-bottom:5px}.fa2{font-size:11px;color:var(--btc)}.fs{font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:1px}
 .ld{display:flex;align-items:center;height:48px;gap:6px}.ld span{width:7px;height:7px;border-radius:50%;background:var(--btc);animation:bl .8s ease-in-out infinite}.ld span:nth-child(2){animation-delay:.12s}.ld span:nth-child(3){animation-delay:.24s}@keyframes bl{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
 @media(max-width:600px){.hero{grid-template-columns:1fr}.hp{font-size:56px}.bn{font-size:18px}.cb{font-size:32px}}
+
+/* ALERTS */
+.alerts-panel{margin-bottom:22px}.alert-item{padding:12px 16px;background:var(--card);border:1px solid var(--border);border-left:3px solid;border-radius:0 6px 6px 0;display:flex;gap:12px;align-items:flex-start;margin-bottom:6px;transition:all .2s;animation:msgin .3s ease}
+.alert-item:hover{background:var(--card2)}.alert-item.critical{border-left-color:var(--red)}.alert-item.warning{border-left-color:#FFB347}.alert-item.bullish{border-left-color:var(--green)}.alert-item.info{border-left-color:var(--blue)}
+.alert-icon{font-size:18px;flex-shrink:0}.alert-body{flex:1;min-width:0}.alert-type{font-size:9px;letter-spacing:2px;margin-bottom:4px;font-weight:700}.alert-item.critical .alert-type{color:var(--red)}.alert-item.warning .alert-type{color:#FFB347}.alert-item.bullish .alert-type{color:var(--green)}.alert-item.info .alert-type{color:var(--blue)}
+.alert-msg{font-size:12px;color:var(--cream2);line-height:1.6}.alert-ts{font-size:9px;color:var(--muted2);margin-top:4px}
+/* PREDICTIONS LOG */
+.pred-log{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:22px}
+.pred-log-header{padding:14px 18px;background:linear-gradient(90deg,rgba(155,89,182,.08),transparent);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.pred-stats{display:flex;gap:16px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border)}
+.pstat{text-align:center}.pstat .psv{font-family:"Barlow Condensed",sans-serif;font-size:28px;font-weight:900;color:var(--gold);line-height:1}.pstat .psl{font-size:9px;color:var(--muted2);letter-spacing:2px;margin-top:3px}
+.pred-log-body{max-height:260px;overflow-y:auto}.pred-row{padding:9px 18px;border-bottom:1px solid rgba(247,147,26,.04);display:grid;grid-template-columns:50px 80px 90px 80px 80px 1fr;gap:10px;align-items:center;font-size:11px;transition:background .15s}
+.pred-row:hover{background:rgba(247,147,26,.04)}.pred-row.win .pr-result{color:var(--green)}.pred-row.loss .pr-result{color:var(--red)}.pred-row.neutral .pr-result{color:var(--muted2)}
+.pr-gen{font-size:9px;color:var(--muted2)}.pr-date{font-size:9px;color:var(--muted2)}.pr-pred{font-size:10px;font-weight:700}.pr-pred.bullish{color:var(--green)}.pr-pred.bearish{color:var(--red)}.pr-pred.neutral{color:var(--gold)}.pr-actual{font-size:10px}.pr-pct{font-size:11px;font-weight:700}.pr-result{font-size:10px;letter-spacing:1px}
+/* HEALTH */
+.health-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:22px;flex-wrap:wrap}
+.health-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:blink 1s infinite}.health-dot.healthy{background:var(--green);box-shadow:0 0 8px var(--green)}.health-dot.stalled{background:var(--red);box-shadow:0 0 8px var(--red)}.health-dot.initializing{background:var(--gold)}
+.health-status{font-family:"Orbitron",monospace;font-size:11px;font-weight:700}.health-status.healthy{color:var(--green)}.health-status.stalled{color:var(--red)}.health-detail{font-size:10px;color:var(--muted2);flex:1}
+/* WIN RATE BANNER */
+.wr-banner{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:22px}
+.wr-card{flex:1;min-width:140px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:6px;position:relative;overflow:hidden}
+.wr-card::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--btc));opacity:.6}
+.wr-val{font-family:"Barlow Condensed",sans-serif;font-size:36px;font-weight:900;color:var(--violet);line-height:1}.wr-label{font-size:9px;color:var(--muted2);letter-spacing:2px;margin-top:4px}.wr-streak{font-size:10px;margin-top:3px}
 </style></head><body>
 <canvas id="mc"></canvas><canvas id="pc"></canvas>
 <div class="scan"></div><div class="vig"></div>
@@ -263,6 +286,23 @@ canvas#mc{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}canva
 <div class="dg" id="dg"><div class="ld"><span></span><span></span><span></span></div></div>
 <div class="sh">Ollie's Learning History</div>
 <div class="evo"><div class="pl" style="margin-bottom:10px">BITCOIN PRICE ACROSS ALL LEARNING CYCLES</div><div class="ec" id="ec"></div><div class="es" id="es">Accumulating history...</div></div>
+
+<div class="sh">Autonomous Alert Engine</div>
+<div class="alerts-panel" id="alerts-panel"><div class="ld"><span></span><span></span><span></span></div></div>
+<div class="sh">Prediction Win/Loss Record</div>
+<div class="wr-banner">
+  <div class="wr-card"><div class="wr-val" id="wr-rate">-%</div><div class="wr-label">WIN RATE</div><div class="wr-streak" id="wr-streak">-</div></div>
+  <div class="wr-card"><div class="wr-val" id="wr-wins" style="color:var(--green)">-</div><div class="wr-label">WINS</div><div class="wr-streak" style="color:var(--green)">correct predictions</div></div>
+  <div class="wr-card"><div class="wr-val" id="wr-losses" style="color:var(--red)">-</div><div class="wr-label">LOSSES</div><div class="wr-streak" style="color:var(--red)">wrong predictions</div></div>
+  <div class="wr-card"><div class="wr-val" id="wr-total">-</div><div class="wr-label">SCORED</div><div class="wr-streak" style="color:var(--muted3)">total predictions</div></div>
+</div>
+<div class="pred-log" id="pred-log-panel">
+  <div class="pred-log-header">
+    <div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--violet);letter-spacing:3px">PREDICTION LOG</div>
+    <div style="font-size:9px;color:var(--muted2)">Every prediction Ollie made vs actual outcome</div>
+  </div>
+  <div class="pred-log-body" id="pred-log-body"><div class="ld" style="padding:16px"><span></span><span></span><span></span></div></div>
+</div>
 <div class="footer"><div class="fl2">OLLIE v6.0 &mdash; SELF-IMPROVING LIVING BITCOIN ORGANISM &mdash; RUNS FOREVER</div><div class="fa2">Learns every 6h &middot; Self-critiques insights &middot; Bitcoin quiz &middot; Knowledge graph &middot; Growth metrics &middot; Proof-of-work game &middot; &#129505;</div><div class="fs">Zero API keys &middot; GitHub Actions &middot; Neural log every cycle &middot; Consciousness diary grows forever &middot; Never stops</div></div>
 </div>
 <script>
@@ -348,6 +388,29 @@ function render(d){
   const evc=el('ec');if(evo.length>1){const prices=evo.map(e=>e.price_usd||0).filter(p=>p>0);const mxp=Math.max(...prices,1);evc.innerHTML=evo.slice(-80).map((e,i,arr)=>{const lt=i===arr.length-1;return'<div class="eb '+(lt?'lt':'')+'" style="height:'+Math.max(5,(e.price_usd||0)/mxp*100)+'%" title="Gen '+e.generation+' | $'+fmt(e.price_usd)+'"></div>';}).join('');el('es').textContent=evo.length+' cycles - Latest: $'+fmt(evo[evo.length-1].price_usd)+' - Accuracy: '+(meta.prediction_accuracy_pct||0)+'%';}
   if(quiz.questions&&quiz.questions.length&&!qData.length){qData=quiz.questions;renderQuiz();}
   if(kg)renderKG(kg);if(gm)renderGrowth(gm);renderBlocks(blocks);
+
+  // Alerts
+  const alertsData=(d.alerts||{}).recent||[];
+  const allAlerts=(d.alerts||{}).log||[];
+  const ap=el('alerts-panel');
+  const alertIcons={extreme_fear:'&#128680;',extreme_greed:'&#128274;',price_surge:'&#128640;',price_crash:'&#128308;',hash_ath:'&#9889;',halving_imminent:'&#128276;',halving_soon:'&#8987;',mempool_congestion:'&#128246;'};
+  if(ap){ap.innerHTML=allAlerts.length?allAlerts.slice(-6).reverse().map(a=>'<div class="alert-item '+(a.level||'info')+'"><div class="alert-icon">'+(alertIcons[a.type]||'&#9888;')+'</div><div class="alert-body"><div class="alert-type">'+(a.type||'').replace(/_/g,' ').toUpperCase()+'</div><div class="alert-msg">'+(a.msg||'')+'</div><div class="alert-ts">Gen '+(a.gen||'-')+' &middot; '+(a.ts||'')+'</div></div></div>').join(''):'<div style="padding:16px;color:var(--muted2);font-size:11px">No alerts triggered yet. Ollie monitors for extreme fear/greed, price surges, hash ATH, and halving proximity every cycle.</div>';}
+  // Predictions log
+  const pl=(d.predictions_log||{});
+  const plRate=pl.win_rate||0;const plWins=pl.wins||0;const plLoss=pl.losses||0;const plTotal=pl.total_scored||0;
+  const plStreak=pl.current_streak||{};
+  if(el('wr-rate'))el('wr-rate').textContent=plRate+'%';
+  if(el('wr-wins'))el('wr-wins').textContent=plWins;
+  if(el('wr-losses'))el('wr-losses').textContent=plLoss;
+  if(el('wr-total'))el('wr-total').textContent=plTotal;
+  if(el('wr-streak'))el('wr-streak').textContent=plStreak.count?(plStreak.count+' '+plStreak.type+' streak'):'No streak yet';
+  const plb=el('pred-log-body');
+  if(plb){const rows=(pl.log||[]).slice().reverse();plb.innerHTML=rows.length?'<div style="display:grid;grid-template-columns:50px 80px 90px 80px 80px 1fr;gap:10px;padding:8px 18px;font-size:9px;color:var(--muted2);border-bottom:1px solid var(--border);letter-spacing:1px"><span>GEN</span><span>DATE</span><span>PREDICTED</span><span>ACTUAL</span><span>MOVE</span><span>RESULT</span></div>'+rows.map(r=>{const correct=r.correct;const cls=correct===true?'win':correct===false?'loss':'neutral';const pct=r.pct>=0?'+'+r.pct+'%':r.pct+'%';const resText=correct===true?'CORRECT':correct===false?'WRONG':'N/A';return'<div class="pred-row '+cls+'"><span class="pr-gen">'+r.gen+'</span><span class="pr-date">'+(r.date||'').slice(5)+'</span><span class="pr-pred '+(r.predicted||'neutral')+'">'+((r.predicted||'neutral').toUpperCase().replace(/-/g,' '))+'</span><span class="pr-actual">'+(r.actual||'-').toUpperCase()+'</span><span class="pr-pct '+(r.pct>=0?'up':'dn')+'">'+pct+'</span><span class="pr-result">'+resText+'</span></div>';}).join(''):'<div style="padding:16px;color:var(--muted2);font-size:11px">Predictions log builds up over cycles. Check back after a few more autonomous runs.</div>';}
+  // Health status
+  const health=(meta.cycle_health||{});
+  let hb=el('health-bar');
+  if(!hb){const hd=document.createElement('div');hd.id='health-bar';hd.className='health-bar';el('bm').parentNode.parentNode.insertBefore(hd,el('bm').parentNode.parentNode.firstChild);}
+
   playLoad();
 }
 async function load(){try{const r=await fetch('data/knowledge.json?t='+Date.now());if(!r.ok)throw new Error(r.status);const d=await r.json();render(d);}catch(e){console.error('Load failed:',e);}}
