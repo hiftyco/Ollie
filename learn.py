@@ -440,59 +440,401 @@ def evolve(existing):
     acc=round(sum(1 for e in scored if e["prediction_score"]>0)/len(scored)*100,1) if scored else 0
     return log,acc
 
+
+# ═══ AUTONOMOUS FEATURE: Alerts Engine ══════════════════════════════════════
+def detect_alerts(price, fg, chain, mempool, hv, existing_alerts, generation):
+    """Detect significant market/network events and log them as alerts."""
+    now = datetime.now(timezone.utc)
+    alerts = existing_alerts[-200:] if existing_alerts else []
+    p = (price or {}).get("price_usd", 0)
+    c24 = (price or {}).get("change_24h_pct", 0)
+    fgv = (fg or {}).get("value", 50)
+    hr = (chain or {}).get("hash_rate_ehs", 0)
+    bl = (hv or {}).get("blocks_remaining", 999999)
+    uc = (mempool or {}).get("unconfirmed_txs", 0)
+    new_alerts = []
+    ts = now.strftime("%Y-%m-%d %H:%M UTC")
+
+    if fgv <= 15:
+        new_alerts.append({"type":"extreme_fear","level":"critical","ts":ts,"gen":generation,
+            "msg":f"EXTREME FEAR {fgv}/100 - Historically a generational buying signal. Every previous extreme fear resolved to new ATH.","value":fgv})
+    elif fgv >= 88:
+        new_alerts.append({"type":"extreme_greed","level":"warning","ts":ts,"gen":generation,
+            "msg":f"EXTREME GREED {fgv}/100 - Maximum euphoria. Historical peak zone. Discipline over impulse.","value":fgv})
+
+    if c24 >= 8:
+        new_alerts.append({"type":"price_surge","level":"info","ts":ts,"gen":generation,
+            "msg":f"BTC surged +{c24:.1f}% in 24h. Strong momentum. Watch for volume confirmation.","value":c24})
+    elif c24 <= -8:
+        new_alerts.append({"type":"price_crash","level":"warning","ts":ts,"gen":generation,
+            "msg":f"BTC dropped {c24:.1f}% in 24h. Significant correction. On-chain data will clarify if capitulation.","value":c24})
+
+    if hr > 900:
+        new_alerts.append({"type":"hash_ath","level":"bullish","ts":ts,"gen":generation,
+            "msg":f"HASH RATE ALL-TIME HIGH: {hr} EH/s. The network has never been more secure. Miners committed long-term capital.","value":hr})
+
+    if 0 < bl <= 10000:
+        new_alerts.append({"type":"halving_imminent","level":"critical","ts":ts,"gen":generation,
+            "msg":f"HALVING IMMINENT: Only {bl:,} blocks remaining! Supply emission about to be cut in half forever.","value":bl})
+    elif 0 < bl <= 50000:
+        new_alerts.append({"type":"halving_soon","level":"warning","ts":ts,"gen":generation,
+            "msg":f"Pre-halving zone: {bl:,} blocks remaining. Historical accumulation territory active.","value":bl})
+
+    if uc > 200000:
+        new_alerts.append({"type":"mempool_congestion","level":"info","ts":ts,"gen":generation,
+            "msg":f"MEMPOOL CONGESTED: {uc:,} unconfirmed transactions. High demand for block space. Fees elevated.","value":uc})
+
+    # Deduplicate by type within last 6 cycles
+    recent_types = {a["type"] for a in alerts[-24:]}
+    for a in new_alerts:
+        if a["type"] not in recent_types:
+            alerts.append(a)
+            print(f"  ALERT: [{a['level'].upper()}] {a['type']} - {a['msg'][:60]}")
+
+    return alerts[-200:]
+
+
+# ═══ AUTONOMOUS FEATURE: Chart Data Builder ══════════════════════════════════
+def build_chart_data(price_history, evolution_log):
+    """Build structured chart data for the UI price chart."""
+    ph = price_history[-168:] if price_history else []  # Last 7 days of 1h data
+    ev = evolution_log[-30:] if evolution_log else []   # Last 30 cycles
+
+    # 7-day sparkline
+    sparkline = [{"t": e.get("ts", ""), "p": e.get("p", 0), "fg": e.get("fg", 50)} for e in ph if e.get("p", 0) > 0]
+
+    # Cycle performance
+    cycle_perf = []
+    for i, e in enumerate(ev):
+        prev_p = ev[i-1].get("price_usd", 0) if i > 0 else 0
+        curr_p = e.get("price_usd", 0)
+        pct = round((curr_p - prev_p) / prev_p * 100, 2) if prev_p and curr_p else 0
+        cycle_perf.append({
+            "gen": e.get("generation", i+1),
+            "date": e.get("date", ""),
+            "price": curr_p,
+            "pct": pct,
+            "outlook": e.get("prediction_outlook", "neutral"),
+            "fg": e.get("fg_value", 50),
+            "score": e.get("prediction_score", None),
+        })
+
+    # Price stats
+    prices = [e.get("p", 0) for e in ph if e.get("p", 0) > 0]
+    stats = {}
+    if prices:
+        stats = {
+            "high_7d": max(prices),
+            "low_7d": min(prices),
+            "avg_7d": round(sum(prices) / len(prices), 2),
+            "volatility_7d": round((max(prices) - min(prices)) / min(prices) * 100, 2) if min(prices) else 0,
+        }
+
+    return {"sparkline": sparkline, "cycle_performance": cycle_perf, "stats": stats}
+
+
+# ═══ AUTONOMOUS FEATURE: Cycle Health Monitor ════════════════════════════════
+def check_cycle_health(evolution_log, now):
+    """Detect if cycles are running on schedule. Flag stalls."""
+    if len(evolution_log) < 2:
+        return {"status": "initializing", "last_cycle": "N/A", "hours_since": 0, "on_schedule": True}
+    last = evolution_log[-1]
+    last_ts = last.get("timestamp", "")
+    try:
+        from datetime import timezone as tz
+        last_dt = datetime.fromisoformat(last_ts.replace("Z", "+00:00"))
+        hours_since = (now - last_dt).total_seconds() / 3600
+        on_schedule = hours_since <= 8
+        status = "healthy" if on_schedule else "stalled"
+        return {
+            "status": status,
+            "last_cycle": last.get("date", "") + " " + last.get("cycle_utc", ""),
+            "hours_since": round(hours_since, 1),
+            "on_schedule": on_schedule,
+            "total_cycles": len(evolution_log),
+            "avg_accuracy": round(sum(e.get("prediction_score", 0) or 0 for e in evolution_log[-20:]) / min(20, len(evolution_log)), 2),
+        }
+    except Exception:
+        return {"status": "unknown", "last_cycle": last_ts, "hours_since": 0, "on_schedule": True}
+
+
+# ═══ AUTONOMOUS FEATURE: Cycle Report Writer ═════════════════════════════════
+def write_cycle_report(knowledge, generation, price, fg, chain, prediction, insights, alerts, accuracy):
+    now = datetime.now(timezone.utc)
+    p = (price or {}).get("price_usd", 0)
+    fgv = (fg or {}).get("value", 50)
+    fgl = (fg or {}).get("label", "Neutral")
+    hr = (chain or {}).get("hash_rate_ehs", 0)
+    outlook = (prediction or {}).get("outlook", "neutral")
+    conf = (prediction or {}).get("confidence", 0)
+    hq = sum(1 for x in insights if x.get("quality") == "high")
+    new_alerts = [a for a in alerts[-10:] if a.get("gen") == generation]
+    lines = [
+        "# Ollie Cycle Report - Generation " + str(generation),
+        "**Date:** " + now.strftime("%B %d, %Y at %H:%M UTC"),
+        "**Version:** v6.1 Self-Improving Bitcoin Organism",
+        "",
+        "## Market Snapshot",
+        "- **Bitcoin Price:** $" + f"{p:,.2f}",
+        "- **Fear & Greed:** " + str(fgv) + "/100 - " + fgl,
+        "- **Hash Rate:** " + str(hr) + " EH/s",
+        "- **Prediction:** " + outlook.upper() + " (" + str(conf) + "% confidence)",
+        "- **Accuracy (lifetime):** " + str(accuracy) + "%",
+        "",
+        "## Intelligence Quality",
+        "- **High-Quality Insights:** " + str(hq) + "/" + str(len(insights)),
+        "- **Cycle Alerts:** " + str(len(new_alerts)),
+        "",
+        "## Top Insights",
+    ]
+    for ins in insights[:3]:
+        lines.append("- [" + (ins.get("level") or "").upper() + "] " + (ins.get("text") or "")[:120])
+    if new_alerts:
+        lines.append("")
+        lines.append("## Alerts This Cycle")
+        for a in new_alerts:
+            lines.append("- [" + (a.get("level") or "").upper() + "] " + (a.get("msg") or ""))
+    lines.append("")
+    lines.append("---")
+    lines.append("*Generated autonomously by Ollie v6.1 every 6 hours. Runs forever.*")
+    report = "\n".join(lines) + "\n"
+    os.makedirs("data/reports", exist_ok=True)
+    fname = "data/reports/cycle_" + str(generation).zfill(4) + ".md"
+    with open(fname, "w") as f:
+        f.write(report)
+    with open("data/reports/latest.md", "w") as f:
+        f.write(report)
+    print("  Report: " + fname)
+    return report
+
+
+def score_predictions_log(evolution_log):
+    """Build a detailed predictions log with win/loss record."""
+    log = []
+    for i, e in enumerate(evolution_log):
+        if i == 0:
+            continue
+        prev = evolution_log[i-1]
+        lp, pp = e.get("price_usd", 0), prev.get("price_usd", 0)
+        outlook = prev.get("prediction_outlook", "neutral")
+        if not lp or not pp:
+            continue
+        actual_up = lp > pp
+        predicted_up = "bullish" in outlook
+        predicted_down = "bearish" in outlook
+        if predicted_up:
+            correct = actual_up
+        elif predicted_down:
+            correct = not actual_up
+        else:
+            correct = None  # neutral - no prediction
+        log.append({
+            "gen": e.get("generation"),
+            "date": e.get("date", ""),
+            "predicted": outlook,
+            "actual": "up" if actual_up else "down",
+            "price_then": pp,
+            "price_now": lp,
+            "pct": round((lp - pp) / pp * 100, 2) if pp else 0,
+            "correct": correct,
+        })
+    wins = sum(1 for e in log if e.get("correct") is True)
+    losses = sum(1 for e in log if e.get("correct") is False)
+    total = wins + losses
+    return {
+        "log": log[-50:],
+        "wins": wins,
+        "losses": losses,
+        "total_scored": total,
+        "win_rate": round(wins / total * 100, 1) if total else 0,
+        "current_streak": _calc_streak(log),
+    }
+
+
+def _calc_streak(log):
+    """Calculate current win/loss streak."""
+    if not log:
+        return {"type": "none", "count": 0}
+    streak = 0
+    last = None
+    for e in reversed(log):
+        c = e.get("correct")
+        if c is None:
+            break
+        if last is None:
+            last = c
+        if c == last:
+            streak += 1
+        else:
+            break
+    return {"type": "win" if last else "loss", "count": streak}
+
+
+
 def main():
-    print("OLLIE v6.0 - Self-Improving Bitcoin Organism")
+    print("=" * 60)
+    print("OLLIE v6.1 - Autonomous Self-Improving Bitcoin Organism")
     print(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"))
-    existing={}
+    print("=" * 60)
+
+    existing = {}
     if os.path.exists(DATA_FILE):
         try:
-            with open(DATA_FILE) as f:existing=json.load(f)
-        except:pass
-    evo_log,accuracy=evolve(existing)
-    generation=len(evo_log)+1
-    now=datetime.now(timezone.utc)
-    days_alive=(now-datetime(2009,1,3,tzinfo=timezone.utc)).days
-    status=ORGANISM_STATES[generation%len(ORGANISM_STATES)]
-    print(f"\n[PHASE 1] Data acquisition...")
-    price=get_price()
-    print("  [FG]");fg=get_fg()
-    print("  [CHAIN]");chain=get_chain()
-    print("  [MEMPOOL]");mempool=get_mempool()
-    print("  [LIGHTNING]");ln=get_lightning()
-    blocks=get_blocks()
-    print("\n[PHASE 2] Intelligence absorption...")
-    headlines=get_news();discussions=get_discussions();bips=get_bips();dev_updates=get_dev_updates()
-    print("\n[PHASE 3] Consciousness synthesis...")
-    raw_insights=gen_insights(price,fg,chain,mempool)
-    critiqued=self_critique(raw_insights)
-    tips=gen_tips(price,fg);thought=gen_thought(price,chain,fg,mempool,generation,accuracy)
-    prediction=gen_prediction(price,fg,chain);personality=get_personality((fg or {}).get("value",50))
-    print("\n[PHASE 4] Neural log + diary...")
-    neural_log=build_neural_log(price,fg,chain,mempool,ln,headlines,generation,accuracy,dev_updates,blocks)
-    diary_entry=build_deep_thought(price,fg,chain,mempool,headlines,generation,accuracy)
-    existing_diary=existing.get("consciousness",{}).get("diary",[])
-    existing_diary.append(diary_entry)
-    if len(existing_diary)>MAX_DIARY:existing_diary=existing_diary[-MAX_DIARY:]
-    print("\n[PHASE 5] Self-improvement...")
-    quiz=gen_quiz(generation)
-    existing_graph=existing.get("knowledge_graph",{}).get("scores",{})
-    kg=update_knowledge_graph(existing_graph,critiqued,headlines,generation)
-    gm=growth_metrics(evo_log,accuracy)
-    print(f"  Quiz: {len(quiz)} Qs | KG: {len(kg['scores'])} topics | Accuracy: {accuracy}%")
-    bh=(chain or {}).get("block_height") or (mempool or {}).get("block_height") or 0
-    bl=max(0,NEXT_HALVING-bh) if bh else 0;ed=round(bl*10/1440,1) if bl else 0;pp=round((bh%210000)/210000*100,2) if bh else 0
-    halving={"current_reward_btc":REWARD,"next_block":NEXT_HALVING,"current_block":bh,"blocks_remaining":bl,"estimated_days":ed,"progress_pct":pp}
-    chat=build_chat(price,fg,chain,mempool,halving,generation)
-    evo_log.append({"generation":generation,"timestamp":now.isoformat(),"date":now.strftime("%Y-%m-%d"),"cycle_utc":now.strftime("%H:00"),"price_usd":(price or {}).get("price_usd",0),"fg_value":(fg or {}).get("value",0),"headlines_absorbed":len(headlines),"insights_generated":len(critiqued),"prediction_outlook":prediction["outlook"],"hash_rate_ehs":(chain or {}).get("hash_rate_ehs",0),"personality_mood":personality["mood"],"high_quality_insights":sum(1 for x in critiqued if x.get("quality")=="high")})
-    if len(evo_log)>MAX_EVO:evo_log=evo_log[-MAX_EVO:]
-    ph=existing.get("price_history",[])
-    if price and price.get("price_usd",0)>0:
-        ph.append({"ts":now.strftime("%Y-%m-%d %H:00"),"p":round(price["price_usd"],2),"c":price.get("change_24h_pct",0),"fg":(fg or {}).get("value",50)})
-        if len(ph)>MAX_PH:ph=ph[-MAX_PH:]
-    knowledge={"meta":{"version":"6.0","generation":generation,"last_updated":now.isoformat(),"last_updated_human":now.strftime("%B %d, %Y at %H:%M UTC"),"update_cycle":"every 6 hours","days_alive":days_alive,"mission":"I am Ollie. A Living Bitcoin Organism. I self-improve every cycle. I run forever.","prediction_accuracy_pct":accuracy,"total_cycles":generation,"organism_status":status,"personality":personality},"current":{"price":price,"fear_greed":fg,"blockchain":chain,"mempool":mempool,"lightning":ln,"halving":halving,"latest_blocks":blocks},"intelligence":{"todays_thought":thought,"todays_prediction":prediction,"todays_insights":critiqued,"todays_tips":tips,"todays_fact":FACTS[int(now.strftime("%j"))%len(FACTS)],"dev_updates":dev_updates},"consciousness":{"neural_log":neural_log,"diary":existing_diary,"current_thought":thought,"generation":generation,"last_cycle_time":now.strftime("%Y-%m-%d %H:%M UTC")},"quiz":{"questions":quiz,"generation":generation,"total_available":len(QUIZ_QUESTIONS)},"knowledge_graph":kg,"growth_metrics":gm,"news":{"headlines":headlines,"discussions":discussions,"bip_updates":bips},"education":{"learning_paths":LEARNING_PATHS,"all_facts":FACTS},"chat":{"responses":chat,"version":"6.0"},"evolution_log":evo_log,"price_history":ph}
-    os.makedirs("data",exist_ok=True)
-    with open(DATA_FILE,"w") as f:json.dump(knowledge,f,indent=2,default=str)
-    hq=sum(1 for x in critiqued if x.get("quality")=="high")
-    print(f"\nOLLIE v6.0 CYCLE {generation} COMPLETE | ${(price or {}).get('price_usd',0):,.0f} | {prediction['outlook']} | {accuracy}% accuracy | {hq}/{len(critiqued)} HQ insights | {len(neural_log)} neural entries | {len(existing_diary)} diary entries")
+            with open(DATA_FILE) as f:
+                existing = json.load(f)
+        except:
+            pass
 
-if __name__=="__main__":main()
+    evo_log, accuracy = evolve(existing)
+    generation = len(evo_log) + 1
+    now = datetime.now(timezone.utc)
+    days_alive = (now - datetime(2009, 1, 3, tzinfo=timezone.utc)).days
+    status = ORGANISM_STATES[generation % len(ORGANISM_STATES)]
+
+    print(f"\n[PHASE 1] Data acquisition (Generation {generation})...")
+    price = get_price()
+    print("  [FG]"); fg = get_fg()
+    print("  [CHAIN]"); chain = get_chain()
+    print("  [MEMPOOL]"); mempool = get_mempool()
+    print("  [LIGHTNING]"); ln = get_lightning()
+    blocks = get_blocks()
+
+    print("\n[PHASE 2] Intelligence absorption...")
+    headlines = get_news()
+    discussions = get_discussions()
+    bips = get_bips()
+    dev_updates = get_dev_updates()
+
+    print("\n[PHASE 3] Consciousness synthesis...")
+    raw_insights = gen_insights(price, fg, chain, mempool)
+    critiqued = self_critique(raw_insights)
+    tips = gen_tips(price, fg)
+    thought = gen_thought(price, chain, fg, mempool, generation, accuracy)
+    prediction = gen_prediction(price, fg, chain)
+    personality = get_personality((fg or {}).get("value", 50))
+
+    print("\n[PHASE 4] Neural log + diary...")
+    neural_log = build_neural_log(price, fg, chain, mempool, ln, headlines, generation, accuracy, dev_updates, blocks)
+    diary_entry = build_deep_thought(price, fg, chain, mempool, headlines, generation, accuracy)
+    existing_diary = existing.get("consciousness", {}).get("diary", [])
+    existing_diary.append(diary_entry)
+    if len(existing_diary) > MAX_DIARY:
+        existing_diary = existing_diary[-MAX_DIARY:]
+
+    print("\n[PHASE 5] Self-improvement systems...")
+    quiz = gen_quiz(generation)
+    existing_graph = existing.get("knowledge_graph", {}).get("scores", {})
+    kg = update_knowledge_graph(existing_graph, critiqued, headlines, generation)
+    gm = growth_metrics(evo_log, accuracy)
+    print(f"  Quiz: {len(quiz)} Qs | KG: {len(kg['scores'])} topics | Accuracy: {accuracy}%")
+
+    print("\n[PHASE 6] Autonomous intelligence systems...")
+    # Alerts engine
+    existing_alerts = existing.get("alerts", {}).get("log", [])
+    bh = (chain or {}).get("block_height") or (mempool or {}).get("block_height") or 0
+    bl = max(0, NEXT_HALVING - bh) if bh else 0
+    ed = round(bl * 10 / 1440, 1) if bl else 0
+    pp_pct = round((bh % 210000) / 210000 * 100, 2) if bh else 0
+    halving = {"current_reward_btc": REWARD, "next_block": NEXT_HALVING, "current_block": bh,
+               "blocks_remaining": bl, "estimated_days": ed, "progress_pct": pp_pct}
+
+    alerts_log = detect_alerts(price, fg, chain, mempool, halving, existing_alerts, generation)
+    recent_alerts = [a for a in alerts_log if a.get("gen") == generation]
+    print(f"  Alerts: {len(recent_alerts)} new this cycle | {len(alerts_log)} total")
+
+    # Chart data
+    ph = existing.get("price_history", [])
+    if price and price.get("price_usd", 0) > 0:
+        ph.append({"ts": now.strftime("%Y-%m-%d %H:00"), "p": round(price["price_usd"], 2),
+                   "c": price.get("change_24h_pct", 0), "fg": (fg or {}).get("value", 50)})
+        if len(ph) > MAX_PH:
+            ph = ph[-MAX_PH:]
+    chart_data = build_chart_data(ph, evo_log)
+
+    # Cycle health
+    health = check_cycle_health(evo_log, now)
+    print(f"  Health: {health['status']} | {health['hours_since']}h since last cycle")
+
+    # Predictions log
+    pred_log = score_predictions_log(evo_log)
+    print(f"  Predictions: {pred_log['wins']}W/{pred_log['losses']}L | {pred_log['win_rate']}% win rate | streak: {pred_log['current_streak']['count']} {pred_log['current_streak']['type']}")
+
+    # Cycle report
+    write_cycle_report(existing, generation, price, fg, chain, prediction, critiqued, alerts_log, accuracy)
+
+    evo_log.append({
+        "generation": generation, "timestamp": now.isoformat(), "date": now.strftime("%Y-%m-%d"),
+        "cycle_utc": now.strftime("%H:00"), "price_usd": (price or {}).get("price_usd", 0),
+        "fg_value": (fg or {}).get("value", 0), "headlines_absorbed": len(headlines),
+        "insights_generated": len(critiqued), "prediction_outlook": prediction["outlook"],
+        "hash_rate_ehs": (chain or {}).get("hash_rate_ehs", 0),
+        "personality_mood": personality["mood"],
+        "high_quality_insights": sum(1 for x in critiqued if x.get("quality") == "high"),
+        "alerts_triggered": len(recent_alerts),
+    })
+    if len(evo_log) > MAX_EVO:
+        evo_log = evo_log[-MAX_EVO:]
+
+    chat = build_chat(price, fg, chain, mempool, halving, generation)
+
+    knowledge = {
+        "meta": {
+            "version": "6.1", "generation": generation,
+            "last_updated": now.isoformat(),
+            "last_updated_human": now.strftime("%B %d, %Y at %H:%M UTC"),
+            "update_cycle": "every 6 hours", "days_alive": days_alive,
+            "mission": "I am Ollie. A Living Bitcoin Organism. I self-improve every cycle. I run forever.",
+            "prediction_accuracy_pct": accuracy, "total_cycles": generation,
+            "organism_status": status, "personality": personality,
+            "cycle_health": health,
+        },
+        "current": {
+            "price": price, "fear_greed": fg, "blockchain": chain,
+            "mempool": mempool, "lightning": ln, "halving": halving, "latest_blocks": blocks,
+        },
+        "intelligence": {
+            "todays_thought": thought, "todays_prediction": prediction,
+            "todays_insights": critiqued, "todays_tips": tips,
+            "todays_fact": FACTS[int(now.strftime("%j")) % len(FACTS)],
+            "dev_updates": dev_updates,
+        },
+        "consciousness": {
+            "neural_log": neural_log, "diary": existing_diary,
+            "current_thought": thought, "generation": generation,
+            "last_cycle_time": now.strftime("%Y-%m-%d %H:%M UTC"),
+        },
+        "quiz": {"questions": quiz, "generation": generation, "total_available": len(QUIZ_QUESTIONS)},
+        "knowledge_graph": kg,
+        "growth_metrics": gm,
+        "chart_data": chart_data,
+        "alerts": {
+            "log": alerts_log,
+            "recent": recent_alerts,
+            "total": len(alerts_log),
+        },
+        "predictions_log": pred_log,
+        "news": {"headlines": headlines, "discussions": discussions, "bip_updates": bips},
+        "education": {"learning_paths": LEARNING_PATHS, "all_facts": FACTS},
+        "chat": {"responses": chat, "version": "6.1"},
+        "evolution_log": evo_log,
+        "price_history": ph,
+    }
+
+    os.makedirs("data", exist_ok=True)
+    with open(DATA_FILE, "w") as f:
+        json.dump(knowledge, f, indent=2, default=str)
+
+    hq = sum(1 for x in critiqued if x.get("quality") == "high")
+    print(f"\n{'='*60}")
+    print(f"OLLIE v6.1 CYCLE {generation} COMPLETE")
+    print(f"  Price:    ${(price or {}).get('price_usd', 0):,.2f}")
+    print(f"  F&G:      {(fg or {}).get('value', 0)}/100 - {(fg or {}).get('label', '')}")
+    print(f"  Outlook:  {prediction['outlook']} ({prediction['confidence']}%)")
+    print(f"  Accuracy: {accuracy}% | Win rate: {pred_log['win_rate']}%")
+    print(f"  Insights: {hq}/{len(critiqued)} HQ | Quiz: {len(quiz)}Q | Alerts: {len(recent_alerts)}")
+    print(f"  Health:   {health['status']} | {health['hours_since']}h since last")
+    print(f"{'='*60}")
+
+
+if __name__ == "__main__":
+    main()
