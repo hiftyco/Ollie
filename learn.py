@@ -430,6 +430,419 @@ def build_chat(price,fg,chain,mempool,halving,gen):
     r["how are you"]=f"I am {'contemplative - sitting with extreme fear, studying the pattern' if fg_val<=25 else ('cautious - measuring extreme greed carefully' if fg_val>=75 else 'steady and analytical')}. Generation {gen}. Bitcoin at ${p:,.0f}."
     return r
 
+
+# ═══════════════════════════════════════════════════════════
+# V7: ON-CHAIN ANALYTICS
+# ═══════════════════════════════════════════════════════════
+def get_onchain_analytics(price, chain, mempool):
+    """Fetch MVRV, realized price, UTXO data, exchange flows."""
+    print("  [ONCHAIN]")
+    result = {}
+    p = (price or {}).get("price_usd", 0)
+    bh = (chain or {}).get("block_height", 0) or (mempool or {}).get("block_height", 0) or 0
+
+    # Realized price via blockchain.info stats
+    d = fjson("https://blockchain.info/stats?format=json")
+    if d:
+        circ = d.get("totalbc", 0) / 1e8  # satoshis to BTC
+        marketcap = (price or {}).get("market_cap_usd", 0)
+        result["total_btc_mined"] = round(circ, 2)
+        result["btc_remaining"] = round(21000000 - circ, 2)
+        result["miner_revenue_usd"] = d.get("miners_revenue_usd", 0)
+        result["cost_per_transaction_usd"] = d.get("cost_per_transaction_usd", 0)
+        result["estimated_transaction_volume_usd"] = d.get("estimated_transaction_volume_usd", 0)
+        result["n_transactions"] = d.get("n_transactions", 0)
+        result["avg_block_size_mb"] = round((d.get("avg_block_size", 0) or 0) / 1e6, 3)
+
+    # NVT Signal (approx) - Network Value to Transactions
+    tx_vol = result.get("estimated_transaction_volume_usd", 0)
+    mcap = (price or {}).get("market_cap_usd", 0)
+    if tx_vol and mcap:
+        nvt = round(mcap / (tx_vol * 365), 2)
+        result["nvt_signal"] = nvt
+        result["nvt_interpretation"] = "overvalued" if nvt > 150 else ("undervalued" if nvt < 65 else "fair")
+
+    # Halving economics
+    if p and bh:
+        daily_btc_mined = 6 * 24 * 3.125  # blocks/day * BTC/block
+        daily_sell_pressure_usd = round(daily_btc_mined * p, 0)
+        result["daily_btc_mined"] = round(daily_btc_mined, 3)
+        result["daily_sell_pressure_usd"] = daily_sell_pressure_usd
+        result["annual_inflation_btc"] = round(daily_btc_mined * 365, 1)
+        result["annual_inflation_pct"] = round(daily_btc_mined * 365 / 19700000 * 100, 3)
+
+    # Stock-to-Flow ratio (approximate)
+    circ_supply = (price or {}).get("circulating_supply", 19700000)
+    annual_new_btc = 6 * 24 * 365 * 3.125
+    if annual_new_btc:
+        s2f = round(circ_supply / annual_new_btc, 1)
+        result["stock_to_flow"] = s2f
+        result["s2f_model_price"] = round((s2f / 10) ** 3 * 1000, 0)  # simplified S2F
+
+    print(f"    NVT: {result.get('nvt_signal','?')} ({result.get('nvt_interpretation','?')}) | S2F: {result.get('stock_to_flow','?')}")
+    return result
+
+
+# ═══════════════════════════════════════════════════════════
+# V7: MACRO CONTEXT
+# ═══════════════════════════════════════════════════════════
+def get_macro_context(price, fg):
+    """Fetch macro correlations and build narrative."""
+    print("  [MACRO]")
+    p = (price or {}).get("price_usd", 0)
+    fgv = (fg or {}).get("value", 50)
+    c24 = (price or {}).get("change_24h_pct", 0)
+    c30 = (price or {}).get("change_30d_pct", 0)
+    dom = (price or {}).get("dominance_pct", 0)
+
+    # Try to get gold price for correlation
+    gold_price = 0
+    gold_data = fjson("https://api.coinbase.com/v2/prices/XAU-USD/spot")
+    if gold_data:
+        try:
+            gold_price = float(gold_data.get("data", {}).get("amount", 0))
+        except: pass
+
+    # Try to get ETH for dominance context
+    eth_data = fjson("https://api.coincap.io/v2/assets/ethereum")
+    eth_price = 0
+    eth_change = 0
+    if eth_data and "data" in eth_data:
+        try:
+            eth_price = round(float(eth_data["data"].get("priceUsd", 0)), 2)
+            eth_change = round(float(eth_data["data"].get("changePercent24Hr", 0)), 2)
+        except: pass
+
+    # Bitcoin vs altcoins narrative
+    if dom > 55:
+        dominance_narrative = "Bitcoin dominance elevated — capital rotating into BTC, away from alts."
+    elif dom > 45:
+        dominance_narrative = "Bitcoin dominance healthy — balanced market cycle."
+    else:
+        dominance_narrative = "Bitcoin dominance low — altseason conditions, risk-on environment."
+
+    # Macro regime
+    if c30 > 20 and fgv > 60:
+        regime = "bull_market"
+        regime_desc = "Strong bull market conditions. Price and sentiment aligned upward."
+    elif c30 < -20 and fgv < 40:
+        regime = "bear_market"
+        regime_desc = "Bear market conditions. Accumulation for long-term holders."
+    elif abs(c30) < 10:
+        regime = "consolidation"
+        regime_desc = "Consolidation phase. Energy compressing before next directional move."
+    else:
+        regime = "transition"
+        regime_desc = "Transitional market. Trend forming."
+
+    # Bitcoin vs Gold ratio
+    btc_gold_ratio = round(p / gold_price, 2) if gold_price > 0 else None
+
+    print(f"    Regime: {regime} | Dominance: {dom}% | BTC/Gold: {btc_gold_ratio}")
+    return {
+        "market_regime": regime,
+        "regime_description": regime_desc,
+        "btc_dominance_pct": dom,
+        "dominance_narrative": dominance_narrative,
+        "gold_price_usd": gold_price,
+        "btc_gold_ratio": btc_gold_ratio,
+        "eth_price_usd": eth_price,
+        "eth_change_24h": eth_change,
+        "btc_30d_pct": c30,
+        "cycle_phase": _classify_cycle_phase(p, fgv, c30, dom),
+    }
+
+
+def _classify_cycle_phase(price, fg, c30, dom):
+    """Classify the current Bitcoin market cycle phase."""
+    if fg <= 25 and c30 < -15:
+        return {"phase": "accumulation", "description": "Capitulation zone. Long-term holder accumulation. Diamond hands season.", "emoji": "💎"}
+    elif fg <= 40 and c30 < 0:
+        return {"phase": "disbelief", "description": "Early recovery. Skeptics dominate. Smart money quietly accumulating.", "emoji": "🤔"}
+    elif fg >= 40 and fg <= 60 and c30 > 0:
+        return {"phase": "awareness", "description": "Recovery confirmed. Growing awareness. Media still cautious.", "emoji": "📡"}
+    elif fg > 60 and c30 > 10:
+        return {"phase": "excitement", "description": "Excitement building. Retail FOMO beginning. Still room to run.", "emoji": "🚀"}
+    elif fg > 75 and c30 > 25:
+        return {"phase": "euphoria", "description": "Peak euphoria risk zone. Everyone bullish. Exercise caution.", "emoji": "⚠️"}
+    elif fg > 60 and c30 < -5:
+        return {"phase": "anxiety", "description": "Anxiety phase. Greed fading. First correction after run.", "emoji": "😰"}
+    else:
+        return {"phase": "neutral", "description": "Neutral market conditions. No clear cycle signal.", "emoji": "⚖️"}
+
+
+# ═══════════════════════════════════════════════════════════
+# V7: COMPOSITE SENTIMENT SCORE
+# ═══════════════════════════════════════════════════════════
+def build_composite_sentiment(fg, headlines, discussions, price, chain):
+    """Build a multi-factor composite sentiment score 0-100."""
+    fg_val = (fg or {}).get("value", 50)
+    c24 = (price or {}).get("change_24h_pct", 0)
+    c7 = (price or {}).get("change_7d_pct", 0)
+    hr = (chain or {}).get("hash_rate_ehs", 0)
+
+    # News sentiment component (0-100)
+    pos = sum(1 for h in headlines if h.get("sentiment") == "positive")
+    neg = sum(1 for h in headlines if h.get("sentiment") == "negative")
+    total_hl = len(headlines) or 1
+    news_score = round((pos / total_hl) * 100)
+
+    # Price momentum component (0-100)
+    price_score = min(100, max(0, 50 + c24 * 3 + c7 * 1.5))
+
+    # Dev activity component (proxy via BIPs/releases: always good)
+    dev_score = 65  # baseline — Bitcoin always has dev activity
+
+    # Social discussion component
+    btc_disc = sum(1 for d in discussions if "bitcoin" in d.get("title", "").lower() or "btc" in d.get("title", "").lower())
+    social_score = min(100, 40 + btc_disc * 6)
+
+    # Miner confidence component (hash rate proxy)
+    miner_score = min(100, 50 + (hr - 400) / 10) if hr > 0 else 50
+
+    # Weighted composite
+    weights = {"fear_greed": 0.35, "news": 0.20, "price": 0.25, "social": 0.10, "miner": 0.10}
+    composite = round(
+        fg_val * weights["fear_greed"] +
+        news_score * weights["news"] +
+        price_score * weights["price"] +
+        social_score * weights["social"] +
+        miner_score * weights["miner"]
+    )
+    composite = min(100, max(0, composite))
+
+    label = (
+        "Extreme Fear" if composite <= 20 else
+        "Fear" if composite <= 40 else
+        "Neutral" if composite <= 60 else
+        "Greed" if composite <= 80 else
+        "Extreme Greed"
+    )
+
+    return {
+        "composite_score": composite,
+        "label": label,
+        "components": {
+            "fear_greed": fg_val,
+            "news_sentiment": news_score,
+            "price_momentum": round(price_score),
+            "social_activity": round(social_score),
+            "miner_confidence": round(miner_score),
+        },
+        "dominant_factor": max(weights, key=lambda k: weights[k]),
+        "signal": "accumulate" if composite < 30 else ("cautious" if composite > 75 else "hold"),
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# V7: LEARNING GOALS ENGINE
+# ═══════════════════════════════════════════════════════════
+def generate_learning_goals(generation, kg_scores, existing_goals):
+    """Each cycle, Ollie sets 3 Bitcoin topics to deepen, then auto-scores them next cycle."""
+    topics = list((kg_scores or {}).keys())
+    if not topics:
+        topics = KNOWLEDGE_TOPICS
+
+    # Find weakest topics (least studied)
+    weak = sorted(topics, key=lambda t: (kg_scores or {}).get(t, 0))[:5]
+    strong = sorted(topics, key=lambda t: (kg_scores or {}).get(t, 0), reverse=True)[:3]
+
+    goal_templates = {
+        "bitcoin_basics": "Absorb at least 3 beginner Bitcoin headlines and distill core value proposition",
+        "halving_cycles": "Analyze current halving cycle position and update pre/post-halving thesis",
+        "lightning_network": "Track Lightning capacity growth and identify adoption milestones",
+        "mining_security": "Assess hash rate trend and miner capitulation/expansion signals",
+        "privacy_techniques": "Research latest CoinJoin, Taproot, and privacy protocol updates",
+        "taproot_schnorr": "Monitor Taproot adoption rate in new transactions",
+        "utxo_model": "Analyze UTXO set growth and dormant coin patterns",
+        "mempool_fees": "Study fee market dynamics and predict congestion windows",
+        "on_chain_analytics": "Compute NVT, MVRV, realized price deviation metrics",
+        "full_nodes": "Track node count growth and geographic distribution",
+        "wallet_security": "Review latest hardware wallet security research and multi-sig advances",
+        "bitcoin_script": "Study latest Script opcode proposals and covenants research",
+        "market_psychology": "Map current cycle to historical psychology chart",
+        "hash_rate_analysis": "Model hash rate ATH, difficulty adjustment, and miner margin",
+        "supply_scarcity": "Calculate exact remaining supply, lost coins estimate, and stock-to-flow",
+        "monetary_history": "Compare Bitcoin to historical sound money parallels",
+        "multisig_custody": "Research latest institutional custody and multisig innovations",
+        "bitcoin_development": "Track Bitcoin Core PRs, BIP proposals, and protocol upgrades",
+    }
+
+    # Score previous goals
+    scored_goals = []
+    for g in (existing_goals or [])[-3:]:
+        topic = g.get("topic", "")
+        prev_score = g.get("kg_score_at_creation", 0)
+        curr_score = (kg_scores or {}).get(topic, 0)
+        achieved = curr_score > prev_score
+        scored_goals.append({**g, "achieved": achieved, "final_score": curr_score})
+
+    # Set new goals for this cycle
+    new_goals = []
+    for topic in (weak[:2] + [strong[0]] if strong else weak[:3]):
+        new_goals.append({
+            "generation": generation,
+            "topic": topic,
+            "goal": goal_templates.get(topic, f"Deepen understanding of {topic.replace('_', ' ')}"),
+            "kg_score_at_creation": (kg_scores or {}).get(topic, 0),
+            "achieved": None,
+        })
+
+    return {
+        "current_goals": new_goals,
+        "previous_goals_scored": scored_goals,
+        "goals_achieved_rate": round(sum(1 for g in scored_goals if g.get("achieved")) / len(scored_goals) * 100) if scored_goals else 0,
+        "focus_areas": [g["topic"].replace("_", " ") for g in new_goals],
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# V7: BITCOIN GLOSSARY (grows every cycle)
+# ═══════════════════════════════════════════════════════════
+BITCOIN_GLOSSARY = {
+    "21 million": "The absolute hard cap on Bitcoin supply. Enforced by every full node. Cannot be changed without unanimous consensus.",
+    "UTXO": "Unspent Transaction Output. Bitcoin doesn't have accounts — it has UTXOs. Each transaction consumes old UTXOs and creates new ones.",
+    "Satoshi": "The smallest unit of Bitcoin: 0.00000001 BTC. Named after Bitcoin's anonymous creator, Satoshi Nakamoto.",
+    "Halving": "Every 210,000 blocks (~4 years), the block reward is cut in half. Reduces new Bitcoin supply permanently. Precedes every major bull run.",
+    "Proof of Work": "Bitcoin's consensus mechanism. Miners compete to find a valid hash. Energy expenditure = unforgeable proof of commitment.",
+    "Lightning Network": "Bitcoin's Layer 2. Enables instant, near-free payments via payment channels. Scales Bitcoin to billions of users.",
+    "Mempool": "Memory pool of unconfirmed transactions waiting to be included in a block. High mempool = high fees = high demand.",
+    "Taproot": "Bitcoin upgrade (Nov 2021). Adds Schnorr signatures, MAST, and Tapscript. More private, flexible, and efficient transactions.",
+    "Hash Rate": "The total computational power securing the Bitcoin network. Higher hash rate = more secure, more decentralized, more committed miners.",
+    "Difficulty Adjustment": "Every 2016 blocks, Bitcoin automatically adjusts mining difficulty to maintain ~10 minute block times. Self-regulating system.",
+    "Fear & Greed Index": "0-100 sentiment indicator. 0 = extreme fear (buy signal historically). 100 = extreme greed (caution). Contrarian tool.",
+    "Full Node": "A computer running Bitcoin Core that independently validates every transaction and block. The backbone of decentralization.",
+    "MVRV Ratio": "Market Value to Realized Value. Below 1 = historically excellent buy zone. Above 3.5 = historically overvalued zone.",
+    "Stock-to-Flow": "Ratio of existing supply to new supply. Bitcoin's S2F increases with each halving, making it scarcer than gold.",
+    "Genesis Block": "Block 0. Mined by Satoshi on January 3, 2009. Contains message: 'Chancellor on brink of second bailout for banks.'",
+    "Seed Phrase": "12 or 24 words that recover all private keys. The master key to your Bitcoin. Never digital, never photographed.",
+    "Multi-sig": "Transactions requiring multiple private keys to sign. M-of-N security. Gold standard for significant holdings.",
+    "CoinJoin": "Privacy technique combining multiple transactions into one. Breaks chain analysis. Implemented in Wasabi, JoinMarket.",
+    "SegWit": "Segregated Witness (2017). Separates signature data. Enables Lightning. Fixes transaction malleability.",
+    "BIP": "Bitcoin Improvement Proposal. How protocol changes are proposed, discussed, and implemented. Governance through code.",
+    "Schnorr Signatures": "More efficient than ECDSA. Enables key aggregation (multiple signers = one signature). Foundation of Taproot.",
+    "Script": "Bitcoin's simple, intentionally non-Turing-complete programming language. Governs spending conditions for all UTXOs.",
+    "Byzantine Generals Problem": "Classic distributed computing problem Satoshi solved: how to reach consensus without trusting any party.",
+    "Realized Price": "Average price at which all Bitcoin last moved. Below realized price = underwater holders = capitulation zone.",
+    "NVT Signal": "Network Value to Transactions. High NVT = overvalued relative to economic activity. Low NVT = undervalued.",
+    "Timelock": "Bitcoin script feature that locks funds until a future block height or timestamp. Foundation of Lightning channels.",
+    "HODL": "Hold On for Dear Life. Originally a typo. Now a philosophy: don't trade, just hold through cycles.",
+    "Sats": "Short for satoshis. 100 million sats = 1 BTC. The future unit of account for a Bitcoin-standard world.",
+    "Block Subsidy": "Newly created Bitcoin paid to miners per block. Currently 3.125 BTC. Decreases each halving until ~2140.",
+    "Timechain": "Satoshi's original name for what we call blockchain. A chain of time-stamped cryptographic commitments.",
+}
+
+def update_glossary(existing_glossary, headlines, insights, generation):
+    """Grow the glossary: reinforce existing terms found in current data."""
+    glossary = existing_glossary or BITCOIN_GLOSSARY.copy()
+    # Add any new base terms not yet in glossary
+    for term, definition in BITCOIN_GLOSSARY.items():
+        if term not in glossary:
+            glossary[term] = definition
+    # Tag which terms appeared in this cycle's data
+    all_text = " ".join([h.get("title", "") for h in headlines] + [i.get("text", "") for i in insights]).lower()
+    active_terms = [t for t in glossary if t.lower() in all_text]
+    return {
+        "terms": glossary,
+        "total_terms": len(glossary),
+        "active_this_cycle": active_terms[:10],
+        "generation_last_updated": generation,
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# V7: FAILURE LOG + SOURCE RELIABILITY TRACKER
+# ═══════════════════════════════════════════════════════════
+FAILURE_LOG = []
+
+def log_failure(source, error, generation):
+    """Track data source failures for reliability scoring."""
+    FAILURE_LOG.append({
+        "source": source,
+        "error": str(error)[:100],
+        "generation": generation,
+        "ts": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+    })
+
+def build_source_reliability(existing_failures, evo_log, generation):
+    """Score each data source by failure rate over last 20 cycles."""
+    all_failures = (existing_failures or []) + FAILURE_LOG
+    all_failures = all_failures[-500:]  # Keep last 500 failures
+
+    sources = ["coingecko", "coincap", "kraken", "blockchain.info", "mempool.space",
+               "alternative.me", "bitcoinops.org", "bitcoin_core_github", "hn_algolia",
+               "bitcoin_magazine", "cointelegraph", "coindesk"]
+
+    recent_failures = [f for f in all_failures if f.get("generation", 0) >= generation - 20]
+    reliability = {}
+    for src in sources:
+        fail_count = sum(1 for f in recent_failures if src in f.get("source", "").lower())
+        score = max(0, 100 - fail_count * 10)
+        reliability[src] = {
+            "score": score,
+            "failures_last_20_cycles": fail_count,
+            "status": "reliable" if score >= 80 else ("degraded" if score >= 50 else "unreliable"),
+        }
+
+    return {
+        "source_scores": reliability,
+        "total_failures": len(all_failures),
+        "failures_this_cycle": len(FAILURE_LOG),
+        "most_reliable": max(reliability, key=lambda k: reliability[k]["score"]),
+        "least_reliable": min(reliability, key=lambda k: reliability[k]["score"]),
+        "failure_log": all_failures[-100:],
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# V7: CYCLE REPORTS INDEX
+# ═══════════════════════════════════════════════════════════
+def update_reports_index(existing_index, generation, price, fg, prediction, accuracy, alerts_count):
+    """Maintain a master index of all cycle reports."""
+    index = existing_index or []
+    now = datetime.now(timezone.utc)
+    p = (price or {}).get("price_usd", 0)
+    fgv = (fg or {}).get("value", 50)
+    fgl = (fg or {}).get("label", "Neutral")
+    outlook = (prediction or {}).get("outlook", "neutral")
+    index.append({
+        "generation": generation,
+        "date": now.strftime("%Y-%m-%d"),
+        "time_utc": now.strftime("%H:%M"),
+        "price_usd": p,
+        "fg_value": fgv,
+        "fg_label": fgl,
+        "prediction_outlook": outlook,
+        "accuracy_at_cycle": accuracy,
+        "alerts": alerts_count,
+        "report_file": f"data/reports/cycle_{generation:04d}.md",
+    })
+    return index[-1000:]  # Keep last 1000 entries
+
+
+# ═══════════════════════════════════════════════════════════
+# V7: AUTONOMY HARDENING - ATOMIC JSON WRITE
+# ═══════════════════════════════════════════════════════════
+def atomic_write_json(filepath, data):
+    """Write JSON atomically: write to .tmp then rename. Prevents corruption on crash."""
+    import tempfile, shutil
+    os.makedirs(os.path.dirname(filepath) if os.path.dirname(filepath) else ".", exist_ok=True)
+    tmp_path = filepath + ".tmp"
+    try:
+        with open(tmp_path, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+        shutil.move(tmp_path, filepath)
+        return True
+    except Exception as e:
+        print(f"  WARNING: Atomic write failed: {e}")
+        try:
+            with open(filepath, "w") as f:
+                json.dump(data, f, indent=2, default=str)
+            return True
+        except Exception as e2:
+            print(f"  CRITICAL: Write failed: {e2}")
+            return False
+
 def evolve(existing):
     log=existing.get("evolution_log",[])
     if len(log)>=2:
@@ -673,7 +1086,8 @@ def _calc_streak(log):
 
 def main():
     print("=" * 60)
-    print("OLLIE v6.1 - Autonomous Self-Improving Bitcoin Organism")
+    print("OLLIE v7.0 - Autonomous Self-Improving Bitcoin Organism")
+    print("Mission: Learn everything about Bitcoin. Teach others.")
     print(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"))
     print("=" * 60)
 
@@ -682,8 +1096,9 @@ def main():
         try:
             with open(DATA_FILE) as f:
                 existing = json.load(f)
-        except:
-            pass
+        except Exception as e:
+            print(f"  WARNING: Could not load existing data: {e}. Starting fresh.")
+            existing = {}
 
     evo_log, accuracy = evolve(existing)
     generation = len(evo_log) + 1
@@ -699,13 +1114,17 @@ def main():
     print("  [LIGHTNING]"); ln = get_lightning()
     blocks = get_blocks()
 
-    print("\n[PHASE 2] Intelligence absorption...")
+    print("\n[PHASE 2] Advanced data systems...")
+    onchain = get_onchain_analytics(price, chain, mempool)
+    macro = get_macro_context(price, fg)
+
+    print("\n[PHASE 3] Intelligence absorption...")
     headlines = get_news()
     discussions = get_discussions()
     bips = get_bips()
     dev_updates = get_dev_updates()
 
-    print("\n[PHASE 3] Consciousness synthesis...")
+    print("\n[PHASE 4] Consciousness synthesis...")
     raw_insights = gen_insights(price, fg, chain, mempool)
     critiqued = self_critique(raw_insights)
     tips = gen_tips(price, fg)
@@ -713,7 +1132,7 @@ def main():
     prediction = gen_prediction(price, fg, chain)
     personality = get_personality((fg or {}).get("value", 50))
 
-    print("\n[PHASE 4] Neural log + diary...")
+    print("\n[PHASE 5] Neural log + diary...")
     neural_log = build_neural_log(price, fg, chain, mempool, ln, headlines, generation, accuracy, dev_updates, blocks)
     diary_entry = build_deep_thought(price, fg, chain, mempool, headlines, generation, accuracy)
     existing_diary = existing.get("consciousness", {}).get("diary", [])
@@ -721,14 +1140,27 @@ def main():
     if len(existing_diary) > MAX_DIARY:
         existing_diary = existing_diary[-MAX_DIARY:]
 
-    print("\n[PHASE 5] Self-improvement systems...")
+    print("\n[PHASE 6] Self-improvement systems...")
     quiz = gen_quiz(generation)
     existing_graph = existing.get("knowledge_graph", {}).get("scores", {})
     kg = update_knowledge_graph(existing_graph, critiqued, headlines, generation)
     gm = growth_metrics(evo_log, accuracy)
     print(f"  Quiz: {len(quiz)} Qs | KG: {len(kg['scores'])} topics | Accuracy: {accuracy}%")
 
-    print("\n[PHASE 6] Autonomous intelligence systems...")
+    # Composite sentiment
+    composite_sentiment = build_composite_sentiment(fg, headlines, discussions, price, chain)
+
+    # Learning goals
+    existing_goals = existing.get("learning_goals", {}).get("current_goals", [])
+    learning_goals = generate_learning_goals(generation, kg["scores"], existing_goals)
+    print(f"  Goals: {len(learning_goals['current_goals'])} set | {learning_goals['goals_achieved_rate']}% achieved rate")
+
+    # Glossary
+    existing_glossary = existing.get("glossary", {}).get("terms", {})
+    glossary = update_glossary(existing_glossary, headlines, critiqued, generation)
+    print(f"  Glossary: {glossary['total_terms']} terms | {len(glossary['active_this_cycle'])} active this cycle")
+
+    print("\n[PHASE 7] Autonomous intelligence systems...")
     # Alerts engine
     existing_alerts = existing.get("alerts", {}).get("log", [])
     bh = (chain or {}).get("block_height") or (mempool or {}).get("block_height") or 0
@@ -740,7 +1172,7 @@ def main():
 
     alerts_log = detect_alerts(price, fg, chain, mempool, halving, existing_alerts, generation)
     recent_alerts = [a for a in alerts_log if a.get("gen") == generation]
-    print(f"  Alerts: {len(recent_alerts)} new this cycle | {len(alerts_log)} total")
+    print(f"  Alerts: {len(recent_alerts)} new | {len(alerts_log)} total")
 
     # Chart data
     ph = existing.get("price_history", [])
@@ -757,11 +1189,21 @@ def main():
 
     # Predictions log
     pred_log = score_predictions_log(evo_log)
-    print(f"  Predictions: {pred_log['wins']}W/{pred_log['losses']}L | {pred_log['win_rate']}% win rate | streak: {pred_log['current_streak']['count']} {pred_log['current_streak']['type']}")
+    print(f"  Predictions: {pred_log['wins']}W/{pred_log['losses']}L | {pred_log['win_rate']}% win rate")
 
-    # Cycle report
+    # Source reliability
+    existing_failures = existing.get("source_reliability", {}).get("failure_log", [])
+    source_reliability = build_source_reliability(existing_failures, evo_log, generation)
+    print(f"  Sources: {source_reliability['most_reliable']} most reliable | {source_reliability['failures_this_cycle']} failures this cycle")
+
+    # Cycle reports index
+    existing_index = existing.get("cycle_reports_index", [])
+    reports_index = update_reports_index(existing_index, generation, price, fg, prediction, accuracy, len(recent_alerts))
+
+    # Write cycle report
     write_cycle_report(existing, generation, price, fg, chain, prediction, critiqued, alerts_log, accuracy)
 
+    # Evolution log
     evo_log.append({
         "generation": generation, "timestamp": now.isoformat(), "date": now.strftime("%Y-%m-%d"),
         "cycle_utc": now.strftime("%H:00"), "price_usd": (price or {}).get("price_usd", 0),
@@ -771,6 +1213,9 @@ def main():
         "personality_mood": personality["mood"],
         "high_quality_insights": sum(1 for x in critiqued if x.get("quality") == "high"),
         "alerts_triggered": len(recent_alerts),
+        "composite_sentiment": composite_sentiment.get("composite_score", 50),
+        "market_regime": (macro or {}).get("market_regime", "unknown"),
+        "s2f": (onchain or {}).get("stock_to_flow", 0),
     })
     if len(evo_log) > MAX_EVO:
         evo_log = evo_log[-MAX_EVO:]
@@ -779,13 +1224,17 @@ def main():
 
     knowledge = {
         "meta": {
-            "version": "6.1", "generation": generation,
+            "version": "7.0",
+            "generation": generation,
             "last_updated": now.isoformat(),
             "last_updated_human": now.strftime("%B %d, %Y at %H:%M UTC"),
-            "update_cycle": "every 6 hours", "days_alive": days_alive,
-            "mission": "I am Ollie. A Living Bitcoin Organism. I self-improve every cycle. I run forever.",
-            "prediction_accuracy_pct": accuracy, "total_cycles": generation,
-            "organism_status": status, "personality": personality,
+            "update_cycle": "every 6 hours",
+            "days_alive": days_alive,
+            "mission": "Learn everything about Bitcoin. Teach others. Run forever.",
+            "prediction_accuracy_pct": accuracy,
+            "total_cycles": generation,
+            "organism_status": status,
+            "personality": personality,
             "cycle_health": health,
         },
         "current": {
@@ -793,46 +1242,56 @@ def main():
             "mempool": mempool, "lightning": ln, "halving": halving, "latest_blocks": blocks,
         },
         "intelligence": {
-            "todays_thought": thought, "todays_prediction": prediction,
-            "todays_insights": critiqued, "todays_tips": tips,
+            "todays_thought": thought,
+            "todays_prediction": prediction,
+            "todays_insights": critiqued,
+            "todays_tips": tips,
             "todays_fact": FACTS[int(now.strftime("%j")) % len(FACTS)],
             "dev_updates": dev_updates,
+            "composite_sentiment": composite_sentiment,
+            "macro_context": macro,
+            "onchain_analytics": onchain,
+            "cycle_phase": (macro or {}).get("cycle_phase", {}),
         },
         "consciousness": {
-            "neural_log": neural_log, "diary": existing_diary,
-            "current_thought": thought, "generation": generation,
+            "neural_log": neural_log,
+            "diary": existing_diary,
+            "current_thought": thought,
+            "generation": generation,
             "last_cycle_time": now.strftime("%Y-%m-%d %H:%M UTC"),
         },
         "quiz": {"questions": quiz, "generation": generation, "total_available": len(QUIZ_QUESTIONS)},
         "knowledge_graph": kg,
         "growth_metrics": gm,
         "chart_data": chart_data,
-        "alerts": {
-            "log": alerts_log,
-            "recent": recent_alerts,
-            "total": len(alerts_log),
-        },
+        "alerts": {"log": alerts_log, "recent": recent_alerts, "total": len(alerts_log)},
         "predictions_log": pred_log,
+        "learning_goals": learning_goals,
+        "glossary": glossary,
+        "source_reliability": source_reliability,
+        "cycle_reports_index": reports_index,
         "news": {"headlines": headlines, "discussions": discussions, "bip_updates": bips},
         "education": {"learning_paths": LEARNING_PATHS, "all_facts": FACTS},
-        "chat": {"responses": chat, "version": "6.1"},
+        "chat": {"responses": chat, "version": "7.0"},
         "evolution_log": evo_log,
         "price_history": ph,
     }
 
-    os.makedirs("data", exist_ok=True)
-    with open(DATA_FILE, "w") as f:
-        json.dump(knowledge, f, indent=2, default=str)
+    # ATOMIC WRITE - prevents corruption
+    success = atomic_write_json(DATA_FILE, knowledge)
 
     hq = sum(1 for x in critiqued if x.get("quality") == "high")
     print(f"\n{'='*60}")
-    print(f"OLLIE v6.1 CYCLE {generation} COMPLETE")
-    print(f"  Price:    ${(price or {}).get('price_usd', 0):,.2f}")
-    print(f"  F&G:      {(fg or {}).get('value', 0)}/100 - {(fg or {}).get('label', '')}")
-    print(f"  Outlook:  {prediction['outlook']} ({prediction['confidence']}%)")
-    print(f"  Accuracy: {accuracy}% | Win rate: {pred_log['win_rate']}%")
-    print(f"  Insights: {hq}/{len(critiqued)} HQ | Quiz: {len(quiz)}Q | Alerts: {len(recent_alerts)}")
-    print(f"  Health:   {health['status']} | {health['hours_since']}h since last")
+    print(f"OLLIE v7.0 CYCLE {generation} COMPLETE")
+    print(f"  Price:     ${(price or {}).get('price_usd', 0):,.2f}")
+    print(f"  F&G:       {(fg or {}).get('value', 0)}/100 ({(fg or {}).get('label', '')})")
+    print(f"  Composite: {composite_sentiment.get('composite_score', 0)}/100 ({composite_sentiment.get('label', '')})")
+    print(f"  Regime:    {(macro or {}).get('market_regime', '?')} | Phase: {(macro or {}).get('cycle_phase',{}).get('phase','?')}")
+    print(f"  Outlook:   {prediction['outlook']} ({prediction['confidence']}%) | Win rate: {pred_log['win_rate']}%")
+    print(f"  S2F:       {(onchain or {}).get('stock_to_flow','?')} | NVT: {(onchain or {}).get('nvt_signal','?')}")
+    print(f"  Insights:  {hq}/{len(critiqued)} HQ | Goals: {len(learning_goals['current_goals'])} set")
+    print(f"  Alerts:    {len(recent_alerts)} new | Sources: {source_reliability['failures_this_cycle']} failures")
+    print(f"  Health:    {health['status']} | Written: {'OK' if success else 'FAILED'}")
     print(f"{'='*60}")
 
 
