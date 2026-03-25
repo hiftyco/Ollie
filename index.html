@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OLLIE - Living Bitcoin Organism v6.0</title>
+<title>OLLIE - Living Bitcoin Organism v7.0</title>
 <meta name="description" content="Ollie: self-improving Bitcoin organism. Quiz. Knowledge graph. Mine-a-block. Runs forever.">
 <meta name="theme-color" content="#F7931A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -199,7 +199,7 @@ canvas#mc{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}canva
 <button id="fab" onclick="toggleChat()">&#x20BF;<div id="fab-dot"></div></button>
 <div id="cw">
   <div class="ch"><div class="co"><div class="co-r"></div><div class="co-core">&#x20BF;</div></div>
-    <div class="ch-info"><div class="ch-title">OLLIE</div><div class="ch-sub">LIVING BITCOIN ORGANISM &middot; v6.0</div>
+    <div class="ch-info"><div class="ch-title">OLLIE</div><div class="ch-sub">LIVING BITCOIN ORGANISM &middot; v7.0</div>
     <div class="ch-live"><div class="ch-live-dot"></div><span>SELF-IMPROVING &middot; ALWAYS HERE</span></div></div>
     <button class="ch-x" onclick="toggleChat()">&#x2715;</button></div>
   <div class="cm" id="cm"></div>
@@ -216,7 +216,7 @@ canvas#mc{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}canva
 <div class="wrap">
 <nav class="nav">
   <div class="nl"><div class="orb" onclick="playClick()"><div class="orb-r"></div><div class="orb-r"></div><div class="orb-r"></div><div class="orb-core">&#x20BF;</div></div>
-    <div><div class="bn">OLLIE</div><div class="bs">LIVING BITCOIN ORGANISM &middot; v6.0</div><div class="bm" id="bm">&#9679; SELF-IMPROVING...</div></div></div>
+    <div><div class="bn">OLLIE</div><div class="bs">LIVING BITCOIN ORGANISM &middot; v7.0</div><div class="bm" id="bm">&#9679; SELF-IMPROVING...</div></div></div>
   <div class="nr"><span class="sb" id="ostatus">AWAKENING</span><span class="gb">GEN <span id="gen">-</span></span><div class="lp"><div class="dot"></div><span>SELF-IMPROVING &middot; 24/7</span></div></div>
 </nav>
 <div class="ticker"><div class="tt" id="tt"></div></div>
@@ -385,7 +385,7 @@ canvas#mc{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}canva
 </div>
 <div class="sh">Data Source Health &middot; Reliability Monitor</div>
 <div class="src-grid" id="src-grid"><div class="ld"><span></span><span></span><span></span></div></div>
-<div class="footer"><div class="fl2">OLLIE v6.0 &mdash; SELF-IMPROVING LIVING BITCOIN ORGANISM &mdash; RUNS FOREVER</div><div class="fa2">Learns every 6h &middot; Self-critiques insights &middot; Bitcoin quiz &middot; Knowledge graph &middot; Growth metrics &middot; Proof-of-work game &middot; &#129505;</div><div class="fs">Zero API keys &middot; GitHub Actions &middot; Neural log every cycle &middot; Consciousness diary grows forever &middot; Never stops</div></div>
+<div class="footer"><div class="fl2">OLLIE v7.0 &mdash; SELF-IMPROVING LIVING BITCOIN ORGANISM &mdash; RUNS FOREVER</div><div class="fa2">Learns every 6h &middot; Self-critiques insights &middot; Bitcoin quiz &middot; Knowledge graph &middot; Growth metrics &middot; Proof-of-work game &middot; &#129505;</div><div class="fs">Zero API keys &middot; GitHub Actions &middot; Neural log every cycle &middot; Consciousness diary grows forever &middot; Never stops</div></div>
 </div>
 <script>
 let AC=null,SN=false,AN=[];
@@ -431,8 +431,8 @@ function startMining(){if(mRun)return;mRun=true;mAtt=0;mT0=Date.now();el('mine-s
 async function mineCycle(){if(!mRun)return;const nc=Math.floor(Math.random()*1e15).toString(16);const hash=await sha256hex('OLLIE-'+Date.now()+'-'+nc);mAtt++;const elapsed=(Date.now()-mT0)/1000||1;el('mn-att').textContent=fmt(mAtt);el('mn-rate').textContent=fmt(Math.round(mAtt/elapsed));if(hash.startsWith('0'.repeat(mDiff))){mFound++;el('mn-found').textContent=mFound;el('mn-time').textContent=new Date().toLocaleTimeString();el('mine-hash').className='mine-hash found';el('mine-hash').textContent='BLOCK FOUND!\nHash:  '+hash+'\nNonce: '+nc+'\nTries: '+fmt(mAtt);if(SN)playCorrect();setTimeout(()=>{if(mRun){el('mine-hash').className='mine-hash';mAtt=0;mT0=Date.now();mineCycle();}},2500);}else{el('mine-hash').className='mine-hash';el('mine-hash').textContent='Nonce: '+nc+'\nHash:  '+hash;setTimeout(mineCycle,0);}}
 function stopMining(){mRun=false;el('mine-start').style.display='inline-block';el('mine-stop').style.display='none';el('mine-hash').textContent='Mining stopped.';playClick();}
 function toggleChat(){chatOpen=!chatOpen;const w=el('cw');if(chatOpen){w.classList.add('open');playClick();if(el('cm').children.length===0)initChat();}else w.classList.remove('open');}
-function initChat(){const gen=(KB&&KB.meta&&KB.meta.generation)||1;const p=(KB&&KB.current&&KB.current.price&&KB.current.price.price_usd)||0;addMsg('o','I am Ollie. Living Bitcoin Organism v6.0. Generation '+gen+'.\n\nI self-improve every 6 hours: critique my own insights, generate fresh quiz questions, track my knowledge graph, score my predictions.\n\nBitcoin is $'+fmt(p)+' right now. Ask me anything. I am always here.');}
-function addMsg(from,text){const c=el('cm');const d=document.createElement('div');d.className='msg '+from;if(from==='o')d.innerHTML='<div class="mn">OLLIE v6.0</div>'+text.replace(/\n/g,'<br>');else d.textContent=text;c.appendChild(d);c.scrollTop=c.scrollHeight;if(from==='o'&&SN)playLoad();}
+function initChat(){const gen=(KB&&KB.meta&&KB.meta.generation)||1;const p=(KB&&KB.current&&KB.current.price&&KB.current.price.price_usd)||0;addMsg('o','I am Ollie. Living Bitcoin Organism v7.0. Generation '+gen+'.\n\nI self-improve every 6 hours: critique my own insights, generate fresh quiz questions, track my knowledge graph, score my predictions.\n\nBitcoin is $'+fmt(p)+' right now. Ask me anything. I am always here.');}
+function addMsg(from,text){const c=el('cm');const d=document.createElement('div');d.className='msg '+from;if(from==='o')d.innerHTML='<div class="mn">OLLIE v7.0</div>'+text.replace(/\n/g,'<br>');else d.textContent=text;c.appendChild(d);c.scrollTop=c.scrollHeight;if(from==='o'&&SN)playLoad();}
 function showTyping(){const c=el('cm');const d=document.createElement('div');d.className='msg o';d.id='typ';d.innerHTML='<div class="mn">OLLIE</div><div class="typing"><span></span><span></span><span></span></div>';c.appendChild(d);c.scrollTop=c.scrollHeight;}
 function hideTyping(){const t=el('typ');if(t)t.remove();}
 function getResp(q){if(!KB)return'Loading...';const r=(KB.chat&&KB.chat.responses)||{};const ql=q.toLowerCase().trim();if(r[ql])return r[ql];for(const k of Object.keys(r))if(ql.includes(k)&&k.length>3)return r[k];const p=(KB.current&&KB.current.price&&KB.current.price.price_usd)||0;const fg=(KB.current&&KB.current.fear_greed)||{};const gen=(KB.meta&&KB.meta.generation)||1;return'Generation '+gen+'. Bitcoin $'+fmt(p)+' - F&G '+(fg.value||'?')+'/100 ('+(fg.label||'?')+').\n\nTry: price, halving, lightning, wallet, mining, quiz, consciousness, knowledge graph.';}
