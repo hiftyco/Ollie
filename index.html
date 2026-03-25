@@ -578,7 +578,7 @@ function render(d){
 
   playLoad();
 }
-async async function load(){try{const r=await fetch('data/knowledge.json?t='+Date.now());if(!r.ok)throw new Error(r.status);const d=await r.json();render(d);}catch(e){console.error('Load failed:',e);}}
+async function load(){try{const r=await fetch('data/knowledge.json?t='+Date.now());if(!r.ok)throw new Error(r.status);const d=await r.json();render(d);}catch(e){console.error('Load failed:',e);}}
 load();setInterval(load,5*60*1000);
 
 function renderGloss(terms, active, filter) {
@@ -586,9 +586,10 @@ function renderGloss(terms, active, filter) {
   if(!gg) return;
   const entries = Object.entries(terms).filter(([t]) => !filter || t.toLowerCase().includes(filter.toLowerCase()) || (terms[t]||'').toLowerCase().includes(filter.toLowerCase()));
   if(!entries.length){ gg.innerHTML = '<div style="color:var(--muted2);font-size:11px;padding:8px">No matching terms.</div>'; return; }
-  gg.innerHTML = entries.map(([term, def]) =>
-    '<div class="gloss-item'+(active.includes(term)?' active-term':'')+'" onclick="this.classList.toggle('open')"><div class="gloss-term">'+term+'</div><div class="gloss-def">'+def+'</div></div>'
-  ).join('');
+  gg.innerHTML = entries.map(([term, def]) => {
+    const active_cls = active.includes(term) ? ' active-term' : '';
+    return '<div class="gloss-item' + active_cls + '" onclick="this.classList.toggle(\'open\')"><div class="gloss-term">' + term + '</div><div class="gloss-def">' + def + '</div></div>';
+  }).join('');
 }
 function filterGloss(q) { renderGloss(window._glossData||{}, window._activeTerms||[], q); }
 
