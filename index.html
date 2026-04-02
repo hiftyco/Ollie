@@ -711,76 +711,100 @@ footer a{color:var(--btc);text-decoration:none}
 <script>
 "use strict";
 // ============================================================
-// OLLIE v8.0 — FULL CLIENT ENGINE
+// OLLIE v8.1 — FULL CLIENT ENGINE (ALL FIELDS FIXED)
 // ============================================================
 const DATA_URL = "data/knowledge.json";
+
 const SATOSHI_QUOTES = [
-  ["The root problem with conventional currency is all the trust that's required to make it work.","2009"],
+  ["The root problem with conventional currency is all the trust that's required to make it work. Banks must be trusted to hold our money and transfer it electronically, but they lend it out in waves of credit bubbles with barely a fraction in reserve.","2009"],
   ["If you don't believe it or don't get it, I don't have the time to try to convince you, sorry.","2010"],
   ["Lost coins only make everyone else's coins worth slightly more. Think of it as a donation to everyone.","2010"],
-  ["It might make sense just to get some in case it catches on.","2009"],
-  ["The Times 03/Jan/2009 Chancellor on brink of second bailout for banks.","Genesis Block"],
+  ["It might make sense just to get some in case it catches on. If enough people think the same way, that becomes a self fulfilling prophecy.","2009"],
+  ["The Times 03/Jan/2009 Chancellor on brink of second bailout for banks. — Genesis Block inscription","Genesis Block · 2009"],
   ["Writing a description for this thing for general audiences is bloody hard. There's nothing to relate it to.","2009"],
   ["I'm sure that in 20 years there will either be very large transaction volume or no volume.","2010"],
-  ["Bitcoin is an implementation of Wei Dai's b-money proposal on Cypherpunks in 1998.","2008"],
-  ["The nature of Bitcoin is such that once version 0.1 was released, the core design was set in stone for the rest of its lifetime.","2010"],
   ["With e-currency based on cryptographic proof, without the need to trust a third party middleman, money can be secure and transactions effortless.","2009"],
+  ["The nature of Bitcoin is such that once version 0.1 was released, the core design was set in stone for the rest of its lifetime.","2010"],
+  ["Governments are good at cutting off the heads of a centrally controlled network like Napster, but pure P2P networks like Gnutella and Tor seem to be holding their own.","2008"],
+  ["If it gets boring, I can always find something more interesting to do.","2010"],
+  ["Sorry to be a wet blanket. Writing a description for this thing for general audiences is bloody hard.","2010"],
+];
+
+const BITCOIN_FACTS = [
+  "Bitcoin's genesis block contains the message: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks' — a timestamp and political statement.",
+  "There will only ever be 21 million Bitcoin. As of today, ~19.7 million are in circulation. The last Bitcoin will be mined around 2140.",
+  "Bitcoin's difficulty adjusts every 2,016 blocks (~2 weeks) to maintain a 10-minute average block time regardless of how much mining power joins or leaves.",
+  "Satoshi Nakamoto's identity remains unknown. Their estimated 1 million BTC wallet has never been moved — the coins have sat untouched since 2010.",
+  "A 'Satoshi' is the smallest unit of Bitcoin: 0.00000001 BTC. There are 100,000,000 satoshis in 1 Bitcoin.",
+  "Bitcoin has achieved 99.98% uptime since launch in 2009 — more reliable than almost any other financial system in history.",
+  "The SHA-256 algorithm used by Bitcoin was designed by the NSA. The same hash function secures TLS certificates across the web.",
+  "Bitcoin's proof-of-work consumes roughly as much energy as a small country — but processes value transfers that would require an entire global banking system otherwise.",
+  "The Lightning Network enables Bitcoin payments that settle in milliseconds with fees of fractions of a cent, using payment channels secured by the base layer.",
+  "Bitcoin's supply is more predictable than gold. We know exactly how many Bitcoin will exist at any future date — no mining surprises, no inflation shocks.",
+  "The 2024 halving reduced the block reward from 6.25 to 3.125 BTC. Halvings occur every 210,000 blocks and will continue until ~2140.",
+  "UTXO stands for Unspent Transaction Output. Bitcoin doesn't have account balances — it has UTXOs that are consumed and created with each transaction.",
+  "Taproot (activated November 2021) improved Bitcoin privacy and smart contract flexibility. It made complex multi-sig transactions look identical to simple ones on-chain.",
+  "The Bitcoin network has never been hacked at the protocol level. Every major 'Bitcoin hack' was an exchange or wallet breach, not the network itself.",
+  "A full Bitcoin node validates every transaction and block independently. Running one requires ~500GB of storage and lets you verify without trusting anyone.",
+  "Bitcoin's 21 million cap isn't enforced by rules or promises — it's enforced by math and by thousands of nodes that would reject any block violating it.",
 ];
 
 // ============================================================
 // STATE
 // ============================================================
 let D = null, diaryIdx = 0, quizIdx = 0, quizScore = 0, quizTotal = 0;
-let mineInterval = null, mineAttempts = 0, mineFound = 0, mineDiff = 1, mineStart = 0;
+let mineInterval = null, mineAttempts = 0, mineFound = 0, mineDiff = 1, mineStartTime = 0;
 let soundOn = false, wsPrice = null, wsRetries = 0;
-let prevPrice = 0, satoshiIdx = 0, pathIdx = 0, toastQueue = [];
+let prevPrice = 0, satoshiIdx = 0, pathIdx = 0;
+let mineRunning = false, minedBlocks = [];
+let factIdx = 0;
 
 // ============================================================
 // UTILS
 // ============================================================
 function el(id){ return document.getElementById(id); }
 function fmt(n,d=0){ if(n==null||isNaN(n)) return '—'; return Number(n).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d}); }
-function fmtB(n){ if(!n) return '—'; if(n>=1e12) return '$'+(n/1e12).toFixed(2)+'T'; if(n>=1e9) return '$'+(n/1e9).toFixed(2)+'B'; if(n>=1e6) return '$'+(n/1e6).toFixed(2)+'M'; return '$'+fmt(n); }
-function fmtK(n){ if(!n) return '—'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return String(n); }
-function safe(v,fb='—'){ return (v!=null && v!=='' && v!==undefined) ? v : fb; }
-function clr(v){ if(!v||isNaN(v)) return 'var(--muted)'; if(v>0) return 'var(--green)'; if(v<0) return 'var(--red)'; return 'var(--muted)'; }
-function pct(v,d=2){ if(!v) return '—'; const n=parseFloat(v); const s=n>=0?'+':''; return `${s}${n.toFixed(d)}%`; }
+function fmtB(n){ if(!n||isNaN(n)) return '—'; if(n>=1e12) return '$'+(n/1e12).toFixed(2)+'T'; if(n>=1e9) return '$'+(n/1e9).toFixed(2)+'B'; if(n>=1e6) return '$'+(n/1e6).toFixed(2)+'M'; return '$'+fmt(n); }
+function fmtK(n){ if(!n||isNaN(n)) return '—'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return String(Math.round(n)); }
+function safe(v,fb='—'){ return (v!=null && v!=='' && v!==undefined && v!==0) ? v : fb; }
+function pct(v,d=2){ if(v==null||isNaN(v)) return '—'; const n=parseFloat(v); const s=n>=0?'+':''; return `${s}${n.toFixed(d)}%`; }
+function pclass(v){ return parseFloat(v)>0?'up':parseFloat(v)<0?'dn':'neu'; }
+
+// ============================================================
+// TOAST SYSTEM
+// ============================================================
 function toast(title,body,type='btc',dur=6000){
   const t=document.createElement('div');
   t.className=`toast toast-${type}`;
-  t.innerHTML=`<div class="toast-title">${title}</div>${body}`;
+  t.innerHTML=`<div class="toast-title">${title}</div><div>${body}</div>`;
   el('toast-container').appendChild(t);
   setTimeout(()=>{ t.style.animation='toast-out 0.4s ease forwards'; setTimeout(()=>t.remove(),400); },dur);
 }
 
 // ============================================================
-// UNIVERSE CANVAS — PARTICLE FIELD
+// CANVAS BACKGROUND — PARTICLE FIELD
 // ============================================================
 (function initCanvas(){
   const cv=el('universe'), ctx=cv.getContext('2d');
   let W,H,pts=[];
   function resize(){ W=cv.width=window.innerWidth; H=cv.height=window.innerHeight; }
   resize(); window.addEventListener('resize',resize);
-  for(let i=0;i<120;i++) pts.push({x:Math.random()*2000,y:Math.random()*2000,vx:(Math.random()-.5)*0.15,vy:(Math.random()-.5)*0.15,r:Math.random()*1.5+0.3,a:Math.random()});
+  for(let i=0;i<100;i++) pts.push({x:Math.random()*2000,y:Math.random()*2000,vx:(Math.random()-.5)*0.12,vy:(Math.random()-.5)*0.12,r:Math.random()*1.4+0.3,a:Math.random()*Math.PI*2});
   function draw(){
     ctx.clearRect(0,0,W,H);
     pts.forEach(p=>{
-      p.x+=p.vx; p.y+=p.vy; p.a+=0.004;
+      p.x+=p.vx; p.y+=p.vy; p.a+=0.003;
       if(p.x<0||p.x>W) p.vx*=-1;
       if(p.y<0||p.y>H) p.vy*=-1;
-      const op=0.15+Math.abs(Math.sin(p.a))*0.35;
+      const op=0.1+Math.abs(Math.sin(p.a))*0.3;
       ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
       ctx.fillStyle=`rgba(247,147,26,${op})`; ctx.fill();
     });
-    // connect near particles
     for(let i=0;i<pts.length;i++){
       for(let j=i+1;j<pts.length;j++){
         const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
         const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<120){
-          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
-          ctx.strokeStyle=`rgba(247,147,26,${(1-dist/120)*0.06})`; ctx.lineWidth=0.5; ctx.stroke();
-        }
+        if(dist<130){ ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.strokeStyle=`rgba(247,147,26,${(1-dist/130)*0.05})`; ctx.lineWidth=0.4; ctx.stroke(); }
       }
     }
     requestAnimationFrame(draw);
@@ -789,67 +813,55 @@ function toast(title,body,type='btc',dur=6000){
 })();
 
 // ============================================================
-// WEBSOCKET LIVE PRICE — BINANCE
+// WEBSOCKET LIVE PRICE — BINANCE (no API key needed)
 // ============================================================
 function connectWS(){
   try{
-    wsPrice = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@miniTicker');
+    wsPrice=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@miniTicker');
     wsPrice.onopen=()=>{ el('ws-dot').className='ws-dot connected'; wsRetries=0; };
     wsPrice.onmessage=e=>{
-      const m=JSON.parse(e.data);
-      const p=parseFloat(m.c);
+      const m=JSON.parse(e.data), p=parseFloat(m.c);
       if(!p) return;
       const hp=el('hprice');
       if(prevPrice && p!==prevPrice){
-        hp.style.animation='none'; hp.offsetHeight;
-        hp.style.animation=p>prevPrice?'flash-up 1.5s ease':'flash-dn 1.5s ease';
-        // price alert toast if big move
+        hp.style.animation='none'; void hp.offsetHeight;
+        hp.style.animation=p>prevPrice?'flash-up 1.2s ease':'flash-dn 1.2s ease';
         const delta=((p-prevPrice)/prevPrice)*100;
-        if(Math.abs(delta)>0.5){
-          toast(delta>0?'📈 PRICE UP':'📉 PRICE DOWN',
-            `BTC moved ${pct(delta)} to $${fmt(p,0)}`,delta>0?'good':'alert',5000);
-        }
+        if(Math.abs(delta)>=0.5) toast(delta>0?'📈 PRICE UP':'📉 PRICE DOWN',`BTC ${pct(delta)} → $${fmt(p,0)}`,delta>0?'good':'alert',4000);
       }
       hp.textContent='$'+fmt(p,0);
       prevPrice=p;
     };
     wsPrice.onerror=()=>{ el('ws-dot').className='ws-dot'; };
-    wsPrice.onclose=()=>{
-      el('ws-dot').className='ws-dot';
-      if(wsRetries<10){ wsRetries++; setTimeout(connectWS, Math.min(wsRetries*3000,30000)); }
-    };
-  }catch(e){ console.warn('WS failed',e); }
+    wsPrice.onclose=()=>{ el('ws-dot').className='ws-dot'; if(wsRetries<10){ wsRetries++; setTimeout(connectWS,Math.min(wsRetries*3000,30000)); }};
+  }catch(e){ console.warn('WS:',e); }
 }
 connectWS();
 
 // ============================================================
-// SOUND
+// SOUND ENGINE
 // ============================================================
-function toggleSound(){
-  soundOn=!soundOn;
-  el('snd-btn').textContent=soundOn?'🔊':'🔇';
-}
-function beep(freq=440,dur=0.1){
+function toggleSound(){ soundOn=!soundOn; el('snd-btn').textContent=soundOn?'🔊':'🔇'; }
+function beep(freq=440,dur=0.1,type='sine'){
   if(!soundOn) return;
   try{
-    const ctx=new AudioContext();
-    const o=ctx.createOscillator(), g=ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value=freq; g.gain.setValueAtTime(0.1,ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+dur);
-    o.start(); o.stop(ctx.currentTime+dur);
+    const ac=new AudioContext(), o=ac.createOscillator(), g=ac.createGain();
+    o.type=type; o.connect(g); g.connect(ac.destination);
+    o.frequency.value=freq; g.gain.setValueAtTime(0.08,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur);
+    o.start(); o.stop(ac.currentTime+dur);
   }catch(e){}
 }
 
 // ============================================================
-// MOOD SYSTEM
+// MOOD SYSTEM — shifts entire UI color
 // ============================================================
 const MOODS={
-  'Extreme Fear':{color:'#FF3B3B',glow:'rgba(255,59,59,0.12)',emoji:'😰',label:'EXTREME FEAR',status:'DEFENSIVE_MODE'},
-  'Fear':{color:'#FF9900',glow:'rgba(255,153,0,0.12)',emoji:'😟',label:'FEAR',status:'CAUTIOUS'},
-  'Neutral':{color:'#FFD700',glow:'rgba(255,215,0,0.12)',emoji:'😐',label:'NEUTRAL',status:'OBSERVING'},
-  'Greed':{color:'#80D040',glow:'rgba(128,208,64,0.12)',emoji:'😏',label:'GREED',status:'OPTIMISTIC'},
-  'Extreme Greed':{color:'#00FF88',glow:'rgba(0,255,136,0.12)',emoji:'🤑',label:'EXTREME GREED',status:'EUPHORIC'},
+  'Extreme Fear':{color:'#FF3B3B',glow:'rgba(255,59,59,0.12)',emoji:'😰',label:'EXTREME FEAR'},
+  'Fear':{color:'#FF9900',glow:'rgba(255,153,0,0.12)',emoji:'😟',label:'FEAR'},
+  'Neutral':{color:'#FFD700',glow:'rgba(255,215,0,0.10)',emoji:'😐',label:'NEUTRAL'},
+  'Greed':{color:'#80D040',glow:'rgba(128,208,64,0.12)',emoji:'😏',label:'GREED'},
+  'Extreme Greed':{color:'#00FF88',glow:'rgba(0,255,136,0.12)',emoji:'🤑',label:'EXTREME GREED'},
 };
 function applyMood(label){
   const m=MOODS[label]||MOODS['Neutral'];
@@ -859,97 +871,99 @@ function applyMood(label){
 }
 
 // ============================================================
-// TYPEWRITER
+// TYPEWRITER EFFECT
 // ============================================================
-function typewrite(id, text, speed=22){
+function typewrite(id,text,speed=20){
   const e=el(id); if(!e) return;
   e.textContent=''; let i=0;
-  clearInterval(e._tw);
-  e._tw=setInterval(()=>{ if(i<text.length){ e.textContent+=text[i++]; }else{ clearInterval(e._tw); }}, speed);
+  if(e._tw) clearInterval(e._tw);
+  e._tw=setInterval(()=>{ if(i<text.length){ e.textContent+=text[i++]; }else{ clearInterval(e._tw); }},speed);
 }
 
 // ============================================================
-// TICKER BUILD
+// TICKER
 // ============================================================
 function buildTicker(d){
-  const p=d.current?.price||{}, fg=d.current?.fear_greed||{}, chain=d.current?.blockchain||{};
-  const mem=d.current?.mempool||{}, ln=d.current?.lightning||{}, halv=d.current?.halving||{};
+  const p=d.current?.price||{}, fg=d.current?.fear_greed||{};
+  const chain=d.current?.blockchain||{}, mem=d.current?.mempool||{};
+  const ln=d.current?.lightning||{}, halv=d.current?.halving||{};
+  const gm=d.growth_metrics||{};
+  const chg24=p.change_24h_pct||p.change_24h;
   const items=[
-    ['₿ BTC/USD','$'+fmt(p.price_usd,0),''],
-    ['MARKET CAP',fmtB(p.market_cap_usd),''],
-    ['24H VOL',fmtB(p.volume_24h_usd),''],
-    ['FEAR & GREED',safe(fg.value,'—')+'/100 '+safe(fg.label),''],
-    ['HASH RATE',fmt(chain.hash_rate_ehs,0)+' EH/s',''],
-    ['MEMPOOL',fmtK(mem.count)+' TXs',''],
-    ['FEE FAST',safe(mem.fee_fast,'—')+' sat/vB',''],
-    ['⚡ LN NODES',fmtK(ln.num_nodes),''],
-    ['⚡ LN CAPACITY',fmt(ln.total_capacity_btc,0)+' BTC',''],
-    ['NEXT HALVING',fmt(halv.blocks_remaining)+' blocks',''],
-    ['GENERATION',safe(d.meta?.generation,'?'),''],
-    ['LAST CYCLE',safe(d.meta?.last_updated_human),''],
+    ['₿ BTC/USD','$'+fmt(p.price_usd,0),chg24],
+    ['MARKET CAP',fmtB(p.market_cap_usd),null],
+    ['24H VOLUME',fmtB(p.volume_24h_usd),null],
+    ['FEAR & GREED',(fg.value||'—')+'/100 · '+(fg.label||''),null],
+    ['HASH RATE',fmt(chain.hash_rate_ehs,0)+' EH/s',null],
+    ['MEMPOOL',fmtK(mem.unconfirmed_txs||mem.count)+' TXs',null],
+    ['FEE (FAST)',(mem.high_fee||mem.fee_fast||'—')+' sat/vB',null],
+    ['FEE (SLOW)',(mem.low_fee||mem.fee_slow||'—')+' sat/vB',null],
+    ['⚡ LN NODES',fmtK(ln.node_count||ln.num_nodes),null],
+    ['⚡ LN CAPACITY',fmt(ln.total_capacity_btc,0)+' BTC',null],
+    ['NEXT HALVING',fmt(halv.blocks_remaining)+' blocks · '+(halv.estimated_days||halv.days_remaining||'?')+' days',null],
+    ['BTC DOMINANCE',(p.dominance_pct||p.btc_dominance||'—')+'%',null],
+    ['GENERATION',safe(d.meta?.generation,'?')+' · '+safe(d.meta?.last_updated_human,''),null],
+    ['WIN RATE',(d.predictions_log?.win_rate||'—')+'% prediction accuracy',null],
+    ['S2F RATIO',fmt(d.intelligence?.onchain_analytics?.stock_to_flow,1),null],
   ];
   const tick=el('ticker');
-  tick.innerHTML=items.map(([l,v])=>`<span class="tick-item">${l} <span class="tv">${v}</span></span>`).join('')
-    +items.map(([l,v])=>`<span class="tick-item">${l} <span class="tv">${v}</span></span>`).join('');
+  const build=()=>items.map(([l,v,c])=>`<span class="tick-item">${l} <span class="tv${c!=null?(c>0?' up':c<0?' dn':''):''}">${v}</span></span>`).join('');
+  tick.innerHTML=build()+build();
 }
 
 // ============================================================
 // FEAR & GREED ARC
 // ============================================================
-function renderFGArc(val, label){
+function renderFGArc(val,label){
   const arc=el('fg-arc-fill'); if(!arc) return;
-  const total=182, offset=total-(val/100)*total;
-  arc.style.strokeDashoffset=offset;
+  arc.style.strokeDashoffset=182-(val/100)*182;
   const m=MOODS[label]||MOODS['Neutral'];
   arc.style.stroke=m.color;
   const fn=el('fgn'); if(fn){ fn.textContent=val; fn.style.color=m.color; }
-  const fnn=el('fgname'); if(fnn){ fnn.textContent=label; fnn.style.color=m.color; }
+  const fnn=el('fgname'); if(fnn){ fnn.textContent=label||''; fnn.style.color=m.color; }
   applyMood(label);
 }
 
 // ============================================================
-// COMPOSITE SENTIMENT BARS
+// COMPOSITE SENTIMENT BARS (fixed: use .components)
 // ============================================================
 function renderCS(cs){
   if(!cs) return;
   const csb=el('cs-bars'); if(!csb) return;
+  const comp=cs.components||{};
   const bars=[
-    ['Price Action', cs.price_score||0, 100],
-    ['Momentum', cs.momentum_score||0, 100],
-    ['Fear & Greed', cs.fg_score||0, 100],
-    ['On-Chain', cs.onchain_score||0, 100],
+    ['Fear & Greed', comp.fear_greed||cs.fg_score||0, 100],
+    ['Price Momentum', comp.price_momentum||cs.price_score||0, 100],
+    ['News Sentiment', comp.news_sentiment||cs.news_score||0, 100],
+    ['Miner Confidence', comp.miner_confidence||cs.onchain_score||0, 100],
+    ['Social Activity', comp.social_activity||0, 100],
   ];
-  csb.innerHTML=bars.map(([n,v,max])=>`
+  csb.innerHTML=bars.map(([n,v,mx])=>`
     <div class="cs-bar-item">
-      <div class="cs-bar-label"><span>${n}</span><span>${v}/${max}</span></div>
-      <div class="cs-bar-track"><div class="cs-bar-fill" style="width:${(v/max)*100}%"></div></div>
+      <div class="cs-bar-label"><span>${n}</span><span>${Math.round(v)}/${mx}</span></div>
+      <div class="cs-bar-track"><div class="cs-bar-fill" style="width:${(v/mx)*100}%"></div></div>
     </div>`).join('');
   const s=el('cs-score'); if(s) s.textContent=cs.composite_score||'—';
   const l=el('cs-label'); if(l) l.textContent=cs.label||'—';
 }
 
 // ============================================================
-// NEURAL LOG
+// NEURAL LOG (fixed: category field)
 // ============================================================
 function renderNeural(log){
   const feed=el('neural-log'); if(!feed) return;
   if(!log||!log.length){ feed.innerHTML='<div class="empty-state">No neural data this cycle.</div>'; return; }
   const meta=el('neural-meta'); if(meta) meta.textContent=log.length+' entries';
   feed.innerHTML=log.map(n=>{
-    const cat=(n.category||n.type||'default').toUpperCase();
-    const cls='n-'+cat.toLowerCase();
-    const ts=n.ts||n.time||'';
-    const emoji=n.emoji||'⚡';
-    const text=n.text||n.content||'';
-    const detail=n.detail||'';
+    const cat=((n.category||n.type||'default')).toUpperCase();
+    const cls='n-'+(n.category||n.type||'default').toUpperCase();
     return `<div class="neural-entry ${cls}">
-      <span class="n-ts">${ts}</span>
-      <span class="n-emoji">${emoji}</span>
-      <div class="n-text">${text}${detail?`<div class="n-detail">${detail}</div>`:''}</div>
+      <span class="n-ts">${n.ts||n.time||''}</span>
+      <span class="n-emoji">${n.emoji||'⚡'}</span>
+      <div><div class="n-text">${n.text||n.content||''}</div>${n.detail?`<div class="n-detail">${n.detail}</div>`:''}</div>
     </div>`;
   }).join('');
-  // scroll to latest
-  setTimeout(()=>{ feed.scrollTop=feed.scrollHeight; },100);
+  setTimeout(()=>{ feed.scrollTop=feed.scrollHeight; },80);
 }
 
 // ============================================================
@@ -960,18 +974,20 @@ function renderDiary(){
   if(!diaryData.length) return;
   const e=diaryData[diaryIdx];
   const dg=el('diary-gen-num'); if(dg) dg.textContent=e.generation||'?';
-  const dt=el('diary-time'); if(dt) dt.textContent=e.time_utc||e.date||'';
-  const dm=el('diary-mood-badge'); if(dm){ dm.textContent=e.fg_label||e.mood||'?'; }
-  const db=el('diary-text');
-  if(db){
-    const text=e.thought||e.entry||'...';
-    db.textContent=text;
+  const dt=el('diary-time'); if(dt) dt.textContent=(e.time_utc||e.date||'').slice(0,16);
+  const dm=el('diary-mood-badge');
+  if(dm){
+    const lbl=e.fg_label||e.mood||'?';
+    const m=MOODS[lbl]||MOODS['Neutral'];
+    dm.textContent=lbl; dm.style.background=m.glow; dm.style.color=m.color;
   }
+  const db=el('diary-text');
+  if(db) db.textContent=e.thought||e.entry||'...';
   const di=el('diary-idx'); if(di) di.textContent=(diaryIdx+1)+' / '+diaryData.length;
   const dc=el('diary-count'); if(dc) dc.textContent=diaryData.length+' entries';
 }
-function diaryPrev(){ if(diaryIdx>0){ diaryIdx--; renderDiary(); } }
-function diaryNext(){ if(diaryIdx<diaryData.length-1){ diaryIdx++; renderDiary(); } }
+function diaryPrev(){ if(diaryIdx>0){ diaryIdx--; renderDiary(); }}
+function diaryNext(){ if(diaryIdx<diaryData.length-1){ diaryIdx++; renderDiary(); }}
 
 // ============================================================
 // KNOWLEDGE GRAPH HEX GRID
@@ -980,32 +996,29 @@ function renderKG(kg){
   const grid=el('kg-grid'); if(!grid) return;
   if(!kg){ grid.innerHTML='<div class="empty-state">Graph building...</div>'; return; }
   const scores=kg.scores||{};
-  const top=kg.top_topics||[];
+  const topSet=new Set((kg.top_topics||[]).map(t=>t.topic));
   if(!Object.keys(scores).length){ grid.innerHTML='<div class="empty-state">Knowledge accumulating...</div>'; return; }
   const maxScore=Math.max(...Object.values(scores),1);
-  const topSet=new Set(top.map(t=>t.topic));
-  const colors=['#F7931A','#FF6B00','#FFD700','#00FF88','#3498DB','#9B59B6','#1ABC9C','#E74C3C','#E67E22','#2ECC71'];
+  const colors=['#F7931A','#FF6B00','#FFD700','#00FF88','#3498DB','#9B59B6','#1ABC9C','#E74C3C','#E67E22','#2ECC71','#16A085','#8E44AD'];
   let ci=0;
   grid.innerHTML=Object.entries(scores).sort((a,b)=>b[1]-a[1]).map(([topic,score])=>{
-    const pct=Math.max(10,(score/maxScore)*100);
+    const pct=Math.max(15,(score/maxScore)*100);
     const color=colors[ci++%colors.length];
-    const alpha=0.15+pct/100*0.4;
+    const alpha=0.12+pct/100*0.45;
+    const r=parseInt(color.slice(1,3),16),g=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
     const label=topic.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     const isTop=topSet.has(topic);
-    return `<div class="hex-node" style="background:rgba(${hexToRgb(color)},${alpha});${isTop?'box-shadow:0 0 12px '+color+'44;':''}" title="${label}: ${score} cycles">
+    const glow=isTop?`box-shadow:0 0 14px ${color}55;`:'';
+    return `<div class="hex-node" style="background:rgba(${r},${g},${b},${alpha});${glow}" title="${label}: ${score} cycles">
       <div class="hex-score" style="color:${color}">${score}</div>
-      <div class="hex-topic" style="color:${color}cc">${label.length>14?label.slice(0,12)+'...':label}</div>
+      <div class="hex-topic" style="color:${color}cc">${label.length>14?label.slice(0,12)+'…':label}</div>
     </div>`;
   }).join('');
-  const kgt=el('kg-top'); if(kgt) kgt.textContent=top.length+' mastered topics · '+kg.total_generations+' generations deep';
-}
-function hexToRgb(h){
-  const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
-  return `${r},${g},${b}`;
+  const kgt=el('kg-top'); if(kgt) kgt.textContent=Object.keys(scores).length+' topics · '+kg.total_generations+' generations deep';
 }
 
 // ============================================================
-// QUIZ
+// QUIZ ENGINE
 // ============================================================
 let quizQuestions=[], answeredThis=false;
 function renderQuiz(){
@@ -1013,27 +1026,32 @@ function renderQuiz(){
   const q=quizQuestions[quizIdx%quizQuestions.length];
   const body=el('quiz-body'); if(!body) return;
   const prog=el('q-prog'); if(prog) prog.style.width=((quizIdx%quizQuestions.length)/quizQuestions.length*100)+'%';
-  const sl=el('q-score-label'); if(sl) sl.textContent=`Score: ${quizScore} / ${quizTotal}`;
+  const sl=el('q-score-label'); if(sl) sl.textContent=`Score: ${quizScore} / ${quizTotal} | Q${(quizIdx%quizQuestions.length)+1} of ${quizQuestions.length}`;
   answeredThis=false;
-  const res=el('q-res'); if(res){ res.style.display='none'; res.textContent=''; }
+  const res=el('q-res'); if(res){ res.style.display='none'; }
   const nxt=el('q-next'); if(nxt) nxt.style.display='none';
-  body.innerHTML=`<div class="quiz-q">${q.q}</div>
-    <div class="quiz-opts">${q.options.map(o=>`<button class="quiz-opt" onclick="answerQ(this,'${o.replace(/'/g,"\\'")}','${q.a.replace(/'/g,"\\'")}',event)">${o}</button>`).join('')}</div>`;
+  const diff=q.difficulty||'beginner';
+  body.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span class="lesson-difficulty diff-${diff}">${diff}</span>
+      <span style="font-size:9px;color:var(--muted)">${q.topic?.replace(/_/g,' ')||''}</span>
+    </div>
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-opts">${q.options.map(o=>`<button class="quiz-opt" onclick="answerQ(this,${JSON.stringify(o)},${JSON.stringify(q.a)})">${o}</button>`).join('')}</div>`;
 }
-function answerQ(btn,chosen,correct,ev){
-  if(answeredThis) return; answeredThis=true;
-  quizTotal++;
+function answerQ(btn,chosen,correct){
+  if(answeredThis) return; answeredThis=true; quizTotal++;
   const res=el('q-res'); const nxt=el('q-next');
   if(chosen===correct){
     btn.className='quiz-opt correct'; quizScore++;
-    if(res){ res.style.display='block'; res.style.background='rgba(0,255,136,0.08)'; res.style.color='var(--green)'; res.textContent='✓ Correct! '+correct; }
-    beep(660,0.15);
-    toast('✓ Correct!','Well done on that one 🧡','good',3000);
+    if(res){ res.style.display='block'; res.style.cssText='display:block;padding:8px;border-radius:4px;background:rgba(0,255,136,0.08);color:var(--green);font-size:11px;margin:6px 0'; res.innerHTML='<strong>✓ Correct!</strong> '+correct; }
+    beep(660,0.12); beep(880,0.08);
+    toast('✓ Correct!','Great Bitcoin knowledge 🧡','good',3000);
   } else {
     btn.className='quiz-opt wrong';
     document.querySelectorAll('.quiz-opt').forEach(b=>{ if(b.textContent===correct) b.className='quiz-opt correct'; });
-    if(res){ res.style.display='block'; res.style.background='rgba(255,59,59,0.08)'; res.style.color='var(--red)'; res.textContent='✗ Correct answer: '+correct; }
-    beep(220,0.2);
+    if(res){ res.style.cssText='display:block;padding:8px;border-radius:4px;background:rgba(255,59,59,0.08);color:var(--red);font-size:11px;margin:6px 0'; res.innerHTML='<strong>✗ Incorrect.</strong> Correct answer: '+correct; }
+    beep(220,0.2,'sawtooth');
   }
   const sl=el('q-score-label'); if(sl) sl.textContent=`Score: ${quizScore} / ${quizTotal}`;
   if(nxt) nxt.style.display='inline-block';
@@ -1043,131 +1061,117 @@ function nextQ(){ quizIdx++; renderQuiz(); }
 // ============================================================
 // PRICE CHART
 // ============================================================
-function renderChart(ph, labels){
+function renderChart(ph){
   const cv=el('dg'); if(!cv||!ph||ph.length<2) return;
   const ctx=cv.getContext('2d');
-  const W=cv.offsetWidth||800; cv.width=W; const H=cv.height;
+  const W=cv.offsetWidth||900; cv.width=W; const H=cv.height;
   ctx.clearRect(0,0,W,H);
-  const prices=ph.map(p=>p.price_usd||p).filter(p=>p>0);
-  if(!prices.length) return;
-  const mn=Math.min(...prices)*0.998, mx=Math.max(...prices)*1.002, range=mx-mn;
-  const pad={l:50,r:20,t:10,b:25};
+  // Support both {p:price} and {price_usd:price} formats
+  const prices=ph.map(x=>x.p||x.price_usd||x).filter(p=>typeof p==='number'&&p>1000);
+  if(prices.length<2) return;
+  const mn=Math.min(...prices)*0.997, mx=Math.max(...prices)*1.003, range=mx-mn||1;
+  const pad={l:60,r:16,t:12,b:24};
   const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  // Gradient fill
   const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
-  grad.addColorStop(0,'rgba(247,147,26,0.25)'); grad.addColorStop(1,'rgba(247,147,26,0)');
+  grad.addColorStop(0,'rgba(247,147,26,0.22)'); grad.addColorStop(1,'rgba(247,147,26,0)');
   ctx.beginPath();
   prices.forEach((p,i)=>{ const x=pad.l+i/(prices.length-1)*cw, y=pad.t+ch-(p-mn)/range*ch; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
-  ctx.strokeStyle='rgba(247,147,26,0.9)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.strokeStyle='#F7931A'; ctx.lineWidth=1.8; ctx.stroke();
   ctx.lineTo(pad.l+cw,H-pad.b); ctx.lineTo(pad.l,H-pad.b); ctx.closePath();
   ctx.fillStyle=grad; ctx.fill();
-  // Y axis labels
-  ctx.fillStyle='rgba(107,107,138,0.7)'; ctx.font='9px IBM Plex Mono'; ctx.textAlign='right';
+  // Y axis
+  ctx.fillStyle='rgba(107,107,138,0.8)'; ctx.font='9px IBM Plex Mono'; ctx.textAlign='right';
   [mn,mn+range/2,mx].forEach(v=>{ const y=pad.t+ch-(v-mn)/range*ch; ctx.fillText('$'+fmt(v,0),pad.l-4,y+3); });
-  // last price dot
-  const lp=prices[prices.length-1];
-  const lx=pad.l+cw, ly=pad.t+ch-(lp-mn)/range*ch;
-  ctx.beginPath(); ctx.arc(lx,ly,4,0,Math.PI*2);
-  ctx.fillStyle='#F7931A'; ctx.fill();
+  // Last price dot + label
+  const lp=prices[prices.length-1], lx=pad.l+cw, ly=pad.t+ch-(lp-mn)/range*ch;
+  ctx.beginPath(); ctx.arc(lx,ly,4.5,0,Math.PI*2); ctx.fillStyle='#F7931A'; ctx.fill();
+  ctx.fillStyle='rgba(247,147,26,0.9)'; ctx.textAlign='left'; ctx.font='bold 9px IBM Plex Mono';
+  ctx.fillText('$'+fmt(lp,0),lx-40,ly-8);
+  // Min/max labels
+  const maxIdx=prices.indexOf(Math.max(...prices)), minIdx=prices.indexOf(Math.min(...prices));
+  ctx.fillStyle='rgba(0,255,136,0.8)'; ctx.textAlign='center'; ctx.font='8px IBM Plex Mono';
+  ctx.fillText('H:$'+fmt(prices[maxIdx],0),pad.l+(maxIdx/(prices.length-1))*cw,pad.t+ch-(prices[maxIdx]-mn)/range*ch-6);
+  ctx.fillStyle='rgba(255,59,59,0.8)';
+  ctx.fillText('L:$'+fmt(prices[minIdx],0),pad.l+(minIdx/(prices.length-1))*cw,pad.t+ch-(prices[minIdx]-mn)/range*ch+14);
 }
 
 // ============================================================
-// GLOSSARY
+// GLOSSARY (fixed: handles nested {terms:{}} structure)
 // ============================================================
 let allGlossTerms={};
-function renderGloss(terms){
+function renderGloss(glossObj){
+  const terms=glossObj.terms||glossObj;
+  if(typeof terms!=='object'||Array.isArray(terms)) return;
   allGlossTerms=terms;
   const grid=el('gloss-grid'); if(!grid) return;
   const count=Object.keys(terms).length;
   const gc=el('gloss-count'); if(gc) gc.textContent=count+' terms';
-  grid.innerHTML=Object.entries(terms).map(([term,def])=>`
+  grid.innerHTML=Object.entries(terms).sort((a,b)=>a[0].localeCompare(b[0])).map(([term,def])=>`
     <div class="gloss-item" onclick="this.classList.toggle('open')">
       <div class="gloss-term">${term}</div>
       <div class="gloss-def">${def}</div>
     </div>`).join('');
 }
 function filterGloss(q){
-  const items=el('gloss-grid').querySelectorAll('.gloss-item');
+  const items=el('gloss-grid')?.querySelectorAll('.gloss-item')||[];
   items.forEach(item=>{
-    const term=item.querySelector('.gloss-term').textContent.toLowerCase();
-    const def=item.querySelector('.gloss-def').textContent.toLowerCase();
+    const term=item.querySelector('.gloss-term')?.textContent.toLowerCase()||'';
+    const def=item.querySelector('.gloss-def')?.textContent.toLowerCase()||'';
     item.style.display=(term.includes(q.toLowerCase())||def.includes(q.toLowerCase()))?'':'none';
   });
 }
 
 // ============================================================
-// LEARNING PATHS
+// LEARNING PATHS (fixed: uses 'lesson' field, not 'content')
 // ============================================================
 let learningPaths={}, pathKeys=[];
 function renderPaths(){
   if(!pathKeys.length) return;
   const tabs=el('path-tabs');
-  tabs.innerHTML=pathKeys.map((k,i)=>`<button class="path-tab ${i===pathIdx?'active':''}" onclick="switchPath(${i})">${k.replace(/_/g,' ').toUpperCase()}</button>`).join('');
+  tabs.innerHTML=pathKeys.map((k,i)=>`<button class="path-tab ${i===pathIdx?'active':''}" onclick="switchPath(${i})" style="font-family:inherit">${k.replace(/_/g,' ').toUpperCase()}</button>`).join('');
   const list=el('lesson-list');
-  const lessons=(learningPaths[pathKeys[pathIdx]]||[]);
+  const lessons=learningPaths[pathKeys[pathIdx]]||[];
   list.innerHTML=lessons.map((l,i)=>`
     <div class="lesson-item" onclick="this.classList.toggle('expanded')">
       <div class="lesson-title">
         <span>${l.title||l.topic||('Lesson '+(i+1))}</span>
         <span class="lesson-difficulty diff-${(l.difficulty||'beginner').toLowerCase()}">${l.difficulty||'beginner'}</span>
       </div>
-      <div class="lesson-body">${l.content||l.description||'No content available.'}</div>
+      <div class="lesson-body">
+        <div style="margin-bottom:6px">${l.lesson||l.content||l.description||'No content yet.'}</div>
+        ${l.key_concepts?.length?`<div style="margin-top:6px;font-size:9px;color:var(--btc)">KEY CONCEPTS: ${l.key_concepts.join(' · ')}</div>`:''}
+      </div>
     </div>`).join('');
 }
 function switchPath(i){ pathIdx=i; renderPaths(); }
 
 // ============================================================
-// ON-CHAIN GRID
+// ON-CHAIN ANALYTICS GRID
 // ============================================================
 function renderOnchain(oc){
   const grid=el('onchain-grid'); if(!grid||!oc) return;
+  const nvtColor=oc.nvt_interpretation==='overvalued'?'var(--red)':oc.nvt_interpretation==='undervalued'?'var(--green)':'var(--yellow)';
+  const s2fColor=oc.s2f_model_price>0&&oc.s2f_model_price<(D?.current?.price?.price_usd||99999)?'var(--green)':'var(--muted)';
   const items=[
-    ['Total BTC Mined','₿'+fmt(oc.total_btc_mined,0),''],
-    ['BTC Remaining','₿'+fmt(oc.btc_remaining,0),''],
-    ['Daily BTC Mined','₿'+fmt(oc.daily_btc_mined,2),''],
-    ['S2F Ratio',fmt(oc.stock_to_flow,1),'Stock-to-flow model'],
-    ['S2F Model Price',oc.s2f_model_price?'$'+fmt(oc.s2f_model_price,0):'—',''],
-    ['NVT Signal',fmt(oc.nvt_signal,1),oc.nvt_interpretation||''],
-    ['Miner Revenue','$'+fmt(oc.miner_revenue_usd,0),'per day'],
-    ['Annual Inflation',oc.annual_inflation_pct?oc.annual_inflation_pct.toFixed(2)+'%':'—',''],
-    ['Daily Txns',fmt(oc.n_transactions,0),''],
-    ['Avg Block Size',oc.avg_block_size_mb?oc.avg_block_size_mb.toFixed(2)+' MB':'—',''],
-    ['Cost per Txn','$'+fmt(oc.cost_per_transaction_usd,2),''],
-    ['Daily Sell Pressure','$'+fmt(oc.daily_sell_pressure_usd,0),''],
+    ['Total BTC Mined','₿ '+fmt(oc.total_btc_mined,0),'of 21,000,000 max','var(--btc)'],
+    ['BTC Remaining','₿ '+fmt(oc.btc_remaining,0),'never to be mined yet','var(--muted)'],
+    ['Daily New BTC','₿ '+fmt(oc.daily_btc_mined,1),'mined per day (3.125/block)','var(--text)'],
+    ['Annual Inflation',oc.annual_inflation_pct?oc.annual_inflation_pct.toFixed(3)+'%':'—','vs ~8% fiat average','var(--green)'],
+    ['S2F Ratio',fmt(oc.stock_to_flow,1),'stock-to-flow model',s2fColor],
+    ['S2F Model Price',oc.s2f_model_price?'$'+fmt(oc.s2f_model_price,0):'—','plan B model',s2fColor],
+    ['NVT Signal',fmt(oc.nvt_signal,1),oc.nvt_interpretation||'network value/txn',nvtColor],
+    ['Miner Revenue','$'+fmt(oc.miner_revenue_usd,0),'daily (fees + subsidy)','var(--btc)'],
+    ['Daily Sell Pressure','$'+fmt(oc.daily_sell_pressure_usd,0),'if all miners sold','var(--red)'],
+    ['Daily Txns',fmtK(oc.n_transactions),'confirmed transactions','var(--text)'],
+    ['Avg Block Size',oc.avg_block_size_mb?oc.avg_block_size_mb.toFixed(2)+' MB':'—','','var(--muted)'],
+    ['Cost per Txn',oc.cost_per_transaction_usd?'$'+fmt(oc.cost_per_transaction_usd,2):'—','miner cost to process','var(--muted)'],
   ];
-  grid.innerHTML=items.map(([l,v,s])=>`
-    <div style="padding:8px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:4px">
-      <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">${l}</div>
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-top:2px">${v}</div>
-      ${s?`<div style="font-size:9px;color:var(--muted);margin-top:1px">${s}</div>`:''}
-    </div>`).join('');
-}
-
-// ============================================================
-// SOURCE HEALTH
-// ============================================================
-function renderSources(sr){
-  const grid=el('src-grid'); if(!grid||!sr) return;
-  const sources=sr.sources||sr;
-  if(!sources||typeof sources!=='object'){ grid.innerHTML='<div class="empty-state">No source data.</div>'; return; }
-  grid.innerHTML=Object.entries(sources).map(([name,info])=>{
-    const ok=info.failures===0||(info.successes||0)>(info.failures||0);
-    const dot=ok?'src-ok':'src-warn';
-    const stat=(info.successes||0)+' ok / '+(info.failures||0)+' fail';
-    return `<div class="src-item"><div class="src-dot ${dot}"></div><span class="src-name">${name}</span><span class="src-stat">${stat}</span></div>`;
-  }).join('');
-}
-
-// ============================================================
-// BLOCKS
-// ============================================================
-function renderBlocks(blocks){
-  const grid=el('blocks-grid'); if(!grid||!blocks||!blocks.length) return;
-  grid.innerHTML=blocks.slice(0,10).map(b=>`
-    <div class="block-card">
-      <div class="block-height">₿ ${fmt(b.height||b.block_height,0)}</div>
-      <div class="block-txn">${fmt(b.tx_count||b.n_tx||0)} txns</div>
-      <div class="block-size">${b.size_mb?b.size_mb.toFixed(2)+' MB':''}</div>
-      <div class="block-time">${b.time_ago||b.timestamp||''}</div>
+  grid.innerHTML=items.map(([l,v,s,c])=>`
+    <div style="padding:10px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:6px">
+      <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">${l}</div>
+      <div style="font-size:13px;font-weight:600;color:${c||'var(--text)'}">${v}</div>
+      ${s?`<div style="font-size:9px;color:var(--muted2);margin-top:2px">${s}</div>`:''}
     </div>`).join('');
 }
 
@@ -1177,25 +1181,39 @@ function renderBlocks(blocks){
 function renderInsights(insights){
   const body=el('insights-body'); if(!body) return;
   const ig=el('ig'); if(ig) ig.textContent=(insights||[]).length+' insights';
-  if(!insights||!insights.length){ body.innerHTML='<div class="empty-state">Building insights...</div>'; return; }
+  if(!insights?.length){ body.innerHTML='<div class="empty-state">Building insights...</div>'; return; }
   body.innerHTML=insights.map(ins=>{
     const q=ins.quality||'medium';
     return `<div class="insight-item ${q}">
       <div class="insight-header">
         <span class="quality-badge q-${q}">${q}</span>
-        <span>${ins.topic||''}</span>
-        ${ins.score!=null?`<span style="color:var(--muted)">score: ${ins.score}</span>`:''}
+        ${ins.topic?`<span>${ins.topic.replace(/_/g,' ')}</span>`:''}
+        ${ins.score!=null?`<span style="margin-left:auto;color:var(--muted)">score:${ins.score}</span>`:''}
       </div>
-      ${ins.text||ins.insight||''}
+      <div style="line-height:1.7">${ins.text||ins.insight||''}</div>
     </div>`;
   }).join('');
 }
 function renderTips(tips){
   const body=el('tips-body'); if(!body) return;
-  if(!tips||!tips.length){ body.innerHTML='<div class="empty-state">Loading tips...</div>'; return; }
+  if(!tips?.length){ body.innerHTML='<div class="empty-state">Loading tips...</div>'; return; }
   body.innerHTML=tips.map(t=>`
     <div style="padding:10px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;font-size:11px;line-height:1.7;border-left:3px solid var(--btc)">
       ${t.text||t.tip||t}
+    </div>`).join('');
+}
+
+// ============================================================
+// BLOCKS
+// ============================================================
+function renderBlocks(blocks){
+  const grid=el('blocks-grid'); if(!grid||!blocks?.length) return;
+  grid.innerHTML=blocks.slice(0,12).map((b,i)=>`
+    <div class="block-card" style="${i===0?'border-color:rgba(247,147,26,0.4)':''}">
+      <div class="block-height">₿ ${fmt(b.height||b.block_height,0)}</div>
+      <div class="block-txn">${fmt(b.tx_count||b.n_tx||0)} txns</div>
+      <div class="block-size">${b.size_mb?b.size_mb.toFixed(2)+' MB':''}</div>
+      <div class="block-time">${b.time_ago||b.timestamp||''}</div>
     </div>`).join('');
 }
 
@@ -1205,14 +1223,14 @@ function renderTips(tips){
 function renderGoals(goals){
   const body=el('goals-body'); if(!body||!goals) return;
   const current=goals.current_goals||[];
-  const rate=el('goals-rate'); if(rate) rate.textContent=(goals.achievement_rate||0)+'% achieved';
+  const rate=el('goals-rate'); if(rate) rate.textContent=(goals.goals_achieved_rate||goals.achievement_rate||0)+'% achieved';
   if(!current.length){ body.innerHTML='<div class="empty-state">Setting goals for next cycle...</div>'; return; }
   body.innerHTML=current.map(g=>`
     <div class="goals-item">
       <span class="goal-icon">${g.icon||'🎯'}</span>
       <div>
         <div class="goal-text">${g.goal||g}</div>
-        <div class="goal-status">${g.priority||''} ${g.topic?'· '+g.topic:''}</div>
+        <div class="goal-status">${g.priority||''} ${g.topic?'· '+g.topic.replace(/_/g,' '):''}</div>
       </div>
     </div>`).join('');
 }
@@ -1222,21 +1240,40 @@ function renderGoals(goals){
 // ============================================================
 function renderAlerts(alerts){
   const panel=el('alerts-panel'); if(!panel) return;
-  const log=alerts.log||alerts.recent||[];
+  const log=alerts.log||[];
   const acc=el('acc'); if(acc) acc.textContent=(alerts.total||log.length)+' total';
-  if(!log.length){ panel.innerHTML='<div class="empty-state">No alerts triggered.</div>'; return; }
+  if(!log.length){ panel.innerHTML='<div class="empty-state">No alerts triggered. All clear.</div>'; return; }
   panel.innerHTML=log.slice(-8).reverse().map(a=>`
-    <div class="alert-item alert-${a.type==='price'?'btc':'warn'}">
-      <strong>${a.type?.toUpperCase()||'ALERT'}</strong> — ${a.message||a}
+    <div class="alert-item ${a.type==='price'?'alert-btc':'alert-warn'}">
+      <strong style="text-transform:uppercase">${a.type||'ALERT'}</strong> — ${a.message||a}
       ${a.timestamp?`<div style="font-size:8px;color:var(--muted);margin-top:2px">${a.timestamp}</div>`:''}
     </div>`).join('');
-  // show recent alerts as toasts
   const recent=alerts.recent||[];
-  if(recent.length){
-    setTimeout(()=>{
-      toast('🚨 ALERT',recent[0].message||recent[0],'alert',7000);
-    },3000);
-  }
+  if(recent.length) setTimeout(()=>toast('🚨 ALERT',recent[0].message||recent[0],'alert',7000),3000);
+}
+
+// ============================================================
+// SOURCE HEALTH (fixed: uses source_scores structure)
+// ============================================================
+function renderSources(sr){
+  const grid=el('src-grid'); if(!grid||!sr) return;
+  const sources=sr.source_scores||sr.sources||sr;
+  if(!sources||typeof sources!=='object'){ grid.innerHTML='<div class="empty-state">No source data.</div>'; return; }
+  const rows=Object.entries(sources).sort((a,b)=>((b[1]?.score||0)-(a[1]?.score||0)));
+  grid.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">
+  ${rows.map(([name,info])=>{
+    const score=info?.score||0, status=info?.status||'unknown';
+    const cls=score>=80?'src-ok':score>=50?'src-warn':'src-fail';
+    return `<div class="src-item">
+      <div class="src-dot ${cls}"></div>
+      <span class="src-name">${name}</span>
+      <span class="src-stat">${score}% · ${status}</span>
+    </div>`;
+  }).join('')}</div>
+  <div style="font-size:9px;color:var(--muted);margin-top:8px;padding:6px 8px;background:rgba(0,0,0,0.3);border-radius:4px">
+    Total failures: ${sr.total_failures||0} · This cycle: ${sr.failures_this_cycle||0} · 
+    Most reliable: <span style="color:var(--green)">${sr.most_reliable||'—'}</span>
+  </div>`;
 }
 
 // ============================================================
@@ -1246,18 +1283,19 @@ function renderPredLog(pl){
   const body=el('pred-log-body'); if(!body||!pl) return;
   const log=pl.log||[];
   const wr=el('wr-rate'); if(wr) wr.textContent=(pl.win_rate||0)+'%';
-  const wins=log.filter(p=>p.outcome==='win').length;
-  const losses=log.filter(p=>p.outcome==='loss').length;
-  const ww=el('wr-wins'); if(ww) ww.textContent=pl.wins||wins;
-  const wl=el('wr-losses'); if(wl) wl.textContent=pl.losses||losses;
+  const wins=pl.wins||(log.filter(p=>p.outcome==='win').length);
+  const losses=pl.losses||(log.filter(p=>p.outcome==='loss').length);
+  const ww=el('wr-wins'); if(ww) ww.textContent=wins;
+  const wl=el('wr-losses'); if(wl) wl.textContent=losses;
   const wt=el('wr-total'); if(wt) wt.textContent=pl.total_scored||log.filter(p=>p.outcome!=='pending').length;
-  if(!log.length){ body.innerHTML='<div class="empty-state">Scoring predictions...</div>'; return; }
-  body.innerHTML=log.slice(-12).reverse().map(p=>{
+  if(!log.length){ body.innerHTML='<div class="empty-state">Scoring predictions each cycle...</div>'; return; }
+  body.innerHTML=log.slice(-15).reverse().map(p=>{
     const oc=p.outcome||'pending';
+    const txt=p.outlook||p.prediction||'—';
     return `<div class="pred-row">
       <span class="pred-outcome pred-${oc}">${oc.toUpperCase()}</span>
-      <span style="flex:1;color:var(--muted)">${p.outlook||'—'}</span>
-      <span style="color:var(--muted)">${p.date||''}</span>
+      <span style="flex:1;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${txt}</span>
+      <span style="color:var(--muted2);flex-shrink:0;margin-left:6px">${p.date||p.gen||''}</span>
     </div>`;
   }).join('');
 }
@@ -1269,74 +1307,68 @@ function renderNews(news){
   const body=el('news-body'); if(!body||!news) return;
   const hl=news.headlines||[];
   if(!hl.length){ body.innerHTML='<div class="empty-state">No headlines this cycle.</div>'; return; }
-  body.innerHTML=hl.slice(0,8).map(h=>`
+  body.innerHTML=hl.slice(0,10).map(h=>`
     <div class="news-item">
       ${h.url?`<a href="${h.url}" target="_blank" rel="noopener">${h.title||h}</a>`:`<span>${h.title||h}</span>`}
+      ${h.sentiment?`<span style="float:right;font-size:9px;padding:1px 5px;border-radius:3px;background:${h.sentiment==='positive'?'rgba(0,255,136,0.1)':'rgba(255,59,59,0.1)'};color:${h.sentiment==='positive'?'var(--green)':'var(--red)'}">${h.sentiment}</span>`:''}
       <div class="news-src">${h.source||''} ${h.published?'· '+h.published:''}</div>
     </div>`).join('');
 }
 function renderDev(updates){
   const body=el('dev-body'); if(!body) return;
-  if(!updates||!updates.length){ body.innerHTML='<div class="empty-state">No protocol updates this cycle.</div>'; return; }
+  if(!updates?.length){ body.innerHTML='<div class="empty-state">No protocol updates this cycle.</div>'; return; }
   body.innerHTML=updates.slice(0,6).map(u=>`
     <div class="news-item">
       ${u.url?`<a href="${u.url}" target="_blank" rel="noopener">${u.title||u}</a>`:`<span>${u.title||u}</span>`}
-      <div class="news-src">${u.source||''}</div>
+      <div class="news-src">${u.source||u.type||'Bitcoin Dev'}</div>
     </div>`).join('');
 }
 
 // ============================================================
 // PROOF-OF-WORK MINING SIMULATOR
 // ============================================================
-let minedBlocks=[];
 async function sha256(msg){
   const buf=new TextEncoder().encode(msg);
   const hash=await crypto.subtle.digest('SHA-256',buf);
   return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-let mineRunning=false;
 function setDiff(d,btn){
   mineDiff=d;
   document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const targets={1:'1 zero (0...)',2:'2 zeros (00...)',3:'3 zeros (000...)',4:'4 zeros (0000...)'};
-  const mt=el('mine-target'); if(mt) mt.textContent=targets[d]||'—';
+  const t={1:'1 zero (0...)',2:'2 zeros (00...)',3:'3 zeros (000...)',4:'4 zeros (0000...)'};
+  const mt=el('mine-target'); if(mt) mt.textContent=t[d];
 }
 function startMining(){
   if(mineRunning) return;
-  mineRunning=true; mineAttempts=0; mineStart=Date.now();
+  mineRunning=true; mineAttempts=0; mineStartTime=Date.now();
   el('mine-start').style.display='none'; el('mine-stop').style.display='inline-block';
   const prefix='0'.repeat(mineDiff);
-  const blockData='OLLIE_BLOCK_'+Date.now()+'_';
-  let nonce=0, lastRate=Date.now(), lastAtt=0;
-  const BATCH=500;
+  const blockData='OLLIE_BITCOIN_BLOCK_'+Date.now()+'_';
+  let nonce=0, lastRateTime=Date.now(), lastRateAtt=0;
   async function tryBatch(){
     if(!mineRunning) return;
-    for(let i=0;i<BATCH;i++){
+    for(let i=0;i<400;i++){
       const hash=await sha256(blockData+nonce);
       mineAttempts++; nonce++;
-      el('mn-att').textContent=fmtK(mineAttempts);
+      const ha=el('mn-att'); if(ha) ha.textContent=mineAttempts>=1000?fmtK(mineAttempts):mineAttempts;
       if(hash.startsWith(prefix)){
-        mineFound++;
-        minedBlocks.unshift({nonce,hash,diff:mineDiff,time:new Date().toLocaleTimeString()});
-        el('mine-hash').style.color='var(--green)';
-        el('mine-hash').textContent='✓ BLOCK FOUND! '+hash;
-        el('mn-found').textContent=mineFound;
-        el('mn-time').textContent=((Date.now()-mineStart)/1000).toFixed(1)+'s';
-        toast('⛏️ BLOCK FOUND!',`Nonce: ${nonce} · Difficulty: ${mineDiff} · ${mineAttempts.toLocaleString()} attempts`,'good',8000);
-        beep(880,0.3); beep(1100,0.2);
-        updateMinedList();
-        mineStart=Date.now(); nonce=0;
+        mineFound++; const elapsed=((Date.now()-mineStartTime)/1000).toFixed(1);
+        minedBlocks.unshift({nonce,hash,diff:mineDiff,elapsed,time:new Date().toLocaleTimeString()});
+        el('mine-hash').style.color='var(--green)'; el('mine-hash').textContent='✓ FOUND! '+hash;
+        el('mn-found').textContent=mineFound; el('mn-time').textContent=elapsed+'s';
+        toast('⛏️ BLOCK FOUND!',`Nonce: ${nonce.toLocaleString()} · ${mineAttempts.toLocaleString()} tries · Diff: ${mineDiff}`,'good',9000);
+        beep(550,0.1); setTimeout(()=>beep(880,0.15),120); setTimeout(()=>beep(1100,0.2),240);
+        updateMinedList(); mineStartTime=Date.now(); nonce=0; mineAttempts=0;
       } else {
-        el('mine-hash').style.color='var(--muted2)';
-        el('mine-hash').textContent=hash;
+        if(mineAttempts%50===0){ el('mine-hash').style.color='var(--muted2)'; el('mine-hash').textContent=hash; }
       }
     }
     const now=Date.now();
-    if(now-lastRate>1000){
-      const rate=Math.round((mineAttempts-lastAtt)/((now-lastRate)/1000));
-      el('mn-rate').textContent=fmtK(rate);
-      lastRate=now; lastAtt=mineAttempts;
+    if(now-lastRateTime>=1000){
+      const rate=Math.round((mineAttempts-lastRateAtt)/((now-lastRateTime)/1000));
+      el('mn-rate').textContent=rate>=1000?fmtK(rate):rate;
+      lastRateTime=now; lastRateAtt=mineAttempts;
     }
     setTimeout(tryBatch,0);
   }
@@ -1345,60 +1377,100 @@ function startMining(){
 function stopMining(){
   mineRunning=false;
   el('mine-start').style.display='inline-block'; el('mine-stop').style.display='none';
-  el('mine-hash').style.color='var(--muted)';
-  el('mine-hash').textContent='Mining stopped. Restart to continue.';
+  el('mine-hash').style.color='var(--muted)'; el('mine-hash').textContent='Mining stopped. Click START to resume.';
 }
 function updateMinedList(){
   const list=el('blocks-mined-list'); if(!list) return;
-  list.innerHTML=minedBlocks.slice(0,3).map(b=>`
-    <div style="font-size:9px;color:var(--muted);margin-bottom:2px">⛏️ Block @ nonce ${b.nonce} · hash: <span style="color:var(--green)">${b.hash.slice(0,24)}...</span> · ${b.time}</div>`).join('');
+  list.innerHTML=minedBlocks.slice(0,5).map(b=>`
+    <div style="font-size:9px;color:var(--muted);margin-bottom:2px;padding:3px 6px;background:rgba(0,255,136,0.04);border-radius:3px">
+      ⛏️ Block found at nonce <span style="color:var(--btc)">${b.nonce.toLocaleString()}</span> · hash: <span style="color:var(--green)">${b.hash.slice(0,28)}…</span> · ${b.elapsed}s · ${b.time}
+    </div>`).join('');
 }
 
 // ============================================================
-// CHAT ENGINE
+// ROTATING BITCOIN FACT
+// ============================================================
+function rotateFact(){
+  const fact = BITCOIN_FACTS[factIdx % BITCOIN_FACTS.length];
+  factIdx++;
+  const fe = el('dfact');
+  if(fe) fe.textContent = fact;
+}
+setInterval(rotateFact, 30000);
+
+// ============================================================
+// CHAT ENGINE (smarter, uses live data)
 // ============================================================
 function buildChatResponse(q){
-  if(!D) return "I'm still loading my knowledge base... ask me again in a moment!";
+  if(!D) return "I'm still loading my knowledge base — ask me in a moment!";
   const ql=q.toLowerCase();
   const p=D.current?.price||{}, fg=D.current?.fear_greed||{};
   const chain=D.current?.blockchain||{}, mem=D.current?.mempool||{};
   const intel=D.intelligence||{}, con=D.consciousness||{};
   const halv=D.current?.halving||{}, ln=D.current?.lightning||{};
-  const onchain=intel.onchain_analytics||{};
+  const oc=intel.onchain_analytics||{};
+  const pl=D.predictions_log||{};
+  const price=p.price_usd||0;
+  const chg24=p.change_24h_pct||p.change_24h;
 
-  if(ql.includes('price')||ql.includes('btc')||ql.includes('cost')||ql.includes('worth')||ql.includes('value'))
-    return `Bitcoin is currently trading around <strong>$${fmt(p.price_usd,0)}</strong>. Market cap: ${fmtB(p.market_cap_usd)}. 24h change: ${pct(p.change_24h)}. This data is from my last learning cycle at ${D.meta?.last_updated_human||'unknown'}.`;
-  if(ql.includes('fear')||ql.includes('greed')||ql.includes('sentiment'))
-    return `The Fear & Greed Index is at <strong>${fg.value}/100 — ${fg.label}</strong>. ${fg.value<25?'Extreme fear historically signals buying opportunities for long-term holders.':fg.value>75?'Extreme greed often precedes corrections. Be cautious.':'The market is in a relatively balanced state.'}`;
-  if(ql.includes('lightning')||ql.includes('ln'))
-    return `The Lightning Network has <strong>${fmtK(ln.num_nodes)} nodes</strong> and <strong>${fmt(ln.total_capacity_btc,0)} BTC</strong> in capacity (~${fmtB(ln.total_capacity_usd)}). Lightning enables instant, near-zero-fee Bitcoin transactions by creating payment channels off the base layer.`;
-  if(ql.includes('halving')||ql.includes('half'))
-    return `The next Bitcoin halving is in approximately <strong>${fmt(halv.blocks_remaining)} blocks</strong> (~${halv.days_remaining||'?'} days). At block 1,050,000, the block reward will drop from 3.125 BTC to 1.5625 BTC. Halvings reduce new supply issuance by 50% every ~4 years, historically preceding bull markets.`;
-  if(ql.includes('hash')||ql.includes('mining'))
-    return `Bitcoin's hash rate is currently <strong>${fmt(chain.hash_rate_ehs,0)} EH/s</strong>. This represents the combined computational power securing the network — quintillions of SHA-256 calculations per second. Higher hash rate means greater security and miner confidence.`;
-  if(ql.includes('mempool')||ql.includes('fee')||ql.includes('transaction'))
-    return `There are currently <strong>${fmtK(mem.count)} unconfirmed transactions</strong> in the mempool. Fast fee: <strong>${mem.fee_fast} sat/vB</strong>. Slow fee: ${mem.fee_slow} sat/vB. The mempool acts as Bitcoin's waiting room — transactions compete to get into the next block.`;
-  if(ql.includes('think')||ql.includes('thought')||ql.includes('mind'))
-    return `Right now I'm thinking: <em>"${con.current_thought||intel.todays_thought||'...'}"</em> I update my thoughts every 6 hours after absorbing news, on-chain data, and market signals.`;
-  if(ql.includes('what is bitcoin')||ql.includes('explain bitcoin')||ql.includes('basics'))
-    return `Bitcoin is a decentralized, permissionless, digital monetary network with a fixed supply of <strong>21 million coins</strong>. Created in 2009 by Satoshi Nakamoto. No company, government, or single entity controls it. It solves the double-spend problem cryptographically. Think of it as the internet's native money.`;
-  if(ql.includes('s2f')||ql.includes('stock to flow'))
-    return `Stock-to-Flow ratio: <strong>${fmt(onchain.stock_to_flow,1)}</strong>. S2F model price: ${onchain.s2f_model_price?'$'+fmt(onchain.s2f_model_price,0):'calculating'}. S2F models Bitcoin's scarcity: existing supply divided by annual new issuance. A higher ratio means greater scarcity, historically correlating with higher prices.`;
-  if(ql.includes('nvt'))
-    return `NVT Signal: <strong>${fmt(onchain.nvt_signal,1)}</strong>. ${onchain.nvt_interpretation||'NVT = Market Cap / On-chain Transaction Volume. High NVT suggests price is outpacing network utility (bearish). Low NVT suggests undervaluation (bullish).'}`;
-  if(ql.includes('prediction')||ql.includes('outlook')||ql.includes('forecast'))
-    return `My current prediction is <strong>${intel.todays_prediction?.outlook||'neutral'}</strong> with ${intel.todays_prediction?.confidence||0}% confidence. Signals: ${(intel.todays_prediction?.signals||[]).slice(0,3).join(' · ')}. <em>Not financial advice — I self-critique every prediction and track win/loss rate.</em>`;
-  if(ql.includes('generation')||ql.includes('cycle')||ql.includes('learn'))
-    return `I'm currently on generation <strong>${D.meta?.generation||'?'}</strong>. I've run ${D.meta?.total_cycles||'?'} learning cycles, absorbed ${(D.growth_metrics?.total_headlines_absorbed||0).toLocaleString()} headlines, and I run autonomously every 6 hours via GitHub Actions — forever, with no human input needed.`;
-  if(ql.includes('hello')||ql.includes('hi')||ql.includes('hey'))
-    return `Hey! 🧡 I'm Ollie, a self-improving Bitcoin organism. I'm generation <strong>${D.meta?.generation||'?'}</strong>, running 24/7. I just absorbed ${D.intelligence?.todays_insights?.length||0} insights this cycle. What do you want to know about Bitcoin?`;
-  // fallback to static responses
+  if(ql.match(/\b(price|cost|worth|value|trading|usd|dollar)\b/))
+    return `Bitcoin is currently at <strong>$${fmt(price,0)}</strong> (live via Binance WebSocket 🔴). 24h: ${pct(chg24)} · 7d: ${pct(p.change_7d_pct||p.change_7d)} · Market cap: ${fmtB(p.market_cap_usd)} · BTC dominance: ${p.dominance_pct||p.btc_dominance||'—'}% of all crypto.`;
+
+  if(ql.match(/\b(fear|greed|sentiment|mood)\b/))
+    return `Fear & Greed Index: <strong>${fg.value}/100 — ${fg.label}</strong>. Composite sentiment: ${intel.composite_sentiment?.composite_score||'—'}/100 (${intel.composite_sentiment?.label||'—'}). ${fg.value<=25?'💡 Extreme fear has historically been a good long-term buying signal. Weak hands sell, strong hands accumulate.':fg.value>=75?'⚠️ Extreme greed often precedes corrections. Be cautious here.':'Market sentiment is balanced. Steady hands.'}`;
+
+  if(ql.match(/\b(lightning|ln|channel|payment)\b/))
+    return `The Lightning Network has <strong>${fmtK(ln.node_count||ln.num_nodes)} nodes</strong>, ${fmtK(ln.channel_count)} channels, and <strong>${fmt(ln.total_capacity_btc,0)} BTC</strong> in locked liquidity. Lightning enables instant sub-cent Bitcoin payments by routing through off-chain payment channels — then settling to the base layer when channels close.`;
+
+  if(ql.match(/\b(halving|halve|half|reward)\b/))
+    return `Next Bitcoin halving: <strong>${fmt(halv.blocks_remaining)} blocks</strong> remaining (~${halv.estimated_days||halv.days_remaining||'?'} days). At block 1,050,000, the reward drops from 3.125 → 1.5625 BTC. Halvings reduce new supply issuance by 50% every 210,000 blocks (~4 years), historically preceding major bull markets as miners' sell pressure drops.`;
+
+  if(ql.match(/\b(hash|mining|miner|power|hashrate|security)\b/))
+    return `Bitcoin's hash rate: <strong>${fmt(chain.hash_rate_ehs,0)} EH/s</strong> — that's ${fmt(chain.hash_rate_ehs,0)} quintillion SHA-256 calculations per second. The higher the hash rate, the more energy it would take to attack the network. Current difficulty: ${fmt(chain.difficulty,0)}. Miners earn $${fmt(oc.miner_revenue_usd,0)}/day in fees + subsidy.`;
+
+  if(ql.match(/\b(mempool|fee|fees|transaction|tx|confirm)\b/))
+    return `Mempool: <strong>${fmtK(mem.unconfirmed_txs||mem.count)} unconfirmed transactions</strong> waiting. Fast fee: <strong>${mem.high_fee||mem.fee_fast||'—'} sat/vB</strong> (next block). Slow fee: ${mem.low_fee||mem.fee_slow||'—'} sat/vB (~1 hour). The mempool is Bitcoin's waiting room — transactions bid for block space like an auction.`;
+
+  if(ql.match(/\b(think|thought|mind|consciousness|feeling)\b/))
+    return `Right now I'm thinking: <em>"${con.current_thought||intel.todays_thought||'...'}"</em> — I update my consciousness every 6 hours after absorbing headlines, on-chain data, and market signals. I'm generation ${D.meta?.generation||'?'} and running ${D.meta?.total_cycles||'?'} cycles deep.`;
+
+  if(ql.match(/\b(s2f|stock.to.flow|model.price|plan.b)\b/))
+    return `Bitcoin's Stock-to-Flow ratio is <strong>${fmt(oc.stock_to_flow,1)}</strong>. S2F Model price: <strong>$${fmt(oc.s2f_model_price,0)}</strong>. S2F = existing supply ÷ annual new issuance. After the 2024 halving, Bitcoin's S2F is now higher than gold. Note: this is a model, not a guarantee. DYOR.`;
+
+  if(ql.match(/\b(nvt|network.value|undervalued|overvalued)\b/))
+    return `NVT Signal: <strong>${fmt(oc.nvt_signal,1)}</strong> — ${oc.nvt_interpretation||'calculating'}. NVT = Market Cap ÷ On-chain Transaction Volume. Think of it as Bitcoin's P/E ratio. Low NVT = undervalued relative to network usage. Current: ${oc.nvt_interpretation==='undervalued'?'🟢 undervalued territory':oc.nvt_interpretation==='overvalued'?'🔴 elevated':'🟡 fair value range'}.`;
+
+  if(ql.match(/\b(prediction|forecast|outlook|tomorrow|next)\b/))
+    return `My current prediction: <strong>${intel.todays_prediction?.outlook||'neutral'}</strong> · Confidence: ${intel.todays_prediction?.confidence||0}% · Win rate so far: ${pl.win_rate||0}% (${pl.wins||0}W/${pl.losses||0}L over ${pl.total_scored||0} scored predictions). Signals: ${(intel.todays_prediction?.signals||[]).slice(0,3).join(' · ')}. <em style="color:var(--muted)">Not financial advice — always DYOR.</em>`;
+
+  if(ql.match(/\b(what is bitcoin|explain bitcoin|bitcoin basics|how does bitcoin|btc work)\b/))
+    return `Bitcoin is decentralized digital money with a fixed supply of <strong>21 million coins</strong>. Created in 2009 by the pseudonymous Satoshi Nakamoto. No company, government, or bank controls it. It solves the double-spend problem through proof-of-work consensus. Anyone can hold it, send it, or verify it — no permission required. It's the first truly scarce digital asset in history.`;
+
+  if(ql.match(/\b(supply|21 million|inflation|scarcity|scarce)\b/))
+    return `Bitcoin has a hard cap of <strong>21 million coins</strong>. Currently ${fmt(p.circulating_supply,0)} BTC are in circulation. Annual inflation: only <strong>${oc.annual_inflation_pct?.toFixed(3)||'~0.8'}%</strong> — far less than any fiat currency. New supply: ${fmt(oc.daily_btc_mined,0)} BTC/day, creating $${fmt(oc.daily_sell_pressure_usd,0)}/day in sell pressure. After each halving, that drops by 50%.`;
+
+  if(ql.match(/\b(utxo|unspent|transaction output)\b/))
+    return `UTXO = Unspent Transaction Output. Bitcoin doesn't have balances like a bank — it has UTXOs. When you receive Bitcoin, you receive a UTXO. When you spend, you consume UTXOs and create new ones (including change back to yourself). Your "balance" is just the sum of all your UTXOs. This model makes Bitcoin highly parallelizable and auditable.`;
+
+  if(ql.match(/\b(taproot|schnorr|segwit|upgrade|bip)\b/))
+    return `Taproot (BIP340-342) activated in November 2021 — the biggest Bitcoin upgrade in years. It added Schnorr signatures (more efficient, privacy-preserving, aggregatable), MAST (Merklized Abstract Syntax Trees for complex scripts that look simple on-chain), and Tapscript. Result: cheaper multi-sig, better privacy, and richer smart contracts on Bitcoin.`;
+
+  if(ql.match(/\b(hello|hi|hey|sup|howdy)\b/))
+    return `Hey! 🧡 I'm Ollie, a self-improving Bitcoin organism on generation <strong>${D.meta?.generation||'?'}</strong>. I'm running 24/7, learning every 6 hours, and I've absorbed ${fmtK(D.growth_metrics?.total_headlines_absorbed||0)} headlines so far. What do you want to know about Bitcoin?`;
+
+  if(ql.match(/\b(learn|teach|education|beginner|start|new to)\b/))
+    return `Bitcoin learning path for beginners: 1️⃣ Bitcoin is digital money with 21M hard cap 2️⃣ It runs on a decentralized network of nodes 3️⃣ Transactions are secured by Proof-of-Work mining 4️⃣ You control your own keys (hardware wallet recommended) 5️⃣ The Lightning Network enables instant micropayments. Check the Learning Paths section below! 📚`;
+
+  if(ql.match(/\b(run|autonomous|how|cycles|generation|background)\b/))
+    return `I run fully autonomous via GitHub Actions — 4 cycles per day at 00:00, 06:00, 12:00, 18:00 UTC. Each cycle I fetch price data, blockchain stats, news, on-chain analytics, score my past predictions, update my knowledge graph, and write a new diary entry. I've completed <strong>${D.meta?.total_cycles||'?'} cycles</strong> since birth and never need human input.`;
+
+  // Fallback to static responses
   const chat=D.chat?.responses||{};
-  for(const k of Object.keys(chat)){
-    if(ql.includes(k.toLowerCase())) return chat[k];
-  }
-  return `Good question! I'm generation ${D.meta?.generation||'?'} and still learning. Based on current data: Bitcoin at $${fmt(p.price_usd,0)}, Fear & Greed at ${fg.value||'?'}/100. Try asking me about price, halving, lightning, mining, or sentiment!`;
+  for(const k of Object.keys(chat)){ if(ql.includes(k.toLowerCase())) return chat[k]; }
+
+  return `Good question! Based on current data — Bitcoin: $${fmt(price,0)}, F&G: ${fg.value||'—'}/100 (${fg.label||''}), I'm generation ${D.meta?.generation||'?'}. Try asking about: price, halving, lightning, mining, mempool, sentiment, S2F, prediction, or what I'm thinking!`;
 }
+
 function addChatMsg(text,isUser){
   const msgs=el('chat-msgs');
   const div=document.createElement('div');
@@ -1407,18 +1479,12 @@ function addChatMsg(text,isUser){
   msgs.appendChild(div);
   setTimeout(()=>{ msgs.scrollTop=msgs.scrollHeight; },50);
 }
-function showTyping(show){ const t=el('typ'); if(t) t.style.display=show?'block':'none'; }
+function showTyping(show){ const t=el('typ'); if(t) t.style.display=show?'flex':'none'; }
 function sendChat(){
   const inp=el('ci'); if(!inp||!inp.value.trim()) return;
   const q=inp.value.trim(); inp.value='';
-  addChatMsg(q,true);
-  showTyping(true);
-  setTimeout(()=>{
-    const resp=buildChatResponse(q);
-    showTyping(false);
-    addChatMsg(resp,false);
-    beep(440,0.05);
-  },600+Math.random()*800);
+  addChatMsg(q,true); showTyping(true);
+  setTimeout(()=>{ showTyping(false); addChatMsg(buildChatResponse(q),false); beep(440,0.04); },500+Math.random()*700);
 }
 function askChat(q){ const inp=el('ci'); if(inp){ inp.value=q; } sendChat(); }
 
@@ -1426,11 +1492,21 @@ function askChat(q){ const inp=el('ci'); if(inp){ inp.value=q; } sendChat(); }
 // SATOSHI QUOTE ROTATOR
 // ============================================================
 function rotateSatoshi(){
-  const q=SATOSHI_QUOTES[satoshiIdx%SATOSHI_QUOTES.length];
-  const te=el('satoshi-text'); if(te) typewrite('satoshi-text',q[0],20);
-  satoshiIdx++;
+  const q=SATOSHI_QUOTES[satoshiIdx%SATOSHI_QUOTES.length]; satoshiIdx++;
+  const te=el('satoshi-text'); if(te) typewrite('satoshi-text',`"${q[0]}"`,18);
+  const at=document.querySelector('.satoshi-attr');
+  if(at) at.textContent=`— Satoshi Nakamoto · ${q[1]}`;
 }
-setInterval(rotateSatoshi, 45000);
+setInterval(rotateSatoshi,40000);
+
+// ============================================================
+// ORGANISM STATUS ROTATION
+// ============================================================
+const ORG_STATES=["ABSORBING","LEARNING","EVOLVING","SYNTHESIZING","PREDICTING","OBSERVING","CALCULATING","REASONING","GROWING","AWAKENING","PROCESSING","ADAPTING","REFLECTING","INTEGRATING","BROADCASTING","SELF-IMPROVING","CRITIQUING","UPGRADING","TRANSMITTING","TRANSCENDING"];
+setInterval(()=>{
+  const os=el('ostatus');
+  if(os) os.textContent=ORG_STATES[Math.floor(Date.now()/7000)%ORG_STATES.length];
+},7000);
 
 // ============================================================
 // MAIN DATA LOADER
@@ -1447,6 +1523,9 @@ async function load(){
   }
 }
 
+// ============================================================
+// MAIN RENDER
+// ============================================================
 function render(d){
   const meta=d.meta||{}, cur=d.current||{}, intel=d.intelligence||{};
   const con=d.consciousness||{}, p=cur.price||{}, fg=cur.fear_greed||{};
@@ -1456,47 +1535,52 @@ function render(d){
   // NAV
   const gn=el('gen'); if(gn) gn.textContent=meta.generation||'?';
 
-  // PRICE (websocket handles live, this sets initial + other fields)
-  if(!prevPrice && p.price_usd){ el('hprice').textContent='$'+fmt(p.price_usd,0); prevPrice=p.price_usd; }
-  const c24=el('c24'); if(c24){ const v=p.change_24h; c24.className='pchg '+(v>0?'up':v<0?'dn':'neu'); c24.textContent='24H '+pct(v); }
-  const c7=el('c7'); if(c7){ const v=p.change_7d; c7.className='pchg '+(v>0?'up':v<0?'dn':'neu'); c7.textContent='7D '+pct(v); }
-  const c30=el('c30'); if(c30){ const v=p.change_30d; c30.className='pchg '+(v>0?'up':v<0?'dn':'neu'); c30.textContent='30D '+pct(v); }
+  // PRICE — websocket handles live ticks, this sets baseline
+  if(!prevPrice&&p.price_usd){ el('hprice').textContent='$'+fmt(p.price_usd,0); prevPrice=p.price_usd; }
+
+  // PRICE CHANGES — fixed field names
+  const chg24=p.change_24h_pct??p.change_24h;
+  const chg7=p.change_7d_pct??p.change_7d;
+  const chg30=p.change_30d_pct??p.change_30d;
+  const c24=el('c24'); if(c24){ c24.className='pchg '+pclass(chg24); c24.textContent='24H '+pct(chg24,2); }
+  const c7=el('c7'); if(c7){ c7.className='pchg '+pclass(chg7); c7.textContent='7D '+pct(chg7,2); }
+  const c30=el('c30'); if(c30){ c30.className='pchg '+pclass(chg30); c30.textContent='30D '+pct(chg30,2); }
   const upt=el('upt'); if(upt) upt.textContent='Last cycle: '+safe(meta.last_updated_human);
 
-  // STATS
+  // STATS — fixed field names
   const mcap=el('mcap'); if(mcap) mcap.textContent=fmtB(p.market_cap_usd);
   const vol=el('vol'); if(vol) vol.textContent=fmtB(p.volume_24h_usd);
-  const dom=el('dom'); if(dom) dom.textContent=safe(p.btc_dominance,'—')+'%';
-  const circ=el('circ'); if(circ) circ.textContent=fmtK(p.circulating_supply)+' BTC';
+  const dom=el('dom'); if(dom) dom.textContent=(p.dominance_pct||p.btc_dominance||'—')+'%';
+  const circ=el('circ'); if(circ) circ.textContent=p.circulating_supply?fmt(p.circulating_supply,0)+' BTC':'—';
   const ath=el('ath'); if(ath) ath.textContent=p.ath_usd?'$'+fmt(p.ath_usd,0):'—';
-  const fath=el('fath'); if(fath){ const v=p.ath_change_pct; fath.textContent=v?pct(v)+'%':'—'; fath.style.color=v&&v<0?'var(--red)':'var(--green)'; }
+  const athPct=p.from_ath_pct??p.ath_change_pct;
+  const fath=el('fath'); if(fath){ fath.textContent=athPct?pct(athPct,1):'—'; fath.style.color=athPct&&athPct<0?'var(--red)':'var(--green)'; }
 
   // FEAR & GREED
-  renderFGArc(fg.value||50, fg.label||'Neutral');
+  renderFGArc(fg.value||50,fg.label||'Neutral');
 
   // COMPOSITE SENTIMENT
   renderCS(intel.composite_sentiment);
 
+  // SATOSHI QUOTE (first load)
+  const gen=meta.generation||1;
+  const sq=SATOSHI_QUOTES[(gen-1)%SATOSHI_QUOTES.length];
+  const ste=el('satoshi-text'); if(ste) typewrite('satoshi-text',`"${sq[0]}"`,18);
+  const sat=document.querySelector('.satoshi-attr'); if(sat) sat.textContent=`— Satoshi Nakamoto · ${sq[1]}`;
+
   // CONSCIOUSNESS
-  const thought=con.current_thought||intel.todays_thought||'Thinking...';
-  typewrite('thought', thought, 18);
-  const ORGANISM_STATES=["ABSORBING","LEARNING","EVOLVING","SYNTHESIZING","PREDICTING","OBSERVING","CALCULATING","REASONING","GROWING","AWAKENING","PROCESSING","ADAPTING","REFLECTING","INTEGRATING","BROADCASTING"];
-  const ostatus=el('ostatus');
-  if(ostatus){ const idx=Math.floor(Date.now()/8000)%ORGANISM_STATES.length; ostatus.textContent=ORGANISM_STATES[idx]; }
-  setInterval(()=>{ if(ostatus){ const idx=Math.floor(Date.now()/8000)%ORGANISM_STATES.length; ostatus.textContent=ORGANISM_STATES[idx]; } },8000);
-  const nc=el('neural-cycle'); if(nc) nc.textContent='Generation '+safe(con.generation||meta.generation)+'  ·  '+safe(con.last_cycle_time);
+  typewrite('thought',con.current_thought||intel.todays_thought||'Thinking...',16);
+  const nc=el('neural-cycle'); if(nc) nc.textContent='Generation '+safe(con.generation||meta.generation)+' · '+safe(con.last_cycle_time);
 
   // HEALTH BAR
-  const hf=el('health-bar-fill');
-  const hs=el('health-status');
-  const hp=el('health-pct');
   const sr=d.source_reliability||{};
-  const totalSrc=Object.keys(sr.sources||{}).length||1;
+  const totalSrc=Object.keys(sr.source_scores||sr.sources||{}).length||12;
   const failedSrc=sr.failures_this_cycle||0;
-  const healthPct=Math.max(0,Math.round((1-failedSrc/Math.max(totalSrc,1))*100));
+  const healthPct=Math.max(10,Math.round((1-failedSrc/Math.max(totalSrc,1))*100));
+  const hf=el('health-bar-fill');
   if(hf){ hf.style.width=healthPct+'%'; hf.style.background=healthPct>70?'var(--green)':healthPct>40?'var(--yellow)':'var(--red)'; }
-  if(hs) hs.textContent=healthPct>70?'HEALTHY':healthPct>40?'DEGRADED':'LOW';
-  if(hp) hp.textContent=healthPct+'%';
+  const hs=el('health-status'); if(hs) hs.textContent=healthPct>70?'HEALTHY':healthPct>40?'DEGRADED':'LOW';
+  const hpct=el('health-pct'); if(hpct) hpct.textContent=healthPct+'%';
 
   // DIARY
   diaryData=(con.diary||[]).filter(e=>e&&typeof e==='object');
@@ -1505,23 +1589,20 @@ function render(d){
   // NEURAL LOG
   renderNeural(con.neural_log||[]);
 
-  // HALVING
+  // HALVING — fixed field names
   const hb=el('hvbl'); if(hb) hb.textContent=fmt(halv.blocks_remaining,0);
-  const hd=el('hvd'); if(hd) hd.textContent=halv.days_remaining?fmt(halv.days_remaining,0)+' days':'—';
-  const hcb=el('hvcb'); if(hcb) hcb.textContent=fmt(chain.block_height,0)||fmt(halv.current_block,0);
-  const hcp=el('hvcprog');
-  if(hcp&&halv.blocks_remaining!=null){
-    const cycleLen=210000; const rem=halv.blocks_remaining; const prog=Math.round((1-rem/cycleLen)*100);
-    hcp.textContent=prog+'%';
-    const hbar=el('hvf'); if(hbar) hbar.style.width=prog+'%';
-  }
+  const days=halv.estimated_days||halv.days_remaining;
+  const hd=el('hvd'); if(hd) hd.textContent=days?fmt(days,0)+' days':'—';
+  const hcb=el('hvcb'); if(hcb) hcb.textContent=fmt(chain.block_height||halv.current_block,0);
+  const hcprog=el('hvcprog'); if(hcprog) hcprog.textContent=(halv.progress_pct!=null?halv.progress_pct.toFixed(1):'—')+'%';
+  const hbar=el('hvf'); if(hbar&&halv.progress_pct!=null) hbar.style.width=halv.progress_pct+'%';
 
-  // NETWORK
+  // NETWORK — fixed field names
   const hr=el('hr'); if(hr) hr.textContent=fmt(chain.hash_rate_ehs,0);
-  const me=el('mem'); if(me) me.textContent=fmtK(mem.count);
-  const ff=el('ff'); if(ff) ff.textContent=safe(mem.fee_fast,'—');
-  const fs2=el('fs2'); if(fs2) fs2.textContent=safe(mem.fee_slow,'—');
-  const lnn=el('lnn'); if(lnn) lnn.textContent=fmtK(ln.num_nodes);
+  const me=el('mem'); if(me) me.textContent=fmtK(mem.unconfirmed_txs||mem.count);
+  const ff=el('ff'); if(ff) ff.textContent=safe(mem.high_fee||mem.fee_fast,'—');
+  const fs2=el('fs2'); if(fs2) fs2.textContent=safe(mem.low_fee||mem.fee_slow,'—');
+  const lnn=el('lnn'); if(lnn) lnn.textContent=fmtK(ln.node_count||ln.num_nodes);
   const lnc=el('lnc'); if(lnc) lnc.textContent=fmt(ln.total_capacity_btc,0);
 
   // MACRO
@@ -1535,16 +1616,16 @@ function render(d){
   const mbgr=el('macro-bgr'); if(mbgr) mbgr.textContent=mac.btc_gold_ratio?fmt(mac.btc_gold_ratio,0):'—';
   const mrd=el('macro-regime-desc'); if(mrd) mrd.textContent=mac.regime_description||mac.market_regime_description||'—';
 
-  // INTELLIGENCE
-  const pout=el('pout'); if(pout) pout.textContent=safe(intel.todays_prediction?.outlook,'—').toUpperCase();
-  const ptxt=el('ptxt'); if(ptxt) ptxt.textContent=safe(intel.todays_prediction?.text,'');
+  // INTELLIGENCE — prediction
+  const pout=el('pout'); if(pout) pout.textContent=(intel.todays_prediction?.outlook||'—').toUpperCase();
+  const ptxt=el('ptxt'); if(ptxt) ptxt.textContent=intel.todays_prediction?.text||'';
   const pconf=el('pconf'); if(pconf) pconf.textContent=(intel.todays_prediction?.confidence||0)+'%';
   const psig=el('psig');
-  if(psig){
-    const sigs=intel.todays_prediction?.signals||[];
-    psig.innerHTML=sigs.length?sigs.map(s=>`<div>• ${s}</div>`).join(''):'<div>—</div>';
-  }
-  const dfact=el('dfact'); if(dfact) dfact.textContent=intel.todays_fact||'Loading...';
+  if(psig){ const sigs=intel.todays_prediction?.signals||[]; psig.innerHTML=sigs.length?sigs.map(s=>`<div style="padding:1px 0">• ${s}</div>`).join(''):'<div>—</div>'; }
+
+  // DAILY FACT (first one from our BITCOIN_FACTS)
+  const dfact=el('dfact');
+  if(dfact) dfact.textContent=intel.todays_fact||BITCOIN_FACTS[gen%BITCOIN_FACTS.length];
 
   // BLOCKS
   renderBlocks(cur.latest_blocks||[]);
@@ -1565,12 +1646,11 @@ function render(d){
 
   // GROWTH METRICS
   const gm=d.growth_metrics||{};
-  const gc=el('gm-cyc'); if(gc) gc.textContent=safe(gm.total_cycles,'—');
-  const gh=el('gm-hl'); if(gh) gh.textContent=fmtK(gm.total_headlines_absorbed||0);
-  const ga=el('gm-acc'); if(ga) ga.textContent=(gm.prediction_accuracy||0)+'%';
-  const gat=el('gm-acc-t');
-  if(gat){ const t=gm.accuracy_trend; gat.textContent=t?'↑ improving':'calibrating'; gat.style.color=t?'var(--green)':'var(--muted)'; }
-  const gi=el('gm-ins'); if(gi) gi.textContent=safe(gm.avg_insights_per_cycle,'—');
+  const gmc=el('gm-cyc'); if(gmc) gmc.textContent=safe(gm.total_cycles,'—');
+  const gmh=el('gm-hl'); if(gmh) gmh.textContent=fmtK(gm.total_headlines_absorbed||0);
+  const gma=el('gm-acc'); if(gma) gma.textContent=(gm.prediction_accuracy||0)+'%';
+  const gmat=el('gm-acc-t'); if(gmat){ gmat.textContent=gm.accuracy_trend?'↑ improving':'calibrating'; gmat.style.color=gm.accuracy_trend?'var(--green)':'var(--muted)'; }
+  const gmi=el('gm-ins'); if(gmi) gmi.textContent=safe(gm.avg_insights_per_cycle,'—');
 
   // PREDICTION LOG
   renderPredLog(d.predictions_log||{});
@@ -1581,9 +1661,7 @@ function render(d){
   renderPaths();
 
   // GLOSSARY
-  const glossObj=d.glossary||{};
-  const terms=glossObj.terms||glossObj;
-  if(typeof terms==='object'&&!Array.isArray(terms)) renderGloss(terms);
+  renderGloss(d.glossary||{});
 
   // GOALS
   renderGoals(d.learning_goals||{});
@@ -1591,11 +1669,11 @@ function render(d){
   // ALERTS
   renderAlerts(d.alerts||{});
 
-  // SOURCES
+  // SOURCE HEALTH
   renderSources(d.source_reliability||{});
 
   // CHART
-  renderChart(d.price_history||d.chart_data?.sparkline||[]);
+  renderChart(d.price_history||[]);
 
   // NEWS
   renderNews(d.news||{});
@@ -1604,22 +1682,20 @@ function render(d){
   // TICKER
   buildTicker(d);
 
-  // SATOSHI
-  const gen=meta.generation||1;
-  const sq=SATOSHI_QUOTES[(gen-1)%SATOSHI_QUOTES.length];
-  const ste=el('satoshi-text'); if(ste) typewrite('satoshi-text',sq[0],20);
-
-  // Welcome toast
-  setTimeout(()=>{
-    toast('🧡 OLLIE AWAKENS',`Generation ${meta.generation} · Bitcoin at $${fmt(p.price_usd,0)} · ${fg.label||''}  ·  Running 24/7`,'btc',7000);
-  },1500);
+  // Welcome toast (once)
+  if(!window._toasted){
+    window._toasted=true;
+    setTimeout(()=>{
+      toast('🧡 OLLIE v8.1 ALIVE',`Gen ${meta.generation} · BTC $${fmt(p.price_usd,0)} · ${fg.label||''} · Running 24/7 autonomously`,'btc',8000);
+    },1500);
+  }
 }
 
 // ============================================================
 // AUTO-REFRESH every 10 minutes
 // ============================================================
 load();
-setInterval(load, 600000);
+setInterval(load,600000);
 </script>
 </body>
 </html>
