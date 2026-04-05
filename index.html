@@ -608,7 +608,921 @@ footer a{color:var(--btc)}
 
 <!-- INTELLIGENCE + HALVING -->
 <div class="g g2">
-  <div class="card">
+  
+<!-- OLLIE OFFICE SECTION — drop this into the main index between neural log and intelligence -->
+<!-- OFFICE PIXEL ART: full CSS + canvas 3D isometric workspace -->
+
+<style>
+/* ═══════════════════════════════════════════════════
+   OLLIE DIGITAL OFFICE — 3D ISOMETRIC PIXEL ART
+═══════════════════════════════════════════════════ */
+.office-wrap{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#0a0a14 0%,#0d0d1a 60%,#080812 100%);
+  border:1px solid rgba(247,147,26,.18);border-radius:var(--r);
+  min-height:480px;
+}
+.office-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px 14px;border-bottom:1px solid rgba(255,255,255,.05);
+  position:relative;z-index:10;
+}
+.office-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.office-status-row{
+  display:flex;align-items:center;gap:12px;
+  padding:0 22px 12px;position:relative;z-index:10;flex-wrap:wrap;
+}
+.office-pill{
+  font-size:9.5px;font-family:var(--mono);font-weight:600;letter-spacing:.6px;
+  padding:3px 10px;border-radius:20px;text-transform:uppercase;
+  border:1px solid;transition:all .5s;
+}
+
+/* CANVAS STAGE */
+.office-stage{
+  position:relative;width:100%;height:340px;overflow:hidden;
+  cursor:crosshair;
+}
+#office-cv{display:block;width:100%;height:100%}
+
+/* ACTIVITY FEED */
+.office-feed{
+  border-top:1px solid rgba(255,255,255,.05);
+  padding:12px 20px 16px;
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  position:relative;z-index:10;min-height:52px;
+}
+.act-chip{
+  font-size:9.5px;font-family:var(--mono);color:rgba(255,255,255,.45);
+  padding:3px 9px;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  transition:all .3s;white-space:nowrap;
+}
+.act-chip.active{color:var(--btc);border-color:var(--btc-b);background:var(--btc-s)}
+.act-chip.done{color:var(--grn);border-color:var(--grn-b);background:var(--grn-s)}
+
+/* THOUGHT BUBBLE popup */
+.thought-popup{
+  position:absolute;z-index:20;pointer-events:none;
+  background:rgba(10,10,20,.92);border:1px solid var(--btc-b);
+  border-radius:12px;padding:10px 14px;max-width:220px;
+  font-size:10.5px;color:rgba(255,255,255,.8);line-height:1.6;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+  transition:opacity .4s,transform .4s;
+  backdrop-filter:blur(20px);
+  font-family:var(--mono);
+}
+.thought-popup::before{
+  content:'💭';position:absolute;top:-14px;left:14px;font-size:18px;
+}
+.thought-popup.hidden{opacity:0;transform:translateY(6px)}
+
+/* CLICK RIPPLE */
+.ripple{
+  position:absolute;border-radius:50%;pointer-events:none;z-index:15;
+  border:1.5px solid var(--btc);
+  animation:rip .6s ease-out forwards;
+}
+@keyframes rip{from{width:0;height:0;opacity:.8;transform:translate(-50%,-50%)}to{width:80px;height:80px;opacity:0;transform:translate(-50%,-50%)}}
+</style>
+
+<!-- OFFICE CARD -->
+<div class="card office-wrap" style="margin-bottom:14px">
+  <div class="office-header">
+    <div class="office-title">
+      <span style="font-size:16px">🏢</span>
+      Ollie's Digital Workspace
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="tag tg ld"><span class="ld-dot"></span>LIVE</span>
+      <span class="tag to" id="office-gen-tag">GEN —</span>
+    </div>
+  </div>
+  <div class="office-status-row">
+    <span class="office-pill" id="op-status" style="color:var(--btc);border-color:var(--btc-b);background:var(--btc-s)">ADAPTING</span>
+    <span class="office-pill" id="op-mood" style="color:#FFD60A;border-color:rgba(255,214,10,.25);background:rgba(255,214,10,.08)">CONTEMPLATIVE</span>
+    <span class="office-pill" id="op-task" style="color:var(--grn);border-color:var(--grn-b);background:var(--grn-s)">ABSORBING HEADLINES</span>
+    <span style="font-size:10px;color:rgba(255,255,255,.3);font-family:var(--mono);margin-left:auto" id="op-time">—</span>
+  </div>
+  <div class="office-stage">
+    <canvas id="office-cv"></canvas>
+    <div class="thought-popup hidden" id="thought-popup">Initializing consciousness...</div>
+  </div>
+  <div class="office-feed" id="office-feed">
+    <span class="act-chip">Awaiting data...</span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  OLLIE DIGITAL OFFICE — 3D ISOMETRIC PIXEL ART ENGINE
+// ═══════════════════════════════════════════════════════════════
+(function(){
+
+const CV = document.getElementById('office-cv');
+if(!CV) return;
+const CTX = CV.getContext('2d');
+
+// ── RESIZE ────────────────────────────────────────────────────
+function resize(){
+  const r = CV.parentElement.getBoundingClientRect();
+  CV.width = r.width * devicePixelRatio;
+  CV.height = r.height * devicePixelRatio;
+  CV.style.width = r.width+'px';
+  CV.style.height = r.height+'px';
+  CTX.scale(devicePixelRatio, devicePixelRatio);
+  W = r.width; H = r.height;
+}
+let W=800, H=340;
+resize();
+window.addEventListener('resize', ()=>{ resize(); });
+
+// ── ISOMETRIC HELPERS ─────────────────────────────────────────
+// Convert grid (gx,gy,gz) → screen (sx,sy)
+// Origin at center-bottom of stage
+function iso(gx, gy, gz=0){
+  const OX = W/2, OY = H*0.55;
+  const TILE_W = 48, TILE_H = 24, TILE_Z = 28;
+  const sx = OX + (gx - gy) * (TILE_W/2);
+  const sy = OY + (gx + gy) * (TILE_H/2) - gz * TILE_Z;
+  return {x:sx, y:sy};
+}
+
+// ── PALETTE ───────────────────────────────────────────────────
+const C = {
+  // floor
+  floorA:'#12121e', floorB:'#14142a', floorLine:'#1e1e38',
+  floorGlow:'rgba(247,147,26,0.06)',
+  // walls
+  wallA:'#0e0e1c', wallB:'#0a0a16', wallTop:'#1a1a2e',
+  wallAccent:'rgba(247,147,26,0.15)',
+  // desk
+  deskTop:'#1e3a2a', deskFront:'#162a1e', deskSide:'#122216',
+  deskEdge:'#2a5a3a',
+  // monitors
+  mon1off:'#0a1628', mon1on:'#0d2040', mon1glow:'#1a4080',
+  monFrame:'#1a1a2e', monBezel:'#0d0d1a',
+  monScreen:'#0a2040',
+  monOrange:'#F7931A', monGreen:'#30D158', monBlue:'#0A84FF',
+  // chair
+  chairSeat:'#1a1a30', chairBack:'#141428', chairLegs:'#252540',
+  // server rack
+  rackBody:'#0f0f1e', rackDoor:'#141428', rackLight:'#F7931A',
+  rackLightB:'#30D158',
+  // bitcoin lamp
+  lampPost:'#2a2a40', lampGlow:'rgba(247,147,26,0.4)',
+  // plants
+  plantPot:'#2a1a0a', plantLeaf:'#1a3a1a', plantLeafB:'#143014',
+  // Ollie character
+  ollieBody:'#F7931A', ollieHead:'#ffb84d', ollieEye:'#000',
+  ollieShirt:'#1a2a3a', olliePants:'#0d1520', ollieShoe:'#0a0a10',
+  // coffee mug
+  mug:'#2a3a5a', mugHot:'rgba(255,255,255,0.3)',
+  // papers
+  paper:'#e8e4d0', paperLine:'#c8c4b0',
+  // bitcoin coin
+  coin:'#F7931A', coinShine:'#FFD60A',
+};
+
+// ── DRAW PRIMITIVES ───────────────────────────────────────────
+function isoRect(x,y, w,h, fill, stroke=null, lw=1){
+  CTX.beginPath();
+  CTX.rect(x,y,w,h);
+  CTX.fillStyle=fill; CTX.fill();
+  if(stroke){CTX.strokeStyle=stroke;CTX.lineWidth=lw;CTX.stroke();}
+}
+
+function isoFloorTile(gx,gy,fillA,fillB,lineCol){
+  const TW=48,TH=24;
+  const p = iso(gx,gy,0);
+  // Top face (rhombus)
+  CTX.beginPath();
+  CTX.moveTo(p.x, p.y);
+  CTX.lineTo(p.x+TW/2, p.y+TH/2);
+  CTX.lineTo(p.x, p.y+TH);
+  CTX.lineTo(p.x-TW/2, p.y+TH/2);
+  CTX.closePath();
+  const grad = CTX.createLinearGradient(p.x-TW/2,p.y,p.x+TW/2,p.y+TH);
+  grad.addColorStop(0,fillA); grad.addColorStop(1,fillB);
+  CTX.fillStyle=grad; CTX.fill();
+  if(lineCol){CTX.strokeStyle=lineCol;CTX.lineWidth=0.5;CTX.stroke();}
+}
+
+function isoCube(gx,gy,gz, tw,th,td, topC,leftC,rightC,edgeC=null){
+  // tw=width(x), th=height(y), td=depth(z) in grid units
+  const TW=48,TH=24,TZ=28;
+  const p = iso(gx,gy,gz);
+  const pw = TW/2, ph = TH/2;
+  const pz = TZ;
+
+  // Top face
+  CTX.beginPath();
+  CTX.moveTo(p.x, p.y);
+  CTX.lineTo(p.x+tw*pw, p.y+tw*ph);
+  CTX.lineTo(p.x+(tw-th)*pw, p.y+(tw+th)*ph);
+  CTX.lineTo(p.x-th*pw, p.y-th*ph+tw*ph*0);
+  // simpler: use the 4 corners
+  const tl = iso(gx,gy,gz+td);
+  const tr = iso(gx+tw,gy,gz+td);
+  const br = iso(gx+tw,gy+th,gz+td);
+  const bl = iso(gx,gy+th,gz+td);
+  const bbl= iso(gx,gy+th,gz);
+  const bbr= iso(gx+tw,gy+th,gz);
+  const btl= iso(gx,gy,gz);
+  const btr= iso(gx+tw,gy,gz);
+
+  // Top face
+  CTX.beginPath();
+  CTX.moveTo(tl.x,tl.y); CTX.lineTo(tr.x,tr.y);
+  CTX.lineTo(br.x,br.y); CTX.lineTo(bl.x,bl.y);
+  CTX.closePath(); CTX.fillStyle=topC; CTX.fill();
+  if(edgeC){CTX.strokeStyle=edgeC;CTX.lineWidth=0.7;CTX.stroke();}
+
+  // Left face (gy side)
+  CTX.beginPath();
+  CTX.moveTo(bl.x,bl.y); CTX.lineTo(br.x,br.y);
+  CTX.lineTo(bbr.x,bbr.y); CTX.lineTo(bbl.x,bbl.y);
+  CTX.closePath(); CTX.fillStyle=leftC; CTX.fill();
+  if(edgeC){CTX.strokeStyle=edgeC;CTX.lineWidth=0.7;CTX.stroke();}
+
+  // Right face (gx side)
+  CTX.beginPath();
+  CTX.moveTo(tr.x,tr.y); CTX.lineTo(br.x,br.y);
+  CTX.lineTo(bbr.x,bbr.y); CTX.lineTo(btr.x,btr.y);
+  CTX.closePath(); CTX.fillStyle=rightC; CTX.fill();
+  if(edgeC){CTX.strokeStyle=edgeC;CTX.lineWidth=0.7;CTX.stroke();}
+
+  return {tl,tr,br,bl,bbl,bbr,btl,btr};
+}
+
+// ── DRAW FLOOR GRID ───────────────────────────────────────────
+function drawFloor(){
+  for(let x=0;x<10;x++){
+    for(let y=0;y<8;y++){
+      const alt = (x+y)%2===0;
+      isoFloorTile(x,y, alt?C.floorA:C.floorB, alt?'#0f0f1c':'#111128', C.floorLine);
+    }
+  }
+  // Orange accent glow strip along front
+  for(let x=0;x<10;x++){
+    const p = iso(x,7,0);
+    CTX.beginPath();
+    CTX.moveTo(p.x,p.y); CTX.lineTo(p.x+24,p.y+12); CTX.lineTo(p.x,p.y+24); CTX.lineTo(p.x-24,p.y+12);
+    CTX.closePath();
+    CTX.fillStyle='rgba(247,147,26,0.04)'; CTX.fill();
+  }
+}
+
+// ── DRAW BACK WALL ────────────────────────────────────────────
+function drawWalls(){
+  // Back wall left — 10 tiles wide, 4 units tall
+  for(let x=0;x<10;x++){
+    const p0 = iso(x,0,0), p1=iso(x,0,4);
+    CTX.beginPath();
+    CTX.moveTo(p0.x-24,p0.y+12);
+    CTX.lineTo(p0.x+24,p0.y-12);
+    CTX.lineTo(p1.x+24,p1.y-12);
+    CTX.lineTo(p1.x-24,p1.y+12);
+    CTX.closePath();
+    CTX.fillStyle= x%2===0?'#0a0a18':'#0c0c1c'; CTX.fill();
+    CTX.strokeStyle='#14142a'; CTX.lineWidth=0.5; CTX.stroke();
+  }
+  // Orange stripe accent along wall base
+  for(let x=0;x<10;x++){
+    const p = iso(x,0,0.1);
+    CTX.beginPath();
+    CTX.moveTo(p.x-24,p.y+12); CTX.lineTo(p.x+24,p.y-12);
+    CTX.lineTo(p.x+24,p.y-12+3); CTX.lineTo(p.x-24,p.y+15);
+    CTX.closePath();
+    CTX.fillStyle='rgba(247,147,26,0.12)'; CTX.fill();
+  }
+}
+
+// ── DRAW DESK ─────────────────────────────────────────────────
+function drawDesk(gx,gy){
+  // Desk surface: 4 wide, 2 deep, 1.5 tall
+  isoCube(gx,gy,0, 4,2,1, C.deskTop,C.deskFront,C.deskSide,'#1a4a2a');
+  // Desk top edge highlight
+  const tl=iso(gx,gy,1), tr=iso(gx+4,gy,1);
+  CTX.beginPath(); CTX.moveTo(tl.x,tl.y); CTX.lineTo(tr.x,tr.y);
+  CTX.strokeStyle='rgba(42,90,58,0.8)'; CTX.lineWidth=1.5; CTX.stroke();
+}
+
+// ── DRAW MONITOR ──────────────────────────────────────────────
+function drawMonitor(gx,gy,gz, screenData, glowColor='#1a4080'){
+  // Stand
+  const sb = iso(gx+0.4,gy+0.3,gz);
+  CTX.beginPath();
+  CTX.moveTo(sb.x,sb.y); CTX.lineTo(sb.x+4,sb.y+2); CTX.lineTo(sb.x+4,sb.y+8); CTX.lineTo(sb.x,sb.y+6);
+  CTX.closePath(); CTX.fillStyle='#1a1a30'; CTX.fill();
+  // Screen frame
+  const s = iso(gx,gy,gz);
+  isoCube(gx,gy,gz+0.2, 2,0.1,1.4, C.monFrame,C.monBezel,C.monBezel,'#252540');
+  // Screen glow
+  const sg = iso(gx+0.1,gy,gz+0.35);
+  CTX.beginPath();
+  CTX.rect(sg.x-2,sg.y-24,80,44);
+  const gl = CTX.createLinearGradient(sg.x,sg.y-24,sg.x,sg.y+20);
+  gl.addColorStop(0,glowColor+'88'); gl.addColorStop(0.5,glowColor+'55'); gl.addColorStop(1,glowColor+'22');
+  CTX.fillStyle=gl; CTX.fill();
+  // Screen content (mini text lines)
+  if(screenData){
+    const p = iso(gx+0.15,gy,gz+1.05);
+    CTX.fillStyle='rgba(247,147,26,0.9)'; CTX.font='bold 7px JetBrains Mono,monospace';
+    CTX.fillText(screenData.line1||'', p.x-12, p.y+3);
+    CTX.fillStyle='rgba(48,209,88,0.8)'; CTX.font='6px JetBrains Mono,monospace';
+    CTX.fillText(screenData.line2||'', p.x-12, p.y+12);
+    CTX.fillStyle='rgba(255,255,255,0.4)'; CTX.font='5px JetBrains Mono,monospace';
+    CTX.fillText(screenData.line3||'', p.x-12, p.y+20);
+  }
+}
+
+// ── DRAW SERVER RACK ──────────────────────────────────────────
+function drawServerRack(gx,gy){
+  isoCube(gx,gy,0, 1.5,1,3, '#0f0f1e','#0a0a16','#0c0c18','#1a1a2e');
+  // Lights on front face — alternating green/orange
+  for(let i=0;i<6;i++){
+    const p = iso(gx+1.5,gy,0.3+i*0.4);
+    const col = i%3===0?C.rackLight:i%3===1?C.rackLightB:'#0A84FF';
+    const pulse = Math.sin(Date.now()*0.003 + i*1.2)*0.5+0.5;
+    CTX.beginPath();
+    CTX.arc(p.x-4, p.y+2, 2.5, 0, Math.PI*2);
+    CTX.fillStyle=col; CTX.fill();
+    // Glow
+    CTX.beginPath();
+    CTX.arc(p.x-4, p.y+2, 5, 0, Math.PI*2);
+    CTX.fillStyle=col+Math.round(pulse*80).toString(16).padStart(2,'0');
+    CTX.fill();
+  }
+}
+
+// ── DRAW CHAIR ────────────────────────────────────────────────
+function drawChair(gx,gy,gz=0){
+  // Seat
+  isoCube(gx,gy,gz, 1.2,1.2,0.4, '#22223a','#181830','#14142c','#2a2a42');
+  // Back
+  isoCube(gx,gy,gz+0.4, 1.2,0.1,1, '#1e1e34','#181830','#141428','#252540');
+  // Armrests
+  const al=iso(gx,gy,gz+0.4), ar=iso(gx+1.2,gy,gz+0.4);
+  CTX.beginPath();
+  CTX.rect(al.x-3,al.y-2,6,10); CTX.fillStyle='#1a1a30'; CTX.fill();
+  CTX.beginPath();
+  CTX.rect(ar.x-3,ar.y-2,6,10); CTX.fillStyle='#1a1a30'; CTX.fill();
+}
+
+// ── DRAW BITCOIN LAMP ─────────────────────────────────────────
+function drawLamp(gx,gy){
+  const base=iso(gx,gy,0);
+  // Post
+  CTX.beginPath();
+  CTX.moveTo(base.x,base.y+6); CTX.lineTo(base.x,base.y-40);
+  CTX.strokeStyle='#2a2a40'; CTX.lineWidth=3; CTX.stroke();
+  // Bitcoin symbol lamp head
+  const lp = iso(gx,gy,3);
+  CTX.beginPath();
+  CTX.arc(lp.x,lp.y-8,10,0,Math.PI*2);
+  const pulse = (Math.sin(Date.now()*0.002)*0.3+0.7);
+  const lg = CTX.createRadialGradient(lp.x,lp.y-8,0,lp.x,lp.y-8,10);
+  lg.addColorStop(0,'rgba(247,147,26,0.9)'); lg.addColorStop(1,'rgba(247,147,26,0.1)');
+  CTX.fillStyle=lg; CTX.fill();
+  CTX.fillStyle='#000'; CTX.font='bold 10px sans-serif'; CTX.textAlign='center';
+  CTX.fillText('₿',lp.x,lp.y-4);
+  // Light pool on floor
+  const flp=iso(gx,gy,0);
+  const flg=CTX.createRadialGradient(flp.x,flp.y+6,0,flp.x,flp.y+6,50);
+  flg.addColorStop(0,`rgba(247,147,26,${0.12*pulse})`);
+  flg.addColorStop(1,'rgba(247,147,26,0)');
+  CTX.beginPath(); CTX.arc(flp.x,flp.y+6,50,0,Math.PI*2);
+  CTX.fillStyle=flg; CTX.fill();
+}
+
+// ── DRAW PLANT ────────────────────────────────────────────────
+function drawPlant(gx,gy){
+  isoCube(gx,gy,0, 0.6,0.6,0.5, '#3a2010','#2a1808','#2a1808');
+  // Leaves
+  const lp = iso(gx+0.3,gy+0.3,0.5);
+  for(let i=0;i<7;i++){
+    const a = (i/7)*Math.PI*2;
+    const r = 8+Math.random()*4;
+    const wave = Math.sin(Date.now()*0.001+i)*2;
+    CTX.beginPath();
+    CTX.ellipse(lp.x+Math.cos(a)*6+wave, lp.y+Math.sin(a)*4-10+wave*0.5, r, r*0.5, a, 0, Math.PI*2);
+    CTX.fillStyle = i%2===0?'#1a3a1a':'#143014'; CTX.fill();
+  }
+}
+
+// ── DRAW COFFEE MUG ───────────────────────────────────────────
+function drawMug(gx,gy,gz){
+  const p = iso(gx,gy,gz);
+  // Mug body
+  CTX.beginPath();
+  CTX.roundRect(p.x-6,p.y-12,12,14,3);
+  CTX.fillStyle='#2a3a5a'; CTX.fill();
+  CTX.strokeStyle='#3a4a6a'; CTX.lineWidth=0.8; CTX.stroke();
+  // Handle
+  CTX.beginPath();
+  CTX.arc(p.x+7,p.y-6,5,Math.PI*0.3,Math.PI*1.7);
+  CTX.strokeStyle='#2a3a5a'; CTX.lineWidth=2; CTX.stroke();
+  // Steam
+  const steamAlpha = (Math.sin(Date.now()*0.003)*0.3+0.4);
+  for(let i=0;i<3;i++){
+    const sx = p.x-4+i*4, offset=Date.now()*0.002+i;
+    CTX.beginPath();
+    CTX.moveTo(sx+Math.sin(offset)*2,p.y-12);
+    CTX.quadraticCurveTo(sx+Math.sin(offset+1)*3,p.y-18,sx+Math.sin(offset+2)*2,p.y-22);
+    CTX.strokeStyle=`rgba(255,255,255,${steamAlpha*0.4})`; CTX.lineWidth=1; CTX.stroke();
+  }
+  // Bitcoin on mug
+  CTX.fillStyle='rgba(247,147,26,0.8)'; CTX.font='bold 7px sans-serif'; CTX.textAlign='center';
+  CTX.fillText('₿',p.x,p.y-3);
+}
+
+// ── DRAW FLOATING DATA PARTICLES ──────────────────────────────
+let particles = [];
+function spawnParticle(){
+  const types = ['₿','$','%','↑','↓','0','1','■','●'];
+  const colors = ['#F7931A','#30D158','#0A84FF','#FFD60A','#BF5AF2'];
+  const p = iso(Math.random()*10, Math.random()*8, Math.random()*2);
+  particles.push({
+    x:p.x, y:p.y, vy:-0.4-Math.random()*0.3,
+    vx:(Math.random()-0.5)*0.3,
+    alpha:0.8, life:1,
+    char:types[Math.floor(Math.random()*types.length)],
+    color:colors[Math.floor(Math.random()*colors.length)],
+    size:7+Math.random()*5,
+  });
+}
+function updateParticles(){
+  particles = particles.filter(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.life-=0.008; p.alpha=p.life;
+    CTX.globalAlpha=p.alpha*0.7;
+    CTX.fillStyle=p.color; CTX.font=`${p.size}px JetBrains Mono,monospace`;
+    CTX.textAlign='center'; CTX.fillText(p.char,p.x,p.y);
+    CTX.globalAlpha=1;
+    return p.life>0;
+  });
+}
+
+// ── OLLIE CHARACTER ───────────────────────────────────────────
+const OLLIE = {
+  // Grid position
+  gx:4.5, gy:3, gz:1,
+  // Target position
+  tx:4.5, ty:3,
+  // Animation state
+  frame:0, walkCycle:0,
+  facing:'right', // left|right|up|down
+  state:'idle',   // idle|walking|typing|thinking|reading|drinking
+  stateTimer:0,
+  blinkTimer:0, blink:false,
+  // Current task for display
+  taskLabel:'Initializing...',
+};
+
+// Ollie positions mapped to tasks
+const OLLIE_STATIONS = [
+  {gx:3.8, gy:1.8, task:'typing', label:'Analyzing BTC price feeds', facing:'right'},
+  {gx:4.8, gy:1.8, task:'typing', label:'Generating insights', facing:'right'},
+  {gx:5.8, gy:1.8, task:'thinking', label:'Building predictions', facing:'right'},
+  {gx:2.5, gy:5,   task:'reading', label:'Absorbing headlines', facing:'left'},
+  {gx:7.5, gy:5,   task:'reading', label:'Checking source health', facing:'right'},
+  {gx:4.5, gy:6,   task:'drinking', label:'Processing sentiment data', facing:'left'},
+  {gx:6.5, gy:3,   task:'idle', label:'Monitoring network health', facing:'right'},
+  {gx:1.5, gy:3,   task:'thinking', label:'Self-critiquing insights', facing:'left'},
+];
+let stationIdx = 0;
+let nextStationTime = Date.now() + 6000;
+
+function drawOllie(gx,gy,gz, state, frame){
+  const p = iso(gx, gy, gz);
+  const bounce = state==='typing'?Math.sin(frame*0.3)*1.5:state==='walking'?Math.abs(Math.sin(frame*0.25))*3:0;
+  const y = p.y - bounce;
+
+  // Shadow
+  CTX.beginPath();
+  CTX.ellipse(p.x, p.y+2, 8, 4, 0, 0, Math.PI*2);
+  CTX.fillStyle='rgba(0,0,0,0.4)'; CTX.fill();
+
+  // Shoes
+  const shoeOff = state==='walking'?Math.sin(frame*0.25)*4:0;
+  CTX.beginPath(); CTX.ellipse(p.x-5+shoeOff,y+12,5,3,0,0,Math.PI*2);
+  CTX.fillStyle=C.ollieShoe; CTX.fill();
+  CTX.beginPath(); CTX.ellipse(p.x+5-shoeOff,y+12,5,3,0,0,Math.PI*2);
+  CTX.fillStyle=C.ollieShoe; CTX.fill();
+
+  // Pants
+  CTX.beginPath();
+  CTX.roundRect(p.x-6,y+1,5,11,2);
+  CTX.fillStyle=C.olliePants; CTX.fill();
+  CTX.beginPath();
+  CTX.roundRect(p.x+1,y+1,5,11,2);
+  CTX.fillStyle=C.olliePants; CTX.fill();
+
+  // Body / shirt
+  CTX.beginPath();
+  CTX.roundRect(p.x-7,y-10,14,13,3);
+  CTX.fillStyle=C.ollieShirt; CTX.fill();
+  // Orange BTC logo on shirt
+  CTX.fillStyle='rgba(247,147,26,0.9)'; CTX.font='bold 8px sans-serif'; CTX.textAlign='center';
+  CTX.fillText('₿',p.x,y-1);
+
+  // Arms
+  const armSwing = state==='typing'?-Math.sin(frame*0.4)*8:state==='walking'?Math.sin(frame*0.25)*6:0;
+  // Left arm
+  CTX.beginPath();
+  CTX.roundRect(p.x-11,y-9+armSwing,4,9,2);
+  CTX.fillStyle=C.ollieShirt; CTX.fill();
+  // Right arm
+  CTX.beginPath();
+  CTX.roundRect(p.x+7,y-9-armSwing,4,9,2);
+  CTX.fillStyle=C.ollieShirt; CTX.fill();
+
+  // Hands
+  CTX.beginPath();
+  CTX.arc(p.x-9,y+armSwing,3,0,Math.PI*2);
+  CTX.fillStyle=C.ollieHead; CTX.fill();
+  CTX.beginPath();
+  CTX.arc(p.x+9,y-armSwing,3,0,Math.PI*2);
+  CTX.fillStyle=C.ollieHead; CTX.fill();
+
+  // Neck
+  CTX.beginPath();
+  CTX.roundRect(p.x-3,y-15,6,6,2);
+  CTX.fillStyle=C.ollieHead; CTX.fill();
+
+  // Head
+  const headBob = state==='thinking'?Math.sin(frame*0.12)*3:0;
+  CTX.beginPath();
+  CTX.roundRect(p.x-9,y-30+headBob,18,16,5);
+  CTX.fillStyle=C.ollieHead; CTX.fill();
+  // Head shine
+  CTX.beginPath();
+  CTX.roundRect(p.x-7,y-28+headBob,8,5,3);
+  CTX.fillStyle='rgba(255,220,160,0.5)'; CTX.fill();
+
+  // Eyes
+  const blinkH = OLLIE.blink?0.5:4;
+  CTX.beginPath();
+  CTX.ellipse(p.x-4,y-21+headBob,2.5,blinkH,0,0,Math.PI*2);
+  CTX.fillStyle='#1a1a30'; CTX.fill();
+  CTX.beginPath();
+  CTX.ellipse(p.x+4,y-21+headBob,2.5,blinkH,0,0,Math.PI*2);
+  CTX.fillStyle='#1a1a30'; CTX.fill();
+  // Eye shine
+  if(!OLLIE.blink){
+    CTX.beginPath(); CTX.arc(p.x-3,y-22+headBob,1,0,Math.PI*2);
+    CTX.fillStyle='rgba(255,255,255,0.9)'; CTX.fill();
+    CTX.beginPath(); CTX.arc(p.x+5,y-22+headBob,1,0,Math.PI*2);
+    CTX.fillStyle='rgba(255,255,255,0.9)'; CTX.fill();
+  }
+
+  // Mouth
+  const mouthY = y-16+headBob;
+  if(state==='typing'||state==='reading'){
+    // Focused straight mouth
+    CTX.beginPath(); CTX.moveTo(p.x-3,mouthY); CTX.lineTo(p.x+3,mouthY);
+    CTX.strokeStyle='#8a5a2a'; CTX.lineWidth=1.5; CTX.stroke();
+  } else {
+    // Smile
+    CTX.beginPath();
+    CTX.arc(p.x,mouthY-1,3,0.2,Math.PI-0.2);
+    CTX.strokeStyle='#8a5a2a'; CTX.lineWidth=1.5; CTX.stroke();
+  }
+
+  // Hair (orange spiky)
+  CTX.fillStyle=C.ollieBody;
+  for(let i=0;i<5;i++){
+    const hx = p.x-8+i*4, hy=y-29+headBob;
+    const spike = 4+Math.sin(i*2.1)*2;
+    CTX.beginPath();
+    CTX.moveTo(hx-2,hy); CTX.lineTo(hx,hy-spike); CTX.lineTo(hx+2,hy);
+    CTX.closePath(); CTX.fill();
+  }
+
+  // State-specific props
+  if(state==='thinking'){
+    // Thought bubbles
+    const tp = iso(gx+0.8,gy,gz+2.2);
+    for(let i=0;i<3;i++){
+      const bubble = (Math.sin(frame*0.08+i*0.8)*0.5+0.5);
+      const br = 2+i*2;
+      CTX.beginPath();
+      CTX.arc(tp.x+i*6, tp.y-i*6, br, 0, Math.PI*2);
+      CTX.fillStyle=`rgba(247,147,26,${0.2+bubble*0.4})`; CTX.fill();
+    }
+  }
+  if(state==='drinking'){
+    // Hold mug in hand
+    CTX.fillStyle='#2a3a5a';
+    CTX.beginPath(); CTX.roundRect(p.x+8,y-4,8,8,2); CTX.fill();
+    CTX.fillStyle='rgba(247,147,26,0.8)'; CTX.font='5px sans-serif'; CTX.textAlign='center';
+    CTX.fillText('₿',p.x+12,y+2);
+  }
+}
+
+// ── DRAW PAPER/NOTES ─────────────────────────────────────────
+function drawPaper(gx,gy,gz, lines=[]){
+  const p = iso(gx,gy,gz);
+  CTX.beginPath();
+  CTX.rect(p.x-15,p.y-20,28,22);
+  CTX.fillStyle='#e8e4d0'; CTX.fill();
+  CTX.strokeStyle='#c8c4b0'; CTX.lineWidth=0.5; CTX.stroke();
+  for(let i=0;i<4;i++){
+    CTX.beginPath();
+    CTX.moveTo(p.x-13,p.y-16+i*4); CTX.lineTo(p.x+11,p.y-16+i*4);
+    CTX.strokeStyle='#b8b4a0'; CTX.lineWidth=0.4; CTX.stroke();
+  }
+  if(lines[0]){
+    CTX.fillStyle='#1a1a30'; CTX.font='4px monospace'; CTX.textAlign='left';
+    CTX.fillText(lines[0],p.x-13,p.y-13);
+  }
+}
+
+// ── DRAW BITCOIN COINS ────────────────────────────────────────
+function drawCoin(gx,gy,gz){
+  const p = iso(gx,gy,gz);
+  const spin = Date.now()*0.003;
+  const w = Math.abs(Math.cos(spin))*8+2;
+  const lg = CTX.createLinearGradient(p.x-w,p.y-5,p.x+w,p.y+5);
+  lg.addColorStop(0,'#FF9500'); lg.addColorStop(0.5,'#FFD60A'); lg.addColorStop(1,'#F7931A');
+  CTX.beginPath();
+  CTX.ellipse(p.x,p.y,w,5,0,0,Math.PI*2);
+  CTX.fillStyle=lg; CTX.fill();
+  CTX.strokeStyle='rgba(255,200,50,0.4)'; CTX.lineWidth=0.8; CTX.stroke();
+  CTX.fillStyle='rgba(0,0,0,0.7)'; CTX.font='bold 6px sans-serif'; CTX.textAlign='center';
+  if(w>4) CTX.fillText('₿',p.x,p.y+2);
+}
+
+// ── DRAW NETWORK VISUALIZATION ───────────────────────────────
+function drawNetworkViz(cx,cy){
+  // Node graph floating above the desk
+  const nodes=[
+    {x:cx,y:cy,r:5,c:'#F7931A'},
+    {x:cx-30,y:cy-15,r:3,c:'#30D158'},
+    {x:cx+30,y:cy-15,r:3,c:'#0A84FF'},
+    {x:cx-20,y:cy+20,r:3,c:'#BF5AF2'},
+    {x:cx+20,y:cy+20,r:3,c:'#FFD60A'},
+  ];
+  const t = Date.now()*0.002;
+  // Animated connections
+  nodes.forEach((n,i)=>{
+    if(i===0) return;
+    const pulse = Math.sin(t+i*1.2)*0.5+0.5;
+    CTX.beginPath();
+    CTX.moveTo(nodes[0].x,nodes[0].y);
+    CTX.lineTo(n.x,n.y);
+    CTX.strokeStyle=`rgba(247,147,26,${0.1+pulse*0.3})`; CTX.lineWidth=0.8; CTX.stroke();
+    // Data packet
+    const px = nodes[0].x+(n.x-nodes[0].x)*((t*0.4)%1);
+    const py = nodes[0].y+(n.y-nodes[0].y)*((t*0.4)%1);
+    CTX.beginPath(); CTX.arc(px,py,1.5,0,Math.PI*2);
+    CTX.fillStyle=n.c; CTX.fill();
+  });
+  nodes.forEach(n=>{
+    const glow = CTX.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r*2);
+    glow.addColorStop(0,n.c+'cc'); glow.addColorStop(1,n.c+'00');
+    CTX.beginPath(); CTX.arc(n.x,n.y,n.r*2,0,Math.PI*2);
+    CTX.fillStyle=glow; CTX.fill();
+    CTX.beginPath(); CTX.arc(n.x,n.y,n.r,0,Math.PI*2);
+    CTX.fillStyle=n.c; CTX.fill();
+  });
+  // Center label
+  CTX.fillStyle='rgba(247,147,26,0.9)'; CTX.font='bold 5px JetBrains Mono,monospace'; CTX.textAlign='center';
+  CTX.fillText('BTC NET',cx,cy+12);
+}
+
+// ── GLOW AURA around Ollie ───────────────────────────────────
+function drawOllieAura(gx,gy,gz){
+  const p = iso(gx,gy,gz);
+  const pulse = Math.sin(Date.now()*0.002)*0.3+0.7;
+  const g = CTX.createRadialGradient(p.x,p.y,0,p.x,p.y,40);
+  g.addColorStop(0,`rgba(247,147,26,${0.12*pulse})`);
+  g.addColorStop(0.5,`rgba(247,147,26,${0.05*pulse})`);
+  g.addColorStop(1,'rgba(247,147,26,0)');
+  CTX.beginPath(); CTX.arc(p.x,p.y,40,0,Math.PI*2);
+  CTX.fillStyle=g; CTX.fill();
+}
+
+// ── SCREEN CONTENT from live data ────────────────────────────
+let screenContent = {
+  mon1:{line1:'BTC $——',line2:'F&G: —/100',line3:'GEN —'},
+  mon2:{line1:'BULLISH',line2:'CONF 50%',line3:'SIGNALS'},
+  mon3:{line1:'HASH —EH/s',line2:'MEM: —K',line3:'FEE: —'},
+};
+
+// ── UPDATE OFFICE UI from D ───────────────────────────────────
+window.updateOffice = function(D){
+  if(!D) return;
+  const p = D.current?.price||{};
+  const fg = D.current?.fear_greed||{};
+  const chain = D.current?.blockchain||{};
+  const mem = D.current?.mempool||{};
+  const meta = D.meta||{};
+  const intel = D.intelligence||{};
+  const con = D.consciousness||{};
+  const pred = intel.todays_prediction||{};
+
+  // Update screen content
+  const price = p.price_usd?`$${p.price_usd.toLocaleString('en-US',{maximumFractionDigits:0})}`:'$——';
+  const chg = p.change_24h_pct?`${p.change_24h_pct>0?'+':''}${p.change_24h_pct?.toFixed(1)}%`:'';
+  screenContent.mon1 = {line1:`₿ ${price}`,line2:`${chg} 24h`,line3:`F&G ${fg.value||'—'}/${fg.label||''}`};
+  screenContent.mon2 = {line1:(pred.outlook||'—').toUpperCase(),line2:`CONF ${pred.confidence||'—'}%`,line3:`GEN ${meta.generation||'—'}`};
+  screenContent.mon3 = {line1:`HR ${chain.hash_rate_ehs||'—'} EH/s`,line2:`MEM ${(mem.unconfirmed_txs||0).toLocaleString()}`,line3:`FEE ${mem.high_fee||'—'} s/vB`};
+
+  // Update status pills
+  const opStatus = document.getElementById('op-status');
+  if(opStatus) opStatus.textContent = meta.organism_status||'ADAPTING';
+  const opMood = document.getElementById('op-mood');
+  if(opMood) opMood.textContent = (meta.personality?.mood||'contemplative').toUpperCase();
+  const opTime = document.getElementById('op-time');
+  if(opTime) opTime.textContent = con.last_cycle_time||'—';
+  const ogTag = document.getElementById('office-gen-tag');
+  if(ogTag) ogTag.textContent = `GEN ${meta.generation||'—'}`;
+
+  // Update activity feed
+  const feed = document.getElementById('office-feed');
+  if(feed){
+    const tasks = [
+      {label:'Price feeds', done:true},
+      {label:'Fear & Greed', done:true},
+      {label:`${(D.news?.headlines||[]).length} headlines`, done:true},
+      {label:'Insights', done:(intel.todays_insights||[]).length>0},
+      {label:'Prediction', done:!!pred.outlook},
+      {label:'Neural log', done:(con.neural_log||[]).length>0},
+      {label:'BIP updates', done:(D.news?.bip_updates||[]).length>0},
+      {label:'Knowledge graph', done:!!D.knowledge_graph},
+    ];
+    feed.innerHTML = tasks.map(t=>
+      `<span class="act-chip ${t.done?'done':'active'}">${t.done?'✓':OLLIE.state==='typing'?'⟳':''} ${t.label}</span>`
+    ).join('');
+  }
+
+  // Thought popup
+  const tp = document.getElementById('thought-popup');
+  if(tp && con.current_thought){
+    const thought = con.current_thought.slice(0,90)+'...';
+    tp.textContent = thought;
+    tp.classList.remove('hidden');
+    setTimeout(()=>tp.classList.add('hidden'),8000);
+    setTimeout(()=>tp.classList.remove('hidden'),16000);
+  }
+};
+
+// ── MAIN RENDER LOOP ──────────────────────────────────────────
+let frameCount = 0;
+let lastParticle = 0;
+
+function render(){
+  CTX.clearRect(0,0,W,H);
+
+  frameCount++;
+  const now = Date.now();
+
+  // ── Background atmosphere ──
+  const bgGrad = CTX.createLinearGradient(0,0,0,H);
+  bgGrad.addColorStop(0,'#080810');
+  bgGrad.addColorStop(1,'#0a0a18');
+  CTX.fillStyle=bgGrad; CTX.fillRect(0,0,W,H);
+
+  // ── Scanline effect ──
+  for(let y=0;y<H;y+=4){
+    CTX.fillStyle='rgba(0,0,0,0.08)'; CTX.fillRect(0,y,W,1);
+  }
+
+  // ── Draw scene (back to front) ──
+  drawWalls();
+  drawFloor();
+
+  // Server rack (back left)
+  drawServerRack(0.5, 1);
+
+  // Main desk setup
+  drawDesk(2, 1);
+
+  // Chair behind desk
+  drawChair(3.2, 2.8);
+
+  // Monitors on desk (3 monitors!)
+  drawMonitor(2.2, 1.1, 1, screenContent.mon1, '#1a4080');
+  drawMonitor(3.5, 1.1, 1, screenContent.mon2, '#0a3020');
+  drawMonitor(4.8, 1.1, 1, screenContent.mon3, '#1a0a30');
+
+  // Papers on desk
+  drawPaper(2.4, 1.8, 1, ['ANALYSIS REPORT']);
+  drawPaper(5.0, 1.3, 1, ['BTC SIGNALS']);
+
+  // Coffee mug
+  drawMug(5.5, 1.5, 1);
+
+  // Bitcoin coins floating
+  drawCoin(6.5, 4, 0.2);
+  drawCoin(7.0, 4.5, 0.2);
+  drawCoin(6.2, 5, 0.2);
+
+  // Plants (corners)
+  drawPlant(0.5, 6.5);
+  drawPlant(9, 0.5);
+
+  // Bitcoin lamps
+  drawLamp(8.5, 6);
+  drawLamp(0.5, 0.2);
+
+  // Network visualization (floating above corner desk)
+  const netP = iso(7.5, 2, 2.5);
+  drawNetworkViz(netP.x, netP.y);
+
+  // Side table
+  isoCube(7, 4, 0, 1.5,1.5,0.8, '#16162a','#10101e','#12122a','#1e1e3a');
+
+  // Ollie aura
+  drawOllieAura(OLLIE.gx, OLLIE.gy, OLLIE.gz);
+
+  // Move Ollie toward target
+  const dx = OLLIE.tx - OLLIE.gx;
+  const dy = OLLIE.ty - OLLIE.gy;
+  const dist = Math.sqrt(dx*dx+dy*dy);
+  if(dist > 0.08){
+    OLLIE.gx += dx*0.025;
+    OLLIE.gy += dy*0.025;
+    OLLIE.state = 'walking';
+  } else {
+    OLLIE.gx = OLLIE.tx;
+    OLLIE.gy = OLLIE.ty;
+    // Keep task state from station
+    const st = OLLIE_STATIONS[stationIdx];
+    OLLIE.state = st?.task||'idle';
+    OLLIE.taskLabel = st?.label||'Monitoring';
+    // Update task pill
+    const op = document.getElementById('op-task');
+    if(op) op.textContent = OLLIE.taskLabel.toUpperCase();
+  }
+
+  // Advance to next station
+  if(now > nextStationTime){
+    stationIdx = (stationIdx+1)%OLLIE_STATIONS.length;
+    const st = OLLIE_STATIONS[stationIdx];
+    OLLIE.tx = st.gx; OLLIE.ty = st.gy;
+    nextStationTime = now + 5000 + Math.random()*4000;
+  }
+
+  // Draw Ollie
+  OLLIE.frame = frameCount;
+  drawOllie(OLLIE.gx, OLLIE.gy, OLLIE.gz, OLLIE.state, OLLIE.frame);
+
+  // Blink logic
+  OLLIE.blinkTimer++;
+  if(OLLIE.blinkTimer > 180+Math.random()*120){
+    OLLIE.blink=true;
+    setTimeout(()=>{ OLLIE.blink=false; },120);
+    OLLIE.blinkTimer=0;
+  }
+
+  // Thought popup position — above Ollie
+  const ollieScreen = iso(OLLIE.gx, OLLIE.gy, OLLIE.gz+2.5);
+  const tp = document.getElementById('thought-popup');
+  if(tp){
+    tp.style.left = Math.min(Math.max(ollieScreen.x-110, 10), W-230)+'px';
+    tp.style.top  = Math.max(ollieScreen.y-60, 10)+'px';
+  }
+
+  // Particles
+  if(now-lastParticle>600 && (OLLIE.state==='typing'||OLLIE.state==='thinking')){
+    spawnParticle(); lastParticle=now;
+  }
+  updateParticles();
+
+  // ── Ambient glow pulse ──
+  const ambPulse = Math.sin(now*0.0008)*0.03+0.03;
+  CTX.fillStyle=`rgba(247,147,26,${ambPulse})`;
+  CTX.fillRect(0,0,W,H);
+
+  requestAnimationFrame(render);
+}
+
+// ── CLICK = ripple ────────────────────────────────────────────
+CV.addEventListener('click', e=>{
+  const r = CV.getBoundingClientRect();
+  const x = e.clientX-r.left, y=e.clientY-r.top;
+  const rip = document.createElement('div');
+  rip.className='ripple';
+  rip.style.left=x+'px'; rip.style.top=y+'px';
+  CV.parentElement.appendChild(rip);
+  setTimeout(()=>rip.remove(),700);
+  // Move Ollie toward click (approx grid conversion)
+  const OX=W/2, OY=H*0.55, TW=24, TH=12;
+  const dx=(x-OX), dy=(y-OY);
+  const clickGX = (dx/TW+dy/TH)/2;
+  const clickGY = (dy/TH-dx/TW)/2;
+  OLLIE.tx = Math.max(0.5,Math.min(9,clickGX));
+  OLLIE.ty = Math.max(0.5,Math.min(7.5,clickGY));
+  nextStationTime = Date.now()+8000;
+});
+
+render();
+
+})();
+</script>
+
+<div class="card">
     <div class="sh"><div class="sh-t"><span class="sh-i">🎯</span>Market Intelligence</div></div>
     <div class="p">
       <div class="pb">
@@ -1694,6 +2608,9 @@ function render(d) {
 
   // TICKER
   buildTicker(d);
+
+  // OFFICE — update workspace display
+  if(typeof updateOffice==='function') updateOffice(d);
 
   // Rotating timers
   if(factTimer) clearInterval(factTimer);
