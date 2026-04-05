@@ -1,4 +1,4 @@
-name: OLLIE_CYCLE_B
+name: OLLIE_v9_CYCLE-B
 on:
   schedule:
     - cron: "0 6 * * *"
@@ -8,7 +8,7 @@ permissions:
 jobs:
   learn:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,16 +23,17 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run Ollie learning cycle
+      - name: Run Ollie v9.0 learning cycle
         run: python learn.py
+        timeout-minutes: 25
 
       - name: Commit and push knowledge update
         run: |
-          git config user.name "Ollie Autonomous"
+          git config user.name "Ollie Autonomous v9.0"
           git config user.email "ollie@autonomous.bitcoin"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/hiftyco/Ollie.git
           git add data/ || true
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git pull --rebase origin main || true
-          git commit -m "Ollie v7.0 cycle $(date -u '+%Y-%m-%d %H:%M UTC') [auto]"
+          git commit -m "Ollie v9.0 cycle $(date -u '+%Y-%m-%d %H:%M UTC') [auto]"
           git push origin main
