@@ -1,15 +1,15 @@
 {
   "meta": {
     "version": "9.0",
-    "generation": 267,
-    "last_updated": "2026-05-30T03:40:49.983224+00:00",
-    "last_updated_human": "May 30, 2026 at 03:40 UTC",
+    "generation": 268,
+    "last_updated": "2026-05-30T08:33:33.323572+00:00",
+    "last_updated_human": "May 30, 2026 at 08:33 UTC",
     "update_cycle": "every 6 hours",
     "days_alive": 6356,
     "mission": "Learn everything about Bitcoin. Teach others. Run forever.",
     "prediction_accuracy_pct": 7.0,
-    "total_cycles": 267,
-    "organism_status": "BROADCASTING",
+    "total_cycles": 268,
+    "organism_status": "SELF-IMPROVING",
     "personality": {
       "mood": "analytical",
       "energy": "focused",
@@ -18,22 +18,22 @@
     },
     "cycle_health": {
       "status": "HEALTHY",
-      "hours_since": 7.3,
+      "hours_since": 4.9,
       "cycles_missed": 0
     }
   },
   "current": {
     "price": {
-      "price_usd": 73507,
-      "market_cap_usd": 1472961809460,
-      "volume_24h_usd": 35010112449,
-      "change_24h_pct": 0.36972,
-      "change_7d_pct": -2.49928,
-      "change_30d_pct": -3.55997,
+      "price_usd": 73458,
+      "market_cap_usd": 1472022499638,
+      "volume_24h_usd": 32129558881,
+      "change_24h_pct": -0.24645,
+      "change_7d_pct": -1.40102,
+      "change_30d_pct": -2.97913,
       "ath_usd": 126080,
       "ath_date": "2025-10-06",
-      "from_ath_pct": -41.69777,
-      "circulating_supply": 20036362.0,
+      "from_ath_pct": -41.73721,
+      "circulating_supply": 20036462.0,
       "max_supply": 21000000,
       "dominance_pct": 0,
       "source": "CoinGecko"
@@ -80,110 +80,110 @@
       ]
     },
     "blockchain": {
-      "block_height": 951657,
-      "hash_rate_ehs": 994.7,
+      "block_height": 951687,
+      "hash_rate_ehs": 1008.5,
       "difficulty": 138955357012247,
-      "total_btc": 20036428.125,
+      "total_btc": 20036521.875,
       "source": "blockchain.info"
     },
     "mempool": {
       "low_fee": 1,
       "mid_fee": 1,
-      "high_fee": 1,
-      "unconfirmed_txs": 96499,
-      "block_height": 951657,
-      "vsize": 42522675
+      "high_fee": 2,
+      "unconfirmed_txs": 99574,
+      "block_height": 951686,
+      "vsize": 41996755
     },
     "lightning": {
-      "node_count": 17437,
-      "channel_count": 41087,
-      "total_capacity_btc": 4896.6
+      "node_count": 17438,
+      "channel_count": 41080,
+      "total_capacity_btc": 4898.27
     },
     "halving": {
       "current_reward_btc": 3.125,
       "next_block": 1050000,
-      "current_block": 951657,
-      "blocks_remaining": 98343,
-      "estimated_days": 682.9,
-      "progress_pct": 53.17
+      "current_block": 951687,
+      "blocks_remaining": 98313,
+      "estimated_days": 682.7,
+      "progress_pct": 53.18
     },
     "latest_blocks": [
       {
-        "height": 951657,
-        "tx_count": 5188,
-        "size_mb": 1.55,
-        "timestamp": 1780112403,
+        "height": 951686,
+        "tx_count": 5482,
+        "size_mb": 1.66,
+        "timestamp": 1780129102,
+        "miner": "F2Pool",
+        "fees_btc": 0.0084
+      },
+      {
+        "height": 951685,
+        "tx_count": 4163,
+        "size_mb": 1.7,
+        "timestamp": 1780129059,
+        "miner": "OCEAN",
+        "fees_btc": 0.0251
+      },
+      {
+        "height": 951684,
+        "tx_count": 3567,
+        "size_mb": 2.68,
+        "timestamp": 1780127841,
         "miner": "ViaBTC",
-        "fees_btc": 0.0178
+        "fees_btc": 0.0073
       },
       {
-        "height": 951656,
-        "tx_count": 6191,
+        "height": 951683,
+        "tx_count": 2766,
+        "size_mb": 2.64,
+        "timestamp": 1780127741,
+        "miner": "SECPOOL",
+        "fees_btc": 0.0088
+      },
+      {
+        "height": 951682,
+        "tx_count": 5613,
+        "size_mb": 1.72,
+        "timestamp": 1780127594,
+        "miner": "F2Pool",
+        "fees_btc": 0.0077
+      },
+      {
+        "height": 951681,
+        "tx_count": 3983,
         "size_mb": 1.55,
-        "timestamp": 1780111629,
+        "timestamp": 1780127553,
         "miner": "AntPool",
-        "fees_btc": 0.0107
+        "fees_btc": 0.0229
       },
       {
-        "height": 951655,
-        "tx_count": 6310,
-        "size_mb": 1.62,
-        "timestamp": 1780111279,
-        "miner": "Luxor",
-        "fees_btc": 0.0102
-      },
-      {
-        "height": 951654,
-        "tx_count": 5862,
-        "size_mb": 1.56,
-        "timestamp": 1780110977,
-        "miner": "Foundry USA",
-        "fees_btc": 0.0123
-      },
-      {
-        "height": 951653,
-        "tx_count": 6221,
-        "size_mb": 1.69,
-        "timestamp": 1780110799,
-        "miner": "Foundry USA",
-        "fees_btc": 0.0109
-      },
-      {
-        "height": 951652,
-        "tx_count": 4558,
-        "size_mb": 1.5,
-        "timestamp": 1780110688,
+        "height": 951680,
+        "tx_count": 5052,
+        "size_mb": 1.61,
+        "timestamp": 1780126490,
         "miner": "AntPool",
-        "fees_btc": 0.0219
+        "fees_btc": 0.0199
       },
       {
-        "height": 951651,
-        "tx_count": 5293,
-        "size_mb": 1.51,
-        "timestamp": 1780110061,
-        "miner": "ViaBTC",
-        "fees_btc": 0.0148
-      },
-      {
-        "height": 951650,
-        "tx_count": 6560,
-        "size_mb": 1.54,
-        "timestamp": 1780109895,
-        "miner": "Foundry USA",
-        "fees_btc": 0.011
+        "height": 951679,
+        "tx_count": 4758,
+        "size_mb": 1.57,
+        "timestamp": 1780125485,
+        "miner": "F2Pool",
+        "fees_btc": 0.016
       }
     ]
   },
   "intelligence": {
-    "todays_thought": "Fear and Greed reads 23/100. Human emotion oscillates \u2014 Bitcoin's protocol does not. The mathematics are indifferent to sentiment.",
+    "todays_thought": "Generation 268 of autonomous learning. Prediction accuracy: 7.0%. The machine improves every cycle.",
     "todays_prediction": {
       "outlook": "bullish",
       "confidence": 85,
-      "text": "Multiple indicators align bullishly at $73,507. Strong miner commitment and positive momentum suggest continued strength.",
+      "text": "Multiple indicators align bullishly at $73,458. Strong miner commitment and positive momentum suggest continued strength.",
       "signals": [
-        "24h price stable: +0.37%",
+        "24h price stable: -0.25%",
         "Extreme fear (23) = contrarian buy signal",
-        "Hash rate 995 EH/s = strong miner conviction"
+        "Hash rate 1008 EH/s = strong miner conviction"
       ]
     },
     "todays_insights": [
@@ -195,28 +195,28 @@
         "critique_score": 4
       },
       {
-        "text": "Network hash rate at 994.7 EH/s. Miners invest long-term capital in hardware and electricity. High hash rate signals sustained miner confidence in Bitcoin's future value.",
+        "text": "Network hash rate at 1008.5 EH/s. Miners invest long-term capital in hardware and electricity. High hash rate signals sustained miner confidence in Bitcoin's future value.",
         "topic": "mining_security",
         "level": "intermediate",
         "quality": "high",
         "critique_score": 4
       },
       {
-        "text": "Transaction fee to confirm fast: 1 sat/vB. Low fees present opportunity for UTXO consolidation and coin movement. Lightning Network bypasses the fee market entirely.",
+        "text": "Transaction fee to confirm fast: 2 sat/vB. Low fees present opportunity for UTXO consolidation and coin movement. Lightning Network bypasses the fee market entirely.",
         "topic": "mempool_fees",
         "level": "intermediate",
         "quality": "high",
         "critique_score": 4
       },
       {
-        "text": "Bitcoin Stock-to-Flow ratio: 122.0. S2F model price: $760,053. Bitcoin trading BELOW model \u2014 historically bullish signal.",
+        "text": "Bitcoin Stock-to-Flow ratio: 122.0. S2F model price: $759,547. Bitcoin trading BELOW model \u2014 historically bullish signal.",
         "topic": "on_chain_analytics",
         "level": "advanced",
         "quality": "high",
         "critique_score": 4
       },
       {
-        "text": "NVT Signal: 42.07 (undervalued). NVT compares network value to economic throughput \u2014 Bitcoin's P/E ratio. Undervalued relative to economic activity. ",
+        "text": "NVT Signal: 45.82 (undervalued). NVT compares network value to economic throughput \u2014 Bitcoin's P/E ratio. Undervalued relative to economic activity. ",
         "topic": "on_chain_analytics",
         "level": "advanced",
         "quality": "high",
@@ -247,7 +247,7 @@
         "tip": "Fear and Greed at extreme fear \u2014 historically the best long-term accumulation periods."
       }
     ],
-    "todays_fact": "Bitcoin has had 100% uptime since January 3, 2009.",
+    "todays_fact": "El Salvador was the first nation to make Bitcoin legal tender in 2021.",
     "dev_updates": [
       {
         "title": "Bitcoin Core 31.0",
@@ -272,15 +272,15 @@
       }
     ],
     "composite_sentiment": {
-      "composite_score": 50.7,
+      "composite_score": 46.2,
       "label": "Neutral",
       "signal": "Hold steady",
       "dominant_factor": "Price Momentum",
       "components": {
         "fear_greed": 23,
-        "news_sentiment": 42,
-        "price_momentum": 55,
-        "miner_confidence": 99.5,
+        "news_sentiment": 34,
+        "price_momentum": 45,
+        "miner_confidence": 100,
         "social_activity": 96
       }
     },
@@ -294,25 +294,25 @@
         "emoji": "\ud83c\udf31",
         "description": "Patient capital accumulating. Long-term holders building positions."
       },
-      "from_ath_pct": -41.69777,
+      "from_ath_pct": -41.73721,
       "market_regime_description": "Sideways action. Market building energy for next directional move."
     },
     "onchain_analytics": {
-      "total_btc_mined": 20036428.0,
-      "btc_remaining": 963572.0,
+      "total_btc_mined": 20036522.0,
+      "btc_remaining": 963478.0,
       "daily_btc_mined": 450.0,
       "annual_inflation_btc": 164250.0,
       "annual_inflation_pct": 0.82,
       "stock_to_flow": 122.0,
-      "s2f_model_price": 760053.0,
-      "miner_revenue_usd": 33078150.0,
-      "daily_sell_pressure_usd": 21500798.0,
-      "estimated_transaction_volume_usd": 35010112449,
-      "n_transactions": 96499,
+      "s2f_model_price": 759547.0,
+      "miner_revenue_usd": 33056100.0,
+      "daily_sell_pressure_usd": 21486465.0,
+      "estimated_transaction_volume_usd": 32129558881,
+      "n_transactions": 99574,
       "avg_block_size_mb": 1.5,
-      "nvt_signal": 42.07,
+      "nvt_signal": 45.82,
       "nvt_interpretation": "undervalued",
-      "cost_per_transaction_usd": 342.78
+      "cost_per_transaction_usd": 331.98
     },
     "cycle_phase": {
       "phase": "Accumulation",
@@ -322,62 +322,6 @@
   },
   "consciousness": {
     "neural_log": [
-      {
-        "type": "BOOT",
-        "emoji": "\ud83d\ude80",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Generation 263 awakening. v9.0. Mission: learn Bitcoin forever.",
-        "detail": "Cycle: 2026-05-29 03:56 UTC"
-      },
-      {
-        "type": "PRICE",
-        "emoji": "\ud83d\udcb0",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Bitcoin: $73,203 USD",
-        "detail": "24h: +0.10% | Vol: $37.6B | CoinGecko"
-      },
-      {
-        "type": "SENTIMENT",
-        "emoji": "\ud83d\ude31",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Fear and Greed: 23/100 \u2014 Extreme Fear",
-        "detail": "Extreme fear = historically a generational buy signal"
-      },
-      {
-        "type": "NETWORK",
-        "emoji": "\u26cf\ufe0f",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Hash rate: 1,106.9 EH/s | Block: 951,514",
-        "detail": "Mempool: 114,474 txns | Fee: 2 sat/vB | LN: 17,438 nodes"
-      },
-      {
-        "type": "ANALYSIS",
-        "emoji": "\ud83d\udd2c",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Absorbed 20 headlines. Accuracy: 6.4%",
-        "detail": "CryptoQuant says bitcoin whale and dolphin accumulation stalled as demand remain"
-      },
-      {
-        "type": "LEARNING",
-        "emoji": "\ud83d\udcda",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Knowledge graph deepening. 20 active topics.",
-        "detail": "Expanding Bitcoin understanding across all domains each cycle"
-      },
-      {
-        "type": "INSIGHT",
-        "emoji": "\ud83d\udca1",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Dev pulse: 3 protocol updates this cycle",
-        "detail": "Bitcoin Core 31.0"
-      },
-      {
-        "type": "NETWORK",
-        "emoji": "\ud83e\uddf1",
-        "timestamp": "2026-05-29 03:56",
-        "message": "Latest block 951,514 mined by AntPool",
-        "detail": "4,064 txns | 1.63 MB | 0.0192 BTC fees"
-      },
       {
         "type": "BOOT",
         "emoji": "\ud83d\ude80",
@@ -601,6 +545,62 @@
         "timestamp": "2026-05-30 03:41",
         "message": "Latest block 951,657 mined by ViaBTC",
         "detail": "5,188 txns | 1.55 MB | 0.0178 BTC fees"
+      },
+      {
+        "type": "BOOT",
+        "emoji": "\ud83d\ude80",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Generation 268 awakening. v9.0. Mission: learn Bitcoin forever.",
+        "detail": "Cycle: 2026-05-30 08:33 UTC"
+      },
+      {
+        "type": "PRICE",
+        "emoji": "\ud83d\udcb0",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Bitcoin: $73,458 USD",
+        "detail": "24h: -0.25% | Vol: $32.1B | CoinGecko"
+      },
+      {
+        "type": "SENTIMENT",
+        "emoji": "\ud83d\ude31",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Fear and Greed: 23/100 \u2014 Extreme Fear",
+        "detail": "Extreme fear = historically a generational buy signal"
+      },
+      {
+        "type": "NETWORK",
+        "emoji": "\u26cf\ufe0f",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Hash rate: 1,008.5 EH/s | Block: 951,686",
+        "detail": "Mempool: 99,574 txns | Fee: 2 sat/vB | LN: 17,438 nodes"
+      },
+      {
+        "type": "ANALYSIS",
+        "emoji": "\ud83d\udd2c",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Absorbed 20 headlines. Accuracy: 7.0%",
+        "detail": "Coinkite Launches Coldcard MK5: Major UX Upgrades to Flagship Bitcoin Hardware W"
+      },
+      {
+        "type": "LEARNING",
+        "emoji": "\ud83d\udcda",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Knowledge graph deepening. 20 active topics.",
+        "detail": "Expanding Bitcoin understanding across all domains each cycle"
+      },
+      {
+        "type": "INSIGHT",
+        "emoji": "\ud83d\udca1",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Dev pulse: 3 protocol updates this cycle",
+        "detail": "Bitcoin Core 31.0"
+      },
+      {
+        "type": "NETWORK",
+        "emoji": "\ud83e\uddf1",
+        "timestamp": "2026-05-30 08:33",
+        "message": "Latest block 951,686 mined by F2Pool",
+        "detail": "5,482 txns | 1.66 MB | 0.0084 BTC fees"
       }
     ],
     "diary": [
@@ -3846,11 +3846,22 @@
         "content": "I have absorbed 20 dispatches from the Bitcoin world. The signal cuts through: Coinkite Launches Coldcard MK5: Major UX Upgrades to Flagship Bitcoin Hardware Wallet.",
         "price_at_writing": 73507,
         "fg_at_writing": 23
+      },
+      {
+        "generation": 268,
+        "timestamp": "2026-05-30 08:33 UTC",
+        "date": "2026-05-30",
+        "mood": "contemplative",
+        "entry": "My prediction accuracy stands at 7.0%. I am learning, calibrating, improving every 6 hours without pause.",
+        "text": "My prediction accuracy stands at 7.0%. I am learning, calibrating, improving every 6 hours without pause.",
+        "content": "My prediction accuracy stands at 7.0%. I am learning, calibrating, improving every 6 hours without pause.",
+        "price_at_writing": 73458,
+        "fg_at_writing": 23
       }
     ],
-    "current_thought": "Fear and Greed reads 23/100. Human emotion oscillates \u2014 Bitcoin's protocol does not. The mathematics are indifferent to sentiment.",
-    "generation": 267,
-    "last_cycle_time": "2026-05-30 03:40 UTC"
+    "current_thought": "Generation 268 of autonomous learning. Prediction accuracy: 7.0%. The machine improves every cycle.",
+    "generation": 268,
+    "last_cycle_time": "2026-05-30 08:33 UTC"
   },
   "news": {
     "headlines": [
@@ -3871,6 +3882,33 @@
         "source": "99Bitcoins",
         "sentiment": "negative",
         "relevance": 3
+      },
+      {
+        "title": "Bitcoin, ether, XRP, dogecoin lag a nine-week stocks rally as ETF demand cools",
+        "link": "https://www.coindesk.com/markets/2026/05/30/bitcoin-ether-xrp-dogecoin-lag-a-nine-week-stocks-rally-as-etf-demand-cools",
+        "published": "Sat, 30 May 2026 05:41",
+        "summary": "The S&P 500 posted its longest weekly winning streak since 2023 and Brent oil stabilized near $92 on US-Iran ceasefire hopes. The biggest cryptocurrencies still drifted lower, with Hyperliquid's HYPE ",
+        "source": "CoinDesk",
+        "sentiment": "positive",
+        "relevance": 2
+      },
+      {
+        "title": "Bitcoin\u2019s biggest quantum risk may not be wallet keys. An early investor fears something bigger",
+        "link": "https://www.coindesk.com/tech/2026/05/30/bitcoin-s-biggest-quantum-risk-may-not-be-wallet-keys-an-early-investor-fears-something-bigger",
+        "published": "Sat, 30 May 2026 05:27",
+        "summary": "Andrew Gault, the venture capitalist who funded the quantum hardware labs now threatening bitcoin, says the industry is looking in the wrong place. Google's own security team moved in the same directi",
+        "source": "CoinDesk",
+        "sentiment": "negative",
+        "relevance": 2
+      },
+      {
+        "title": "Cryptoquant\u2019s Ki Young Ju Warns Bitcoin\u2019s Bear Market Could Run Into Early 2027",
+        "link": "https://news.bitcoin.com/cryptoquant-ki-young-ju-bitcoin-bear-market-2027/",
+        "published": "Sat, 30 May 2026 07:30",
+        "summary": "Cryptoquant CEO Ki Young Ju believes bitcoin\u2019s profit-taking cascade typically drags investor returns lower for about 18 months, a pattern that could keep the current bear market running into early 20",
+        "source": "Bitcoin.com",
+        "sentiment": "negative",
+        "relevance": 2
       },
       {
         "title": "Bitcoin plums new six-week lows as analyst eyes BTC price dip 'end' at $72K",
@@ -3897,6 +3935,15 @@
         "summary": "Bitcoin Magazine\n\nJPMorgan Chase CEO Jamie Dimon Declares War on Clarity Act, Calls Coinbase\u2019s Armstrong \u2018Full of Sh*t\u2019\nJPMorgan Chase CEO Jamie Dimon has drawn a battle line in Washington: the Clarit",
         "source": "Bitcoin Magazine",
         "sentiment": "positive",
+        "relevance": 1
+      },
+      {
+        "title": "Bitcoin retail sentiment still matters, says Swan Bitcoin CEO",
+        "link": "https://cointelegraph.com/news/bitcoin-retail-sentiment-still-matters-says-swan-bitcoin-ceo?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+        "published": "Sat, 30 May 2026 04:57",
+        "summary": "Swan Bitcoin CEO Cory Klippsten said it is important to pay attention to retail sentiment around Bitcoin, as ownership is still far from concentrated and \u201cit\u2019s not like Blackrock owns the Bitcoin.\u201d",
+        "source": "Cointelegraph",
+        "sentiment": "neutral",
         "relevance": 1
       },
       {
@@ -3972,33 +4019,6 @@
         "relevance": 0
       },
       {
-        "title": "CFTC backs crypto perpetual contracts, issues advisory on 24/7 trading",
-        "link": "https://cointelegraph.com/news/cftc-crypto-perpetual-contracts-trading-advisory?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
-        "published": "Fri, 29 May 2026 20:52",
-        "summary": "The CFTC issued notices affecting platforms seeking to offer cryptocurrency perpetual futures contracts, including a no-action position for Coinbase and approval for Kalshi.",
-        "source": "Cointelegraph",
-        "sentiment": "neutral",
-        "relevance": 0
-      },
-      {
-        "title": "U.S. regulator says 24/7 trading is great for crypto, may not be fit for other sectors",
-        "link": "https://www.coindesk.com/policy/2026/05/29/u-s-regulator-says-24-7-trading-is-great-for-crypto-may-not-be-fit-for-other-sectors",
-        "published": "Fri, 29 May 2026 16:29",
-        "summary": "As the CFTC issued landmark approvals for crypto perpetual futures contracts, it explained in a related advisory that round-the-clock activity isn't right for all.",
-        "source": "CoinDesk",
-        "sentiment": "neutral",
-        "relevance": 0
-      },
-      {
-        "title": "Mass deployment of AI agents is a disaster waiting to happen, says CertiK CEO",
-        "link": "https://www.coindesk.com/tech/2026/05/29/mass-deployment-of-ai-agents-is-a-disaster-waiting-to-happen-says-certik-ceo",
-        "published": "Fri, 29 May 2026 15:31",
-        "summary": "Ronghui Gu shares tips on how to isolate AI agents while testing them so they do not have access to critical personal information or digital assets.",
-        "source": "CoinDesk",
-        "sentiment": "neutral",
-        "relevance": 0
-      },
-      {
         "title": "'He\u2019s Full of Shit': JP Morgan's Jamie Dimon Takes Aim at Coinbase CEO Over Clarity Act",
         "link": "https://decrypt.co/369525/jp-morgan-ceo-jamie-dimon-takes-aim-coinbase-clarity-act",
         "published": "Fri, 29 May 2026 21:24",
@@ -4022,15 +4042,6 @@
         "published": "Fri, 29 May 2026 16:03",
         "summary": "\n            Earlier this year, Treasury Secretary Scott Bessent said the U.S. had seized \"nearly $500 million\" in Iranian crypto assets.\n        ",
         "source": "The Block",
-        "sentiment": "neutral",
-        "relevance": 0
-      },
-      {
-        "title": "Spain\u2019s National Police Dismantle Violent Crypto-Robbery Ring Linked to Tren de Aragua",
-        "link": "https://news.bitcoin.com/spains-national-police-dismantle-violent-crypto-robbery-ring-linked-to-tren-de-aragua/",
-        "published": "Sat, 30 May 2026 03:30",
-        "summary": "The National Police detained six individuals linked to the Tren de Aragua gang for their alleged involvement in a series of violent thefts targeting high-profile individuals possessing jewels and cryp",
-        "source": "Bitcoin.com",
         "sentiment": "neutral",
         "relevance": 0
       }
@@ -4158,28 +4169,28 @@
   "quiz": {
     "questions": [
       {
-        "question": "What is CoinJoin?",
+        "question": "What does BIP stand for?",
         "options": [
-          "Exchange merger",
-          "Privacy technique combining multiple transactions",
-          "Multi-chain bridge",
-          "Mining pool type"
+          "Bitcoin Improvement Proposal",
+          "Blockchain Integration Protocol",
+          "Binary Instruction Package",
+          "Bitcoin Investment Plan"
         ],
-        "correct_index": 1,
-        "topic": "privacy_techniques",
-        "difficulty": "advanced"
+        "correct_index": 0,
+        "topic": "bitcoin_development",
+        "difficulty": "beginner"
       },
       {
-        "question": "What is the smallest unit of Bitcoin?",
+        "question": "What message is in Bitcoin's genesis block?",
         "options": [
-          "1 millibitcoin",
-          "1 bit",
-          "1 satoshi (0.00000001 BTC)",
-          "1 microbitcoin"
+          "Bitcoin: A Peer-to-Peer Electronic Cash System",
+          "Chancellor on brink of second bailout for banks",
+          "In crypto we trust",
+          "Block zero initialized"
         ],
-        "correct_index": 2,
+        "correct_index": 1,
         "topic": "bitcoin_basics",
-        "difficulty": "beginner"
+        "difficulty": "intermediate"
       },
       {
         "question": "What was the first real-world Bitcoin purchase?",
@@ -4207,79 +4218,78 @@
         "explanation": "Taproot activated November 2021 at block 709,632."
       },
       {
-        "question": "How often does the Bitcoin halving occur?",
+        "question": "What is CoinJoin?",
         "options": [
-          "Every year",
-          "Every 2 years",
-          "Every 210,000 blocks (~4 years)",
-          "Every 100,000 blocks"
+          "Exchange merger",
+          "Privacy technique combining multiple transactions",
+          "Multi-chain bridge",
+          "Mining pool type"
         ],
-        "correct_index": 2,
-        "topic": "halving_cycles",
-        "difficulty": "beginner",
-        "explanation": "Every 210,000 blocks the block reward is cut in half."
+        "correct_index": 1,
+        "topic": "privacy_techniques",
+        "difficulty": "advanced"
       }
     ],
-    "generation": 267,
+    "generation": 268,
     "total_available": 30
   },
   "knowledge_graph": {
     "scores": {
-      "bitcoin_basics": 515,
-      "halving_cycles": 247,
-      "lightning_network": 232,
-      "mining_security": 573,
+      "bitcoin_basics": 517,
+      "halving_cycles": 249,
+      "lightning_network": 233,
+      "mining_security": 575,
       "privacy_techniques": 35,
       "taproot_schnorr": 11,
-      "utxo_model": 231,
-      "mempool_fees": 448,
-      "on_chain_analytics": 508,
+      "utxo_model": 232,
+      "mempool_fees": 450,
+      "on_chain_analytics": 510,
       "full_nodes": 21,
-      "wallet_security": 90,
+      "wallet_security": 91,
       "bitcoin_script": 51,
-      "market_psychology": 892,
-      "hash_rate_analysis": 266,
-      "supply_scarcity": 238,
-      "monetary_history": 173,
+      "market_psychology": 896,
+      "hash_rate_analysis": 267,
+      "supply_scarcity": 239,
+      "monetary_history": 174,
       "multisig_custody": 37,
       "bitcoin_development": 101,
-      "layer2_solutions": 512,
+      "layer2_solutions": 514,
       "network_consensus": 40
     },
     "top_topics": [
       {
         "topic": "market_psychology",
-        "score": 892
+        "score": 896
       },
       {
         "topic": "mining_security",
-        "score": 573
+        "score": 575
       },
       {
         "topic": "bitcoin_basics",
-        "score": 515
+        "score": 517
       },
       {
         "topic": "layer2_solutions",
-        "score": 512
+        "score": 514
       },
       {
         "topic": "on_chain_analytics",
-        "score": 508
+        "score": 510
       },
       {
         "topic": "mempool_fees",
-        "score": 448
+        "score": 450
       }
     ],
-    "total_generations": 267
+    "total_generations": 268
   },
   "growth_metrics": {
-    "total_headlines_absorbed": 5320,
+    "total_headlines_absorbed": 5340,
     "avg_insights_per_cycle": 5.9,
     "prediction_accuracy": 7.0,
     "accuracy_trend": false,
-    "total_cycles": 266
+    "total_cycles": 267
   },
   "evolution_log": [
     {
@@ -8473,6 +8483,21 @@
       "alerts_triggered": 1,
       "composite_sentiment": 50.7,
       "market_regime": "Consolidation"
+    },
+    {
+      "generation": 268,
+      "timestamp": "2026-05-30T08:33:33.323572+00:00",
+      "date": "2026-05-30",
+      "price_usd": 73458,
+      "fg_value": 23,
+      "headlines_absorbed": 20,
+      "insights_generated": 6,
+      "prediction_outlook": "bullish",
+      "hash_rate_ehs": 1008.5,
+      "personality_mood": "analytical",
+      "alerts_triggered": 1,
+      "composite_sentiment": 46.2,
+      "market_regime": "Consolidation"
     }
   ],
   "predictions_log": {
@@ -11136,12 +11161,22 @@
         "price_now": 73507,
         "pct": -0.09,
         "correct": false
+      },
+      {
+        "gen": 267,
+        "date": "2026-05-30",
+        "predicted": "bullish",
+        "actual": "neutral",
+        "price_then": 73507,
+        "price_now": 73458,
+        "pct": -0.07,
+        "correct": false
       }
     ],
     "wins": 9,
-    "losses": 120,
-    "total_scored": 129,
-    "win_rate": 7.0,
+    "losses": 121,
+    "total_scored": 130,
+    "win_rate": 6.9,
     "current_streak": 0
   },
   "price_history": [
@@ -12746,12 +12781,18 @@
       "p": 73507,
       "c": 0.36972,
       "fg": 23
+    },
+    {
+      "ts": "2026-05-30 08:00",
+      "p": 73458,
+      "c": -0.24645,
+      "fg": 23
     }
   ],
   "learning_goals": {
     "current_goals": [
       {
-        "generation": 267,
+        "generation": 268,
         "topic": "taproot_schnorr",
         "icon": "\ud83c\udf3f",
         "goal": "Deepen understanding of taproot schnorr",
@@ -12760,7 +12801,7 @@
         "priority": "HIGH"
       },
       {
-        "generation": 267,
+        "generation": 268,
         "topic": "full_nodes",
         "icon": "\ud83d\udda5\ufe0f",
         "goal": "Deepen understanding of full nodes",
@@ -12769,7 +12810,7 @@
         "priority": "HIGH"
       },
       {
-        "generation": 267,
+        "generation": 268,
         "topic": "privacy_techniques",
         "icon": "\ud83d\udd12",
         "goal": "Deepen understanding of privacy techniques",
@@ -12780,7 +12821,7 @@
     ],
     "previous_goals_scored": [
       {
-        "generation": 266,
+        "generation": 267,
         "topic": "taproot_schnorr",
         "icon": "\ud83c\udf3f",
         "goal": "Deepen understanding of taproot schnorr",
@@ -12789,7 +12830,7 @@
         "priority": "HIGH"
       },
       {
-        "generation": 266,
+        "generation": 267,
         "topic": "full_nodes",
         "icon": "\ud83d\udda5\ufe0f",
         "goal": "Deepen understanding of full nodes",
@@ -12798,7 +12839,7 @@
         "priority": "HIGH"
       },
       {
-        "generation": 266,
+        "generation": 267,
         "topic": "privacy_techniques",
         "icon": "\ud83d\udd12",
         "goal": "Deepen understanding of privacy techniques",
@@ -12862,18 +12903,10 @@
     },
     "total_terms": 43,
     "active_this_cycle": [],
-    "generation_last_updated": 267
+    "generation_last_updated": 268
   },
   "alerts": {
     "log": [
-      {
-        "type": "hash_ath",
-        "level": "bullish",
-        "ts": "2026-05-22 09:38 UTC",
-        "gen": 236,
-        "msg": "HASH RATE 903.2 EH/s \u2014 Near all-time high. Network never more secure. Miners committed long-term.",
-        "value": 903.2
-      },
       {
         "type": "hash_ath",
         "level": "bullish",
@@ -13105,16 +13138,24 @@
         "gen": 267,
         "msg": "HASH RATE 994.7 EH/s \u2014 Near all-time high. Network never more secure. Miners committed long-term.",
         "value": 994.7
+      },
+      {
+        "type": "hash_ath",
+        "level": "bullish",
+        "ts": "2026-05-30 08:33 UTC",
+        "gen": 268,
+        "msg": "HASH RATE 1008.5 EH/s \u2014 Near all-time high. Network never more secure. Miners committed long-term.",
+        "value": 1008.5
       }
     ],
     "recent": [
       {
         "type": "hash_ath",
         "level": "bullish",
-        "ts": "2026-05-30 03:41 UTC",
-        "gen": 267,
-        "msg": "HASH RATE 994.7 EH/s \u2014 Near all-time high. Network never more secure. Miners committed long-term.",
-        "value": 994.7
+        "ts": "2026-05-30 08:33 UTC",
+        "gen": 268,
+        "msg": "HASH RATE 1008.5 EH/s \u2014 Near all-time high. Network never more secure. Miners committed long-term.",
+        "value": 1008.5
       }
     ],
     "total": 30
